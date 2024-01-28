@@ -10,7 +10,6 @@ export const fetchCache = 'auto'
 export const runtime = 'nodejs'
 export const preferredRegion = 'auto'
 
-const WHOOING_URL = process.env.WHOOING_URL || 'https://whooing.com'
 const WHOOING_APP_ID = process.env.WHOOING_APP_ID || ''
 const WHOOING_APP_SECRET = process.env.WHOOING_APP_SECRET || ''
 
