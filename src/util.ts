@@ -21,10 +21,17 @@ export const getMaximumEndDate = (account: Account) => {
   }
 
   const today = Number(dayjs().tz('Asia/Seoul').format().slice(0, 10).replace(/-/g, ''))
-  console.log("🚀 ~ getMaximumEndDate ~ today:", today)
   if (result > today) {
     result = today
   }
 
   return result
+}
+
+// example: [TICKER=005930.KS]
+export const getTicket = (memo: string) => {
+  const match = memo.match(/\[TICKER=(.+)\]/)
+  if (!match) return null
+
+  return match[1]
 }

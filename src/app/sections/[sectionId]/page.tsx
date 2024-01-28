@@ -5,6 +5,8 @@ import { getAccounts, getUser } from '@/app/actions'
 import { StockAssets } from '../../../components/StockAssets'
 import { AllAssets } from '../../../components/AllAssets'
 import { StockTable } from '../../../components/StockTable'
+import { useAtom } from 'jotai'
+import { globalTotalPriceAtom } from '../../../states/global-total-price.state'
 
 export default async function Home({ params }: {
   params: {
@@ -27,9 +29,6 @@ export default async function Home({ params }: {
       </div>
       <AllAssets sectionId={sectionId} assets={accounts.assets || []} />
 
-      <div className="mt-12 mb-2 text-xl font-semibold">
-        {`투자 자산 종목별 현황`}
-      </div>
       <StockTable accounts={accounts} />
     </main>
   )

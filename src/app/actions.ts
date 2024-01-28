@@ -81,14 +81,6 @@ export const getEntries = async (params: {
 }) => {
   const whooingAPI = getWhooingAPI()
 
-  console.log('get entries with: ')
-  console.log({
-    section_id: params.sectionId,
-    account: 'assets',
-    account_id: params.accountId,
-    start_date: params.startDate,
-    end_date: params.endDate,
-  })
   const res = await whooingAPI.get('/api/entries.json_array', { params: {
     section_id: params.sectionId,
     account: 'assets',
@@ -108,7 +100,6 @@ export const getEntries = async (params: {
 export async function getAllEntries(account: Account) {
   let startDate = Number(account.open_date)
   let endDate = getMaximumEndDate(account)
-  console.log("🚀 ~ getAllEntries ~ endDate:", endDate)
 
   let result: Entry[] = []
 
@@ -128,6 +119,5 @@ export async function getAllEntries(account: Account) {
     endDate = getMaximumEndDate(account)
   }
 
-  console.log(result)
   return { ok: true, data: result }
 }

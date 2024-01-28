@@ -1,7 +1,7 @@
 'use client'
 
-import { useMemo } from 'react'
-import { useAtom } from 'jotai'
+import { useEffect, useMemo } from 'react'
+import { useAtom, useSetAtom } from 'jotai'
 import { stockAssetsAtom } from '@/states/stock-assets.state'
 import { Account, AccountType } from '@/types/account.type'
 import { AccountEntries, accountEntriesAtom } from '../states/acount-entries.state'
@@ -14,38 +14,32 @@ import {
   Column,
   ColumnDef
 } from '@tanstack/react-table'
+import { putTickerPriceAtom, tickerPricesAtom } from '../states/ticker-price'
+import { getTicket } from '../util'
+import Link from 'next/link'
+import { Item } from '../types/item.type'
+import { TickerPriceCell } from './TickerPriceCell'
+import { globalTotalPriceAtom } from '../states/global-total-price.state'
 
 const colors = [
-  "md:bg-red-500/50",
-  "md:bg-amber-500/50",
-  "md:bg-lime-500/50",
-  "md:bg-emerald-500/50",
-  "md:bg-cyan-500/50",
-  "md:bg-blue-500/50",
-  "md:bg-violet-500/50",
-  "md:bg-fuchsia-500/50",
-  "md:bg-rose-500/50",
-  "md:bg-orange-500/50",
-  "md:bg-yellow-500/50",
-  "md:bg-green-500/50",
-  "md:bg-teal-500/50",
-  "md:bg-sky-500/50",
-  "md:bg-indigo-500/50",
-  "md:bg-purple-500/50",
-  "md:bg-pink-500/50",
+  "md:bg-red-500/40",
+  "md:bg-amber-500/40",
+  "md:bg-lime-500/40",
+  "md:bg-emerald-500/40",
+  "md:bg-cyan-500/40",
+  "md:bg-blue-500/40",
+  "md:bg-violet-500/40",
+  "md:bg-fuchsia-500/40",
+  "md:bg-rose-500/40",
+  "md:bg-orange-500/40",
+  "md:bg-yellow-500/40",
+  "md:bg-green-500/40",
+  "md:bg-teal-500/40",
+  "md:bg-sky-500/40",
+  "md:bg-indigo-500/40",
+  "md:bg-purple-500/40",
+  "md:bg-pink-500/40",
 ]
-
-interface Item {
-  sectionId: string
-  accountId: string
-  name: string
-  isFund: boolean
-  perAccount: {  // 계좌별 수량
-    [from: string]: number
-  }
-  totalQty: number
-  totalPrice: number
-}
 
 const columnHelper = createColumnHelper<Item>()
 
@@ -77,11 +71,11 @@ export const StockTable = (props: {
   accounts: Record<string, Account[]>
 }) => {
   const { accounts } = props
-  const income = useMemo(() => accounts.income || [], [accounts])
   const assets = useMemo(() => accounts.assets || [], [accounts])
-  const capital = useMemo(() => accounts.capital || [], [accounts])
   const [accountEntries] = useAtom(accountEntriesAtom)
   const [stockAssets, setStockAssets] = useAtom(stockAssetsAtom)
+  const [tickerPrices, setTickerPrices] = useAtom(tickerPricesAtom)
+  const [globalTotalPrice, setGlobalTotalPrice] = useAtom(globalTotalPriceAtom)
 
   const tableData = useMemo(() => {
     const isSelected = (ae: AccountEntries) => (
@@ -106,7 +100,6 @@ export const StockTable = (props: {
       .reduce((acc, cur) => {
         const name = cur.item.split('(')[0]
         const isFund = cur.item.startsWith('펀드 ')
-        console.log(cur)
         const idx = acc.findIndex(a =>
           a.sectionId === cur.sectionId
             && a.accountId === cur.accountId
@@ -127,8 +120,8 @@ export const StockTable = (props: {
             totalPrice: (acc[idx]?.totalPrice || 0) + cur.money,
             perAccount: acc[idx]?.perAccount || {},
             totalQty: acc[idx]?.totalQty || 0,
+            ticker: getTicket(cur.memo) || acc[idx]?.ticker,
           }
-          console.log("🚀 ~ .reduce ~ updatedItem:", updatedItem)
 
           if (idx === -1) {
             return [...acc, updatedItem]
@@ -161,9 +154,9 @@ export const StockTable = (props: {
           totalQty,
           totalPrice: type === 'buy'
             ? (acc[idx]?.totalPrice || 0) + cur.money
-            : (acc[idx]?.totalPrice || 0) - cur.money
+            : (acc[idx]?.totalPrice || 0) - cur.money,
+          ticker: getTicket(cur.memo) || acc[idx]?.ticker,
         }
-        console.log("🚀 ~ .reduce ~ updatedItem:", updatedItem)
 
         if (updatedItem.perAccount[from] === 0) {
           delete updatedItem.perAccount[from]
@@ -182,6 +175,10 @@ export const StockTable = (props: {
       .filter(i => i.totalQty > 0)
 
   }, [accountEntries, stockAssets])
+
+  useEffect(() => {
+    setGlobalTotalPrice(sum(tableData.map(item => item.totalPrice)))
+  }, [tableData, setGlobalTotalPrice])
 
   const table = useReactTable({
     data: tableData,
@@ -218,132 +215,134 @@ export const StockTable = (props: {
   }
 
   return (
-    <div className="p-2">
-      <table
-        className="table-auto w-full"
-      >
-        <thead>
-          {table.getHeaderGroups().map(headerGroup => (
-            <tr key={headerGroup.id}>
-              {headerGroup.headers.map(header => (
-                <th key={header.id}>
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(
-                      header.column.columnDef.header,
-                      header.getContext()
-                    )}
-                </th>
-              ))}
+    <>
+      <div className="mt-12 mb-2 text-xl font-semibold">
+        {`투자 자산 종목별 현황 (총 ${globalTotalPrice.toLocaleString()}원)`}
+      </div>
+      <div className="p-2">
+        <table
+          className="table-auto w-full"
+        >
+          <thead>
+            {table.getHeaderGroups().map(headerGroup => (
+              <tr key={headerGroup.id}>
+                {headerGroup.headers.map(header => (
+                  <th key={header.id}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
+                  </th>
+                ))}
 
-              <th>
+                <th>
                 현재 1주 가격
-              </th>
-              <th>
+                </th>
+                <th>
+                현재 평가액
+                </th>
+                <th>
                 평가 손익
-              </th>
-            </tr>
-          ))}
-        </thead>
+                </th>
+              </tr>
+            ))}
+          </thead>
 
-        <tbody>
-          {table.getRowModel().rows.map(row => {
-            const rowSpan = getRowSpan(row.index)
-            return (
+          <tbody>
+            {table.getRowModel().rows.map(row => {
+              const { accountId, isFund, totalPrice, totalQty, ticker } = row.original
+              const rowSpan = getRowSpan(row.index)
+              const tickerPrice = tickerPrices.find(t => t.ticker === ticker)?.price
+              const currentPrice = (tickerPrice || 0) * totalQty
+              const profit = currentPrice - totalPrice
 
-              <tr
-                key={row.id}
-                className={`border-b-2 p-4 m-2 ${getBGColorCN(row.original.accountId)}`}
-              >
-                {row.getVisibleCells().map(cell => {
-                  if (cell.column.id === 'perAccount') {
+              return (
+                <tr
+                  key={row.id}
+                  className={`border-b-2 p-4 m-2 ${getBGColorCN(accountId)}`}
+                >
+                  {row.getVisibleCells().map(cell => {
+                    if (cell.column.id === 'perAccount') {
+                      return (
+                        <td key={cell.id} className='p-4'>
+                          {Object.keys(cell.getValue()!).map(from => (
+                            <div key={from}>
+                              <span>
+                                {getAssetName(from)} : {(cell.getValue() as Record<string, number>)[from]}
+                              </span>
+                              <span>
+                                {cell.row.original.isFund ? '원' : '주'}
+                              </span>
+                            </div>
+                          ))}
+                        </td>
+                      )
+                    }
+
+                    if (cell.column.id === 'accountId') {
+                      return rowSpan ? (
+                        <td
+                          key={cell.id}
+                          className='p-4 border-r-2'
+                          rowSpan={rowSpan}
+                        >
+                          {getAssetName(cell.getValue() as string)}
+                        </td>
+                      ) : null
+                    }
                     return (
-                      <td key={cell.id} className='p-4'>
-                        {Object.keys(cell.getValue()!).map(from => (
-                          <div key={from}>
-                            <span>
-                              {getAssetName(from)} : {(cell.getValue() as Record<string, number>)[from]}
-                            </span>
-                            <span>
-                              {cell.row.original.isFund ? '원' : '주'}
-                            </span>
-                          </div>
-                        ))}
-                      </td>
-                    )
-                  }
-
-                  if (cell.column.id === 'accountId') {
-                    return rowSpan ? (
                       <td
                         key={cell.id}
-                        className='p-4 border-r-2'
-                        rowSpan={rowSpan}
+                        className={`p-2 ${cell.column.id === 'name' ? 'text-left' : 'text-right'}`}
                       >
-                        {getAssetName(cell.getValue() as string)}
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </td>
-                    ) : null
-                  }
-                  return (
-                    <td
-                      key={cell.id}
-                      className={`p-2 ${cell.column.id === 'name' ? 'text-left' : 'text-right'}`}
-                    >
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </td>
-                  )
-                })}
+                    )
+                  })}
 
-                <td className='text-right'>
-                  {row.original.isFund ? '-' : row.original.totalPrice / row.original.totalQty}원
-                </td>
+                  {/* 현재 1주 가격 */}
+                  <TickerPriceCell item={row.original} />
 
-                <td className='text-right'>
-                  {row.original.isFund ? '-' : row.original.totalPrice / row.original.totalQty}원
-                </td>
+                  {/* 현재 평가액 */}
+                  <td className='text-right'>
+                    {isFund ? (
+                      null
+                    ) : tickerPrice ? (
+                      <span className='text-right'>
+                        {(tickerPrice * totalQty).toLocaleString()}원
+                      </span>
+                    ) : (
+                      <span className='text-right'>
+                        {'-'}
+                      </span>
+                    )}
+                  </td>
 
-                {rowSpan ? (
+                  {/* 평가 손익 */}
+                  <td className='p-4 text-right'>
+                    {ticker ? (
+                      <span>{profit >= 0 ? '+' : '-'} {Math.abs(profit).toLocaleString()}원</span>
+                    ) : (
+                      '-'
+                    )}
+                  </td>
+
                   <td
                     className='p-4 border-l-2 text-center'
-                    rowSpan={rowSpan}
                   >
-                    <button>현재 가격 반영</button>
+                    <button
+                      disabled={profit === 0}
+                    >
+                    평가 손익 반영
+                    </button>
                   </td>
-                ) : null}
-              </tr>
-            )})}
-        </tbody>
-      </table>
-    </div>
+                </tr>
+              )})}
+          </tbody>
+        </table>
+      </div>
+    </>
   )
-
-  //   <div className="flex flex-col max-w-5xl w-full gap-2">
-  //     <div className="flex flex-row">
-  //       <h3>주식이름</h3>
-  //       <h3>계좌</h3>
-  //       <h3>수량</h3>
-  //     </div>
-  //     {items.map(item => (
-  //       <div key={item.sectionId + item.accountId + item.name}>
-  //         <h3>{item.name}</h3>
-  //         <table>
-  //           <thead>
-  //             <tr>
-  //               <th>계좌</th>
-  //               <th>수량</th>
-  //             </tr>
-  //           </thead>
-  //           <tbody>
-  //             {Object.entries(item.perAccount).map(([from, qty]) => (
-  //               <tr key={from}>
-  //                 <td>{from}</td>
-  //                 <td>{qty}</td>
-  //               </tr>
-  //             ))}
-  //           </tbody>
-  //         </table>
-  //       </div>
-  //     ))}
-  //   </div>
-  // )
 }
