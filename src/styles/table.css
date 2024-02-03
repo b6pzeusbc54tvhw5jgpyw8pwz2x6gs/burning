@@ -1,3 +1,5 @@
+@tailwind base;
+
 html {
   font-family: sans-serif;
   font-size: 14px;

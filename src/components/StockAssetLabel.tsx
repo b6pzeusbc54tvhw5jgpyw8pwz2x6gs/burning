@@ -2,7 +2,7 @@
 
 import { useAtom, useSetAtom } from 'jotai'
 import { StockAsset, stockAssetsAtom } from '@/states/stock-assets.state'
-import { getEntries } from '../app/actions'
+import { getEntries } from '../server/actions/whooing'
 import { Account } from '../types/account.type'
 import { getMaximumEndDate } from '../util'
 import { accountEntriesAtom, fetchAccountEntriesAtom, removeAccountEntriesAtom } from '../states/acount-entries.state'

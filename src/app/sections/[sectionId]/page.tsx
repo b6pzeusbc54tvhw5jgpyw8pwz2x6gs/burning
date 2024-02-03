@@ -1,12 +1,13 @@
 // import { useTransition } from 'react'
 "use server"
 
-import { getAccounts, getUser } from '@/app/actions'
-import { StockAssets } from '../../../components/StockAssets'
-import { AllAssets } from '../../../components/AllAssets'
-import { StockTable } from '../../../components/StockTable'
-import { useAtom } from 'jotai'
-import { globalTotalPriceAtom } from '../../../states/global-total-price.state'
+import { getAccounts, getUser } from '@/server/actions/whooing'
+import { StockAssets } from '@/components/StockAssets'
+import { AllAssets } from '@/components/AllAssets'
+import { StockTable } from '@/components/StockTable'
+// import { useAtom } from 'jotai'
+// import { globalTotalPriceAtom } from '../../../states/global-total-price.state'
+import { Box } from '@radix-ui/themes'
 
 export default async function Home({ params }: {
   params: {
@@ -19,9 +20,9 @@ export default async function Home({ params }: {
 
   return (
     <main className="flex min-h-screen flex-col p-12">
-      <div className="mt-12 mb-2 text-xl font-semibold">
+      <Box className="mt-12 mb-2 text-xl font-semibold mask">
         {`나의 투자 자산`}
-      </div>
+      </Box>
       <StockAssets sectionId={sectionId} />
 
       <div className="mt-12 mb-2 text-xl font-semibold">

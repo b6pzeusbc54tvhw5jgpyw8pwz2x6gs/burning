@@ -1,7 +1,7 @@
 // import { useTransition } from 'react'
 "use server"
 
-import { getAccounts, getSections, getUser } from '@/app/actions'
+import { getAccounts, getSections, getUser } from '@/server/actions/whooing'
 import Link from "next/link"
 
 export default async function Home() {

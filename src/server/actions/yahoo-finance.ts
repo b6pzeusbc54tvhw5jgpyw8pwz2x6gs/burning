@@ -1,21 +1,25 @@
 "use server"
 
+// import { createSafeActionClient } from "next-safe-action"
 import yahooFinance from 'yahoo-finance2'
+
+// export const action = createSafeActionClient()
 
 export const getTickerPrice = async (ticker: string) => {
   const res = await yahooFinance.quoteSummary(ticker, {
     modules: ['price'],
   })
-  console.log("🚀 ~ getTickerPrice ~ res:", res)
+  console.log("🚀 ~ getTickerPrice ~ price:", ticker, res.price)
+
   if (!res.price?.regularMarketPrice) {
     throw new Error('no price')
   }
 
-  if (res.price.currency !== 'KRW') {
+  if (res.price.currency !== 'KRW' && res.price.exchange !== 'KSC') {
     const res2 = await yahooFinance.quoteSummary(`${res.price.currency}KRW=X`, {
       modules: ['price'],
     })
-    console.log("🚀 ~ getTickerPrice ~ res2:", res2)
+
     const rate = res2?.price?.marketState === 'CLOSED'
       ? res2.price.regularMarketPreviousClose
       : res2?.price?.regularMarketPrice

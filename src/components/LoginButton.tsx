@@ -1,4 +1,4 @@
-import { requestToken } from "@/app/actions"
+import { requestToken } from "@/server/actions/whooing"
 
 export const LoginButton = () => {
 

@@ -2,7 +2,7 @@
 "use server"
 
 import Image from "next/image"
-import { getAccounts, getSections, getUser } from '@/app/actions'
+import { getAccounts, getSections, getUser } from '@/server/actions/whooing'
 import { LoginButton } from "@/components/LoginButton"
 import Link from "next/link"
 

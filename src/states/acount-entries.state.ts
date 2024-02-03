@@ -1,7 +1,7 @@
 import { atomWithStorage } from 'jotai/utils'
 import { Entry } from '../types/entry.type'
 import { atom } from 'jotai'
-import { getAllEntries, getEntries } from '../app/actions'
+import { getAllEntries, getEntries } from '../server/actions/whooing'
 import { Account } from '../types/account.type'
 
 export interface AccountEntries {

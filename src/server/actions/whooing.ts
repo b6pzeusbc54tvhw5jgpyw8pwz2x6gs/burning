@@ -4,19 +4,17 @@ import axios from "axios"
 import { redirect } from "next/navigation"
 import { z } from 'zod'
 import { cache } from 'react'
-import { getWhooingAPI } from "../util.server"
-import { zUser } from "../types/user.type"
-import { Account, zAccount, zAccountType } from '../types/account.type'
-import { zSection } from "../types/section.type"
-import { Entry, zEntry } from "../types/entry.type"
-import { getMaximumEndDate } from "../util"
+import { getWhooingAPI } from "@/util.server"
+import { zUser } from "../../types/user.type"
+import { Account, zAccount, zAccountType } from '../../types/account.type'
+import { zSection } from "../../types/section.type"
+import { Entry, zEntry } from "../../types/entry.type"
+import { getMaximumEndDate } from "../../util"
 
-const VERCEL_URL = process.env.VERCEL_URL
+const APP_URL = process.env.APP_URL
 const WHOOING_APP_ID = process.env.WHOOING_APP_ID || ''
 const WHOOING_APP_SECRET = process.env.WHOOING_APP_SECRET || ''
 const WHOOING_URL = process.env.WHOOING_URL || 'https://whooing.com'
-
-const vercelEndpoint = `https://${VERCEL_URL}`
 
 export async function requestToken() {
   console.log('this server')
@@ -24,7 +22,7 @@ export async function requestToken() {
   const query = new URLSearchParams({
     app_id: WHOOING_APP_ID,
     app_secret: WHOOING_APP_SECRET,
-    callback: new URL('/api/callback', vercelEndpoint).toString(),
+    callback: new URL('/api/callback', APP_URL).toString(),
   }).toString()
 
   const res = await axios.get(`${WHOOING_URL}/app_auth/request_token?${query}`)
@@ -32,7 +30,7 @@ export async function requestToken() {
 
   const query2 = new URLSearchParams({
     token,
-    callbackuri: new URL('/api/callback', vercelEndpoint).toString(),
+    callbackuri: new URL('/api/callback', APP_URL).toString(),
   }).toString()
 
   redirect(`${WHOOING_URL}/app_auth/authorize?${query2}`)
