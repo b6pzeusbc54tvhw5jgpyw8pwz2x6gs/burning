@@ -16,7 +16,7 @@ export const getWhooingAPI = () => {
   const token_secret = cookieStore.get('token_secret')?.value
 
   if (!userId) {
-    return redirect('/login')
+    throw new Error('NO_USER_ID: not logged in')
   }
 
   const signiture = crypto.createHash('sha1')

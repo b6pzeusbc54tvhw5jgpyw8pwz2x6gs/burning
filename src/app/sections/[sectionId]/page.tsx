@@ -5,9 +5,12 @@ import { getAccounts, getUser } from '@/server/actions/whooing'
 import { StockAssets } from '@/components/StockAssets'
 import { AllAssets } from '@/components/AllAssets'
 import { StockTable } from '@/components/StockTable'
+import { Button } from "@/components/ui/button"
+import { ItemsTable } from '@/components/ItemsTable'
+
 // import { useAtom } from 'jotai'
 // import { globalTotalPriceAtom } from '../../../states/global-total-price.state'
-import { Box } from '@radix-ui/themes'
+// import { Box } from '@radix-ui/themes'
 
 export default async function Home({ params }: {
   params: {
@@ -15,22 +18,20 @@ export default async function Home({ params }: {
   }
 }) {
   const { sectionId } = params
-  const { data: user } = await getUser()
-  const { data: accounts } = await getAccounts(sectionId)
+  const accounts = await getAccounts(sectionId)
 
   return (
-    <main className="flex min-h-screen flex-col p-12">
-      <Box className="mt-12 mb-2 text-xl font-semibold mask">
-        {`나의 투자 자산`}
-      </Box>
+    // <main className="flex min-h-screen flex-col p-12">
+    <div>
+      <h3 className="mt-8 scroll-m-20 text-2xl font-semibold tracking-tight mb-2">
+        {`투자 자산 목록`}
+      </h3>
+
       <StockAssets sectionId={sectionId} />
 
-      <div className="mt-12 mb-2 text-xl font-semibold">
-        {`투자 자산 또는 투자 자산이 들어있는 "거래처 관리 항목" 자산을 선택하세요.`}
-      </div>
-      <AllAssets sectionId={sectionId} assets={accounts.assets || []} />
-
-      <StockTable accounts={accounts} />
-    </main>
+      {/* <StockTable accounts={accounts} /> */}
+      <ItemsTable accounts={accounts} />
+    </div>
+    // </main>
   )
 }

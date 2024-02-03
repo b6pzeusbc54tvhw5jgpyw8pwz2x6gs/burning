@@ -5,6 +5,7 @@ import { useAtom, useSetAtom } from 'jotai'
 import { stockAssetsAtom } from '@/states/stock-assets.state'
 import { Account } from '@/types/account.type'
 import { removeAccountEntriesAtom } from '../states/acount-entries.state'
+import { useAccounts } from '@/data/hooks'
 
 export const AllAssets = (props: {
   sectionId: string
@@ -13,6 +14,7 @@ export const AllAssets = (props: {
   const { assets, sectionId } = props
   const [stockAssets, setStockAssets] = useAtom(stockAssetsAtom)
   const removeAccountEntries = useSetAtom(removeAccountEntriesAtom)
+  const { data: accounts, isFetching } = useAccounts(sectionId)
 
   const handleAdd = (a: Account) => {
     const found = stockAssets.find(p => p.account.account_id === a.account_id)

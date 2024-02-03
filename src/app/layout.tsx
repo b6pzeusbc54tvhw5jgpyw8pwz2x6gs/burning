@@ -1,9 +1,10 @@
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import Providers from "@/lib/query-provider"
-import { Nav } from "@/components/Nav"
+import { GlobalNav } from "@/components/GlobalNav"
 import { Theme } from '@radix-ui/themes'
 import "./globals.css"
+import { ThemeProvider } from "../lib/theme-provider"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -20,14 +21,21 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <Nav />
-        <div className="p-4 lg:px-48">
-          <Theme appearance="light">
-            <Providers>
-              {children}
-            </Providers>
-          </Theme>
-        </div>
+        <Providers>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <Theme appearance="light">
+              <GlobalNav />
+              <div className="p-2 lg:py-12 lg:px-12">
+                {children}
+              </div>
+            </Theme>
+          </ThemeProvider>
+        </Providers>
       </body>
     </html>
   )

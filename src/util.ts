@@ -35,3 +35,7 @@ export const getTicket = (memo: string) => {
 
   return match[1]
 }
+
+export const formatCurrency = (value: number) => {
+  return value.toLocaleString()
+}

@@ -25,8 +25,7 @@ export const fetchAccountEntriesAtom = atom(
       { sectionId, accountId: account_id, loading: true }
     ])
 
-    const { ok, data } = await getAllEntries(account)
-    if (!ok) return
+    const data = await getAllEntries(account)
 
     prev = get(accountEntriesAtom)
     const idx = prev.findIndex(p => p.accountId === account_id)

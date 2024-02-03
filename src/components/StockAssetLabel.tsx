@@ -7,6 +7,7 @@ import { Account } from '../types/account.type'
 import { getMaximumEndDate } from '../util'
 import { accountEntriesAtom, fetchAccountEntriesAtom, removeAccountEntriesAtom } from '../states/acount-entries.state'
 import { startTransition, useEffect, useRef, useTransition } from 'react'
+import { Button } from './ui/button'
 // import { accountEntriesAtom } from '../states/acount-entries.state'
 
 export const StockAssetLabel = (props: {
@@ -46,11 +47,10 @@ export const StockAssetLabel = (props: {
   }, [fetchAccountEntries, account])
 
   return (
-    <div
-      className="bg-gray-200 dark:bg-zinc-300/30 rounded-lg p-2 whitespace-nowrap cursor-pointer"
+    <Button
       onClick={() => handleRemove(account)}
     >
       {account.title}
-    </div>
+    </Button>
   )
 }

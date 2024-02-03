@@ -5,28 +5,39 @@ import Image from "next/image"
 import { getAccounts, getSections, getUser } from '@/server/actions/whooing'
 import { LoginButton } from "@/components/LoginButton"
 import Link from "next/link"
+import { Card, CardDescription, CardHeader, CardTitle } from "../components/ui/card"
 
 export default async function Home() {
-  const { data: user } = await getUser()
+  const user = await getUser()
   // const { data: accounts } = await getAccounts()
-  const { data: sections } = await getSections()
+  const sections = await getSections()
   console.log("🚀 ~ Home ~ sections:", sections)
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <div className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          {user ? (
-            <p className="text-2xl font-bold">Hello {user.username}</p>
-          ) : (
-            <LoginButton />
-          )}
-        </div>
+    <main className="flex min-h-screen flex-col gap-2">
+      <h2 className="mt-10 scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight transition-colors first:mt-0">
+        섹션들
+      </h2>
 
-        <Link href="/sections">
-          Sections
-        </Link>
-      </div>
+      {sections.map(s => (
+        <Card
+          key={s.section_id}
+          className="w-full"
+        >
+          <CardHeader>
+            <CardTitle>
+              <Link
+                href={`/sections/${s.section_id}`}
+                key={s.section_id}
+              >
+                {s.title}
+              </Link>
+
+            </CardTitle>
+            <CardDescription>{s.memo}</CardDescription>
+          </CardHeader>
+        </Card>
+      ))}
     </main>
   )
 }
