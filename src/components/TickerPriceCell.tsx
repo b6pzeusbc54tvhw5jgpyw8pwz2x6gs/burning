@@ -64,7 +64,7 @@ export const TickerPriceCell = (props: {
                 link
             </Link>
             <button onClick={() => refetch()}>
-                update
+              update
             </button>
           </>
         )}

@@ -8,6 +8,7 @@ import { useTickerPrice } from "../data/hooks"
 import { Box, TextField } from '@radix-ui/themes'
 import { TableCell } from "./ui/table"
 import { Input } from "./ui/input"
+import { ChevronRight, RotateCw } from "lucide-react"
 
 const isAvailableAutoUpdate = (ticker: string) => {
   return !ticker.startsWith('비상장-')
@@ -27,52 +28,48 @@ export const ItemsTableCellTickerPrice = (props: {
     ticker && isAvailableAutoUpdate(ticker) ? ticker : undefined
   )
 
+  useEffect(() => {
+    if (!ticker || !data) return
+
+    putTickerPrice(ticker, data, 'yahoo')
+  }, [putTickerPrice, ticker, data])
+
+  const tickerPrice = tickerPrices.find(t => t.ticker === ticker)?.price
+
   if (isFund) {
     return <td className='text-right'>-</td>
   }
 
   if (!ticker) {
-    return <td className='text-right'>Ticker를 입력해주세요</td>
+    return (
+      <TableCell className="text-right">
+        Ticker 정보 필요
+      </TableCell>
+    )
   }
+
+
+  if (isFetching) {
+    return (
+      <TableCell className="text-right animate-pulse">Loading...</TableCell>
+    )
+  }
+  // const value = tickerPrice?.toLocaleString() || ''
 
   // https://finance.yahoo.com/quote/360750.KS?p=360750.KS&.tsrc=fin-srch
   return (
-    <TableCell>
+    <TableCell className="text-right">
 
-      <Input
-        className="h-5"
-        size={1}
-        type="text"
-        // className='text-gray-900 text-right'
-        value={editing ? undefined : tickerPrices.find(t => t.ticker === ticker)?.price || ''}
-        onFocus={e => setEditing(true)}
-        onBlur={e => {
-          putTickerPrice(ticker!, Number(e.target.value), 'manual')
-          setEditing(false)
-        }}
-      />
-
-      <div
-        // Flex 우측 정렬
-        className={'flex gap-2 justify-end'}
-      >
-        {isAvailableAutoUpdate(ticker) && !isFetching && (
-          <>
-            <Link
-              href={`https://finance.yahoo.com/quote/${ticker}?p=${ticker}&.tsrc=fin-srch`}
-              target="_blank"
-            >
-                link
-            </Link>
-            <button onClick={() => refetch()}>
-                update
-            </button>
-          </>
-        )}
-        {isFetching && (
-          <div className='animate-pulse'>loading...</div>
-        )}
-
+      <div className="flex text-right justify-end">
+        <Input
+          className="h-5 text-right px-1 w-full"
+          type="text"
+          value={tickerPrice?.toLocaleString() || ''}
+          onFocus={e => setEditing(true)}
+          onChange={e => putTickerPrice(ticker, Number(e.target.value?.replace(/,/g,'')), 'manual')}
+          onBlur={e => setEditing(false)}
+        />
+        <span>원</span>
       </div>
     </TableCell>
   )

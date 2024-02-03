@@ -30,7 +30,7 @@ export default function RootLayout({
           >
             <Theme appearance="light">
               <GlobalNav />
-              <div className="p-2 lg:py-12 lg:px-12">
+              <div className="p-2 lg:py-6 lg:px-12">
                 {children}
               </div>
             </Theme>

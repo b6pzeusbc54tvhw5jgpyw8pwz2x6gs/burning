@@ -22,6 +22,7 @@ import { TickerPriceCell } from './TickerPriceCell'
 import { globalTotalPriceAtom } from '../states/global-total-price.state'
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from './ui/table'
 import { ItemsTableRow } from './ItemsTableRow'
+import { ItemsTableLastRow } from './ItemsTableLastRow'
 
 const colors = [
   "md:bg-red-500/40",
@@ -221,41 +222,37 @@ export const ItemsTable = (props: {
       <div className="mt-12 mb-2 text-xl font-semibold">
         {`투자 자산 종목별 현황 (총 ${globalTotalPrice.toLocaleString()}원)`}
       </div>
-      <div className="p-2">
 
-        <Table>
-          <TableCaption>A list of your recent invoices.</TableCaption>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[120px]">자산군</TableHead>
-              <TableHead>투자 자산</TableHead>
-              <TableHead className='text-right'>계좌 별 수량</TableHead>
-              <TableHead className="text-right">총 수량</TableHead>
-              <TableHead className="text-right">기록된 평가액</TableHead>
-              <TableHead className="text-right">현재 1주 가격</TableHead>
-              <TableHead className="text-right">현재 평가액</TableHead>
-              <TableHead className="text-right">현재 평가 손익</TableHead>
-              <TableHead className="text-right">평가 손익 기록</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {tableData.map((item, idx) => (
-              <ItemsTableRow
-                accounts={accounts}
-                key={item.accountId + '-' + item.name}
-                item={item}
-              />
-            ))}
-            <TableRow>
-              <TableCell className="font-medium">INV001</TableCell>
-              <TableCell>Paid</TableCell>
-              <TableCell>Credit Card</TableCell>
-              <TableCell className="text-right">$250.00</TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="w-[120px]">자산군</TableHead>
+            <TableHead>투자 자산</TableHead>
+            <TableHead className='text-right'>계좌 별 수량</TableHead>
+            <TableHead className="text-right min-w-[80px]">총 수량</TableHead>
+            <TableHead className="text-right">기록된 평가액</TableHead>
+            <TableHead className="text-right w-[160px]">현재 1주 가격</TableHead>
+            <TableHead className="text-right">현재 평가액</TableHead>
+            <TableHead className="text-right">현재 평가 손익</TableHead>
+            <TableHead className="text-right">평가 손익 기록</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {tableData.map((item, idx) => (
+            <ItemsTableRow
+              accounts={accounts}
+              key={item.accountId + '-' + item.name}
+              item={item}
+            />
+          ))}
 
-      </div>
+          <ItemsTableLastRow
+            accounts={accounts}
+            items={tableData}
+          />
+        </TableBody>
+      </Table>
+
     </>
   )
 }

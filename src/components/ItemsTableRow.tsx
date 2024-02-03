@@ -22,55 +22,75 @@ import { TickerPriceCell } from './TickerPriceCell'
 import { globalTotalPriceAtom } from '../states/global-total-price.state'
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from './ui/table'
 import { ItemsTableCellTickerPrice } from './ItemsTableCellTickerPrice'
+import { ItemsTableCellActions } from './ItemsTableCellActions'
+import { ExternalLink } from 'lucide-react'
 
 const colors = [
-  "md:bg-red-500/40",
-  "md:bg-amber-500/40",
-  "md:bg-lime-500/40",
-  "md:bg-emerald-500/40",
-  "md:bg-cyan-500/40",
-  "md:bg-blue-500/40",
-  "md:bg-violet-500/40",
-  "md:bg-fuchsia-500/40",
-  "md:bg-rose-500/40",
-  "md:bg-orange-500/40",
-  "md:bg-yellow-500/40",
-  "md:bg-green-500/40",
-  "md:bg-teal-500/40",
-  "md:bg-sky-500/40",
-  "md:bg-indigo-500/40",
-  "md:bg-purple-500/40",
-  "md:bg-pink-500/40",
+  "md:bg-red-500/30",
+  "md:bg-amber-500/30",
+  "md:bg-lime-500/30",
+  "md:bg-emerald-500/30",
+  "md:bg-cyan-500/30",
+  "md:bg-blue-500/30",
+  "md:bg-violet-500/30",
+  "md:bg-fuchsia-500/30",
+  "md:bg-rose-500/30",
+  "md:bg-orange-500/30",
+  "md:bg-yellow-500/30",
+  "md:bg-green-500/30",
+  "md:bg-teal-500/30",
+  "md:bg-sky-500/30",
+  "md:bg-indigo-500/30",
+  "md:bg-purple-500/30",
+  "md:bg-pink-500/30",
 ]
-
-
 
 export const ItemsTableRow = (props: {
   item: Item
   accounts: Record<string, Account[]>
 }) => {
   const { item, accounts } = props
-  const { accountId, perAccount, isFund, name } = item
+  const { accountId, perAccount, isFund, name, ticker, totalQty, totalPrice } = item
   const assets = accounts.assets
   const [stockAssets, setStockAssets] = useAtom(stockAssetsAtom)
   const getAssetName = (accountId: string) => {
     const found = assets.find(a => a.account_id === accountId)
     return found ? found.title : 'Unknown'
   }
-  const accontName = assets?.find(a => a.account_id === item.accountId)?.title
+  const idx = stockAssets.findIndex(sa => sa.account.account_id === accountId)
+
+  const [tickerPrices, setTickerPrices] = useAtom(tickerPricesAtom)
+  const tickerPrice = tickerPrices.find(t => t.ticker === item.ticker)?.price
+
+  const currentPrice = (tickerPrice || 0) * totalQty
+  const profit = currentPrice - totalPrice
 
   return (
-    <TableRow className="bg-orange-400 py-0">
+    <TableRow className={`${colors[idx]} py-0`}>
       <TableCell className="font-medium py-0">{getAssetName(accountId)}</TableCell>
-      <TableCell className=''>{item.name}</TableCell>
+      <TableCell className=''>
+        <div className='flex'>
+          <span>
+            {name}
+          </span>
+          {ticker && (
+            <Link
+              href={`https://finance.yahoo.com/quote/${ticker}?p=${ticker}&.tsrc=fin-srch`}
+              target="_blank"
+            >
+              <ExternalLink className="ml-1 h-4 w-4" />
+            </Link>
+          )}
+        </div>
+      </TableCell>
 
       <TableCell className='text-right'>
-        {Object.keys(item.perAccount).map(from => (
+        {Object.keys(perAccount).map(from => (
           <div key={from}>
             <span>
               {getAssetName(from)}
               {' '}
-              <b>{formatCurrency(item.perAccount[from])}</b>
+              <b>{formatCurrency(perAccount[from])}</b>
             </span>
             <span>
               {isFund ? '원' : '주'}
@@ -82,15 +102,12 @@ export const ItemsTableRow = (props: {
       <TableCell className="text-right">
         {isFund
           ? '-'
-          : <><b>{item.totalQty.toLocaleString()}</b>주</>
+          : <><b>{totalQty.toLocaleString()}</b>주</>
         }
       </TableCell>
 
       <TableCell className="text-right">
-        {isFund
-          ? '-'
-          : <><b>{item.totalPrice.toLocaleString()}</b>원</>
-        }
+        <><b>{totalPrice.toLocaleString()}</b>원</>
       </TableCell>
 
       <ItemsTableCellTickerPrice
@@ -100,9 +117,23 @@ export const ItemsTableRow = (props: {
       <TableCell className="text-right">
         {isFund
           ? '-'
-          : <><b>{item.totalPrice.toLocaleString()}</b>원</>
+          : tickerPrice
+            ? <><b>{(totalQty * tickerPrice).toLocaleString()}</b>원</>
+            : 'Ticker 정보 필요'
         }
       </TableCell>
+
+      <TableCell className="text-right">
+        {ticker ? (
+          <span className={`${profit >= 0 ? 'text-green-600' : 'text-red-400'}`}>
+            {profit >= 0 ? '+' : '-'} {Math.abs(profit).toLocaleString()}원
+          </span>
+        ) : (
+          '-'
+        )}
+      </TableCell>
+      <ItemsTableCellActions item={item} />
+
     </TableRow>
   )
 }
