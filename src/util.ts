@@ -6,6 +6,7 @@ import timezone from 'dayjs/plugin/timezone'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
+dayjs.tz.setDefault()
 
 export const getMaximumEndDate = (account: Account) => {
   const strDate = String(account.open_date)
@@ -20,7 +21,7 @@ export const getMaximumEndDate = (account: Account) => {
     result = account.close_date
   }
 
-  const today = Number(dayjs().tz('Asia/Seoul').format().slice(0, 10).replace(/-/g, ''))
+  const today = Number(dayjs().format().slice(0, 10).replace(/-/g, ''))
   if (result > today) {
     result = today
   }
@@ -38,4 +39,32 @@ export const getTicket = (memo: string) => {
 
 export const formatCurrency = (value: number) => {
   return value.toLocaleString()
+}
+
+export const relativeDate = (value: string) => {
+  const yyyyMMdd = value.split('.')[0]
+  const yyyy = yyyyMMdd.slice(0, 4)
+  const MM = yyyyMMdd.slice(4, 6)
+  const dd = yyyyMMdd.slice(6, 8)
+
+  const date = dayjs(`${yyyy}-${MM}-${dd}`)
+
+  const now = dayjs().format()
+  const todayYYYY = now.slice(0, 4)
+  const todayMM = now.slice(5, 7)
+  const todaydd = now.slice(8, 10)
+
+  const today = dayjs(`${todayYYYY}-${todayMM}-${todaydd}`)
+
+  const diff = today.diff(date, 'day')
+
+  if (diff === 0) {
+    return '오늘'
+  } else if (diff === 1) {
+    return '어제'
+  } else if (diff === 2) {
+    return '그제'
+  } else {
+    return `${diff}일 전`
+  }
 }

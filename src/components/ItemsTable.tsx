@@ -25,23 +25,23 @@ import { ItemsTableRow } from './ItemsTableRow'
 import { ItemsTableLastRow } from './ItemsTableLastRow'
 
 const colors = [
-  "md:bg-red-500/40",
-  "md:bg-amber-500/40",
-  "md:bg-lime-500/40",
-  "md:bg-emerald-500/40",
-  "md:bg-cyan-500/40",
-  "md:bg-blue-500/40",
-  "md:bg-violet-500/40",
-  "md:bg-fuchsia-500/40",
-  "md:bg-rose-500/40",
-  "md:bg-orange-500/40",
-  "md:bg-yellow-500/40",
-  "md:bg-green-500/40",
-  "md:bg-teal-500/40",
-  "md:bg-sky-500/40",
-  "md:bg-indigo-500/40",
-  "md:bg-purple-500/40",
-  "md:bg-pink-500/40",
+  "bg-red-500/40",
+  "bg-amber-500/40",
+  "bg-lime-500/40",
+  "bg-emerald-500/40",
+  "bg-cyan-500/40",
+  "bg-blue-500/40",
+  "bg-violet-500/40",
+  "bg-fuchsia-500/40",
+  "bg-rose-500/40",
+  "bg-orange-500/40",
+  "bg-yellow-500/40",
+  "bg-green-500/40",
+  "bg-teal-500/40",
+  "bg-sky-500/40",
+  "bg-indigo-500/40",
+  "bg-purple-500/40",
+  "bg-pink-500/40",
 ]
 
 const columnHelper = createColumnHelper<Item>()
@@ -124,6 +124,7 @@ export const ItemsTable = (props: {
             perAccount: acc[idx]?.perAccount || {},
             totalQty: acc[idx]?.totalQty || 0,
             ticker: getTicket(cur.memo) || acc[idx]?.ticker,
+            lastItemDate: cur.entry_date,
           }
 
           if (idx === -1) {
@@ -159,6 +160,7 @@ export const ItemsTable = (props: {
             ? (acc[idx]?.totalPrice || 0) + cur.money
             : (acc[idx]?.totalPrice || 0) - cur.money,
           ticker: getTicket(cur.memo) || acc[idx]?.ticker,
+          lastItemDate: cur.entry_date,
         }
 
         if (updatedItem.perAccount[from] === 0) {
@@ -218,41 +220,36 @@ export const ItemsTable = (props: {
   }
 
   return (
-    <>
-      <div className="mt-12 mb-2 text-xl font-semibold">
-        {`투자 자산 종목별 현황 (총 ${globalTotalPrice.toLocaleString()}원)`}
-      </div>
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-[120px]">자산군</TableHead>
-            <TableHead>투자 자산</TableHead>
-            <TableHead className='text-right'>계좌 별 수량</TableHead>
-            <TableHead className="text-right min-w-[80px]">총 수량</TableHead>
-            <TableHead className="text-right">기록된 평가액</TableHead>
-            <TableHead className="text-right w-[160px]">현재 1주 가격</TableHead>
-            <TableHead className="text-right">현재 평가액</TableHead>
-            <TableHead className="text-right">현재 평가 손익</TableHead>
-            <TableHead className="text-right">평가 손익 기록</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {tableData.map((item, idx) => (
-            <ItemsTableRow
-              accounts={accounts}
-              key={item.accountId + '-' + item.name}
-              item={item}
-            />
-          ))}
-
-          <ItemsTableLastRow
+    <Table className="min-w-[1024px]">
+      <TableHeader>
+        <TableRow>
+          <TableHead className="w-[120px]">자산군</TableHead>
+          <TableHead>투자 자산</TableHead>
+          <TableHead className='text-right'>계좌 별 수량</TableHead>
+          <TableHead className="text-right min-w-[80px]">총 수량</TableHead>
+          <TableHead className="text-right w-[120px]">기록된 평가액</TableHead>
+          <TableHead className="text-right w-[120px]">현재 1주 가격</TableHead>
+          <TableHead className="text-right w-[160px]">현재 평가액</TableHead>
+          <TableHead className="text-right w-[160px]">현재 평가 손익</TableHead>
+          <TableHead className="text-right">평가 손익 기록</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {tableData.map((item, idx) => (
+          <ItemsTableRow
             accounts={accounts}
-            items={tableData}
+            key={item.accountId + '-' + item.name}
+            item={item}
           />
-        </TableBody>
-      </Table>
+        ))}
 
-    </>
+        <ItemsTableLastRow
+          accounts={accounts}
+          items={tableData}
+        />
+      </TableBody>
+    </Table>
+
   )
 }

@@ -15,7 +15,7 @@ import {
   ColumnDef
 } from '@tanstack/react-table'
 import { putTickerPriceAtom, tickerPricesAtom } from '../states/ticker-price'
-import { formatCurrency, getTicket } from '../util'
+import { formatCurrency, getTicket, relativeDate } from '../util'
 import Link from 'next/link'
 import { Item } from '@/types/item.type'
 import { TickerPriceCell } from './TickerPriceCell'
@@ -26,23 +26,23 @@ import { ItemsTableCellActions } from './ItemsTableCellActions'
 import { ExternalLink } from 'lucide-react'
 
 const colors = [
-  "md:bg-red-500/30",
-  "md:bg-amber-500/30",
-  "md:bg-lime-500/30",
-  "md:bg-emerald-500/30",
-  "md:bg-cyan-500/30",
-  "md:bg-blue-500/30",
-  "md:bg-violet-500/30",
-  "md:bg-fuchsia-500/30",
-  "md:bg-rose-500/30",
-  "md:bg-orange-500/30",
-  "md:bg-yellow-500/30",
-  "md:bg-green-500/30",
-  "md:bg-teal-500/30",
-  "md:bg-sky-500/30",
-  "md:bg-indigo-500/30",
-  "md:bg-purple-500/30",
-  "md:bg-pink-500/30",
+  "bg-amber-500/30",
+  "bg-lime-500/30",
+  "bg-emerald-500/30",
+  "bg-cyan-500/30",
+  "bg-blue-500/30",
+  "bg-violet-500/30",
+  "bg-fuchsia-500/30",
+  "bg-rose-500/30",
+  "bg-orange-500/30",
+  "bg-yellow-500/30",
+  "bg-green-500/30",
+  "bg-teal-500/30",
+  "bg-sky-500/30",
+  "bg-indigo-500/30",
+  "bg-purple-500/30",
+  "bg-pink-500/30",
+  "bg-red-500/30",
 ]
 
 export const ItemsTableRow = (props: {
@@ -106,10 +106,17 @@ export const ItemsTableRow = (props: {
         }
       </TableCell>
 
+      {/* 기록된 평가액 */}
       <TableCell className="text-right">
-        <><b>{totalPrice.toLocaleString()}</b>원</>
+        <div>
+          <b>{totalPrice.toLocaleString()}</b>원
+        </div>
+        <div className='text-gray-400'>
+          {relativeDate(item.lastItemDate)}
+        </div>
       </TableCell>
 
+      {/* 현재 1주 가격 */}
       <ItemsTableCellTickerPrice
         item={item}
       />

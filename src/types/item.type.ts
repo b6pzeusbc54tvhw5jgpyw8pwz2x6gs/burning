@@ -9,4 +9,5 @@ export interface Item {
   totalQty: number
   totalPrice: number
   ticker?: string
+  lastItemDate: string
 }
