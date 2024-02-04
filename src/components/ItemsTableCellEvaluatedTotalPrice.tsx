@@ -5,7 +5,7 @@ import { Item } from "../types/item.type"
 import { useTickerPrice } from "../data/hooks"
 import { TableCell } from "./ui/table"
 import { Input } from "./ui/input"
-import { nonTickerEvaluatedPricesAtom, putNonTickerEvaluatedPricesAtom } from "@/states/non-ticker-evaluated-price"
+import { putNonTickerEvaluatedPricesAtom } from "@/states/non-ticker-evaluated-price"
 import { useItemPrice } from "@/hooks/use-item-price"
 
 const isAvailableAutoUpdate = (ticker: string) => {
@@ -16,7 +16,7 @@ export const ItemsTableCellEvaluatedTotalPrice = (props: {
   item: Item
 }) => {
   const { item } = props
-  const { name, sectionId, accountId, ticker, isFund, totalQty } = item
+  const { name, sectionId, accountId, ticker, tickerType, totalQty } = item
   const putTickerPrice = useSetAtom(putTickerPriceAtom)
   const [tickerPrices, setTickerPrices] = useAtom(tickerPricesAtom)
   const [editing, setEditing] = useState(false)
@@ -37,7 +37,7 @@ export const ItemsTableCellEvaluatedTotalPrice = (props: {
 
   const tickerPrice = tickerPrices.find(t => t.ticker === ticker)?.price
 
-  if (!isFund && isFetching) {
+  if (tickerType && isFetching) {
     return (
       <TableCell className="text-right animate-pulse">Loading...</TableCell>
     )
@@ -46,7 +46,7 @@ export const ItemsTableCellEvaluatedTotalPrice = (props: {
   return (
     <TableCell className="text-right">
 
-      {isFund ? (
+      {!tickerType ? (
         <div className="flex text-right justify-end">
           <Input
             className="h-5 text-right px-1 w-full"

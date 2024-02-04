@@ -1,6 +1,5 @@
 import { useAccounts, usePostEntry } from "@/data/hooks"
 import { toast } from "react-toastify"
-import { AllAssets } from "./AllAssets"
 import { Button } from "./ui/button"
 import { DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
 import { Input } from "./ui/input"
@@ -9,19 +8,8 @@ import { Item } from "@/types/item.type"
 import { today } from "@/util"
 import { useAtom, useSetAtom } from "jotai"
 import { tickerPricesAtom } from "@/states/ticker-price"
-import {
-  Command,
-  CommandDialog,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-  CommandSeparator,
-  CommandShortcut,
-} from "@/components/ui/command"
 import { AccountSelect } from "./AccountSelect"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { useErrorToast } from "@/hooks/use-error-toast"
 import { fetchAccountEntriesAtom, removeAccountEntriesAtom } from "@/states/acount-entries.state"
 import { Loader2 } from "lucide-react"
@@ -30,9 +18,9 @@ export function ValueChangeTransactionFormDialogContent(props: {
   item: Item
 }) {
   const { item } = props
-  const { sectionId, accountId, perAccount, isFund, name, ticker, totalQty, totalPrice } = item
+  const { sectionId, accountId, name, totalQty, totalPrice } = item
 
-  const { data: accounts, isFetching, isLoading, isError, isSuccess } = useAccounts(item.sectionId)
+  const { data: accounts } = useAccounts(item.sectionId)
   const { isPending, mutateAsync: postEntry, error } = usePostEntry()
   const [entryDate, setEntryDate] = useState(() => today())
 
@@ -89,7 +77,7 @@ export function ValueChangeTransactionFormDialogContent(props: {
         </DialogDescription>
       </DialogHeader>
 
-      {/* 4x2 그리드 */}
+      {/* 5x3 그리드 */}
       <div className="flex justify-between mt-4 gap-2 text-sm">
         <div className="basis-2/12">날짜</div>
         <div className="basis-6/12">아이템</div>

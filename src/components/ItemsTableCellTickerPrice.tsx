@@ -1,32 +1,20 @@
 import { useAtom, useSetAtom } from "jotai"
-import { startTransition, useEffect, useRef, useState, useTransition } from 'react'
+import { useEffect, useState } from 'react'
 import { putTickerPriceAtom, tickerPricesAtom } from "../states/ticker-price"
 import { Item } from "../types/item.type"
-import Link from "next/link"
-import { getTickerPrice } from "../server/actions/yahoo-finance"
 import { useTickerPrice } from "../data/hooks"
-import { Box, TextField } from '@radix-ui/themes'
 import { TableCell } from "./ui/table"
 import { Input } from "./ui/input"
-import { ChevronRight, RotateCw } from "lucide-react"
-
-const isAvailableAutoUpdate = (ticker: string) => {
-  return !ticker.startsWith('비상장-')
-}
 
 export const ItemsTableCellTickerPrice = (props: {
   item: Item
 }) => {
   const { item } = props
-  const { ticker, isFund } = item
+  const { ticker, tickerType } = item
   const putTickerPrice = useSetAtom(putTickerPriceAtom)
-  const [tickerPrices, setTickerPrices] = useAtom(tickerPricesAtom)
-  // const [isPending, startTransition] = useTransition()
-  const [defaultValue, setDefaultValue] = useState(() => tickerPrices.find(t => t.ticker === ticker)?.price || '')
+  const [tickerPrices] = useAtom(tickerPricesAtom)
   const [editing, setEditing] = useState(false)
-  const { data, dataUpdatedAt, isFetching, error, refetch } = useTickerPrice(
-    ticker && isAvailableAutoUpdate(ticker) ? ticker : undefined
-  )
+  const { data, dataUpdatedAt, isFetching, error, refetch } = useTickerPrice(ticker)
 
   useEffect(() => {
     if (!ticker || !data) return
@@ -36,8 +24,8 @@ export const ItemsTableCellTickerPrice = (props: {
 
   const tickerPrice = tickerPrices.find(t => t.ticker === ticker)?.price
 
-  if (isFund) {
-    return <td className='text-right'>-</td>
+  if (!tickerType) {
+    return <td className='text-right'></td>
   }
 
   if (!ticker) {

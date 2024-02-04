@@ -22,7 +22,7 @@ export const ItemsTableCellActions = (props: {
   item: Item
 }) => {
   const { item } = props
-  const { ticker, isFund } = item
+  const { ticker, tickerType } = item
   const putTickerPrice = useSetAtom(putTickerPriceAtom)
   // const [tickerPrices, setTickerPrices] = useAtom(tickerPricesAtom)
   // const [isPending, startTransition] = useTransition()
@@ -52,7 +52,7 @@ export const ItemsTableCellActions = (props: {
             <Button
               variant="outline"
               size="sm"
-              disabled={!item.isFund && !item.ticker}
+              disabled={tickerType && !ticker}
             >
               📝
             </Button>

@@ -38,7 +38,7 @@ export const ItemsTableRow = (props: {
   accounts: Record<string, Account[]>
 }) => {
   const { item, accounts } = props
-  const { accountId, perAccount, isFund, name, ticker, totalQty, totalPrice } = item
+  const { accountId, perAccount, tickerType, name, ticker, totalQty, totalPrice } = item
   const assets = accounts.assets
   const [stockAssets, setStockAssets] = useAtom(stockAssetsAtom)
   const getAssetName = (accountId: string) => {
@@ -75,16 +75,16 @@ export const ItemsTableRow = (props: {
               <b>{formatCurrency(perAccount[from])}</b>
             </span>
             <span>
-              {isFund ? '원' : '주'}
+              {tickerType ? '주' : '원'}
             </span>
           </div>
         ))}
       </TableCell>
 
       <TableCell className="text-right">
-        {isFund
-          ? '-'
-          : <><b>{totalQty.toLocaleString()}</b>주</>
+        {tickerType
+          ? <><b>{totalQty.toLocaleString()}</b>주</>
+          : '-'
         }
       </TableCell>
 
