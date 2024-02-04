@@ -6,19 +6,10 @@ import { stockAssetsAtom } from '@/states/stock-assets.state'
 import { Account, AccountType } from '@/types/account.type'
 import { AccountEntries, accountEntriesAtom } from '../states/acount-entries.state'
 import { sum, unique } from 'radash'
-import {
-  createColumnHelper,
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-  Column,
-  ColumnDef
-} from '@tanstack/react-table'
+import { createColumnHelper, ColumnDef } from '@tanstack/react-table'
 import { putTickerPriceAtom, tickerPricesAtom } from '../states/ticker-price'
 import { getTicket } from '../util'
-import Link from 'next/link'
 import { Item } from '../types/item.type'
-import { TickerPriceCell } from './TickerPriceCell'
 import { globalTotalPriceAtom } from '../states/global-total-price.state'
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from './ui/table'
 import { ItemsTableRow } from './ItemsTableRow'

@@ -16,8 +16,6 @@ const WHOOING_APP_SECRET = process.env.WHOOING_APP_SECRET || ''
 const WHOOING_URL = process.env.WHOOING_URL || 'https://whooing.com'
 
 export async function requestToken() {
-  console.log('this server')
-
   const query = new URLSearchParams({
     app_id: WHOOING_APP_ID,
     app_secret: WHOOING_APP_SECRET,
@@ -40,10 +38,9 @@ export async function requestToken() {
 export async function getUser() {
   const whooingAPI = getWhooingAPI()
   const res = await whooingAPI.get('/api/user.json_array')
-  // if (res.data.code !== 200) {
-  //   throw new Error(res.data.message)
-  //   // return { ok: false, reason: res.data.message }
-  // }
+  if (res.data.code !== 200) {
+    throw new Error(`${res.data.code} ${res.data.message}`)
+  }
 
   return zUser.parse(res.data.results)
 }
@@ -87,15 +84,15 @@ export const getEntries = async (params: {
     limit: 9999,
   }})
 
-  // if (res.data.code !== 200) {
-  //   return { ok: false, reason: res.data.message }
-  // }
+  if (res.data.code !== 200) {
+    throw new Error(`${res.data.code} ${res.data.message}`)
+  }
 
   return zEntry.array().parse(res.data.results.rows)
 }
 
-export async function getAllEntries(account: Account) {
-  let startDate = Number(account.open_date)
+export async function getAllEntries(account: Account, initialDate?: number) {
+  let startDate = initialDate || Number(account.open_date)
   let endDate = getMaximumEndDate(account)
 
   let result: Entry[] = []
@@ -115,4 +112,38 @@ export async function getAllEntries(account: Account) {
   }
 
   return result
+}
+
+export async function postEntry(entry: {
+  sectionId: string
+  entryDate: number
+  lAccount: 'assets' | 'expenses'
+  lAccountId: string
+  rAccount: 'assets' | 'income'
+  rAccountId: string
+  item: string
+  money: number
+  memo?: string
+  attachmentIds?: string[]
+}) {
+  const whooingAPI = getWhooingAPI()
+  const body = {
+    section_id: entry.sectionId,
+    entry_date: entry.entryDate,
+    l_account: entry.lAccount,
+    l_account_id: entry.lAccountId,
+    r_account: entry.rAccount,
+    r_account_id: entry.rAccountId,
+    item: entry.item,
+    money: entry.money,
+    memo: entry.memo,
+    attachment_ids: entry.attachmentIds?.join(','),
+  }
+
+  const res = await whooingAPI.post('/api/entries.json', body)
+  if (res.data.code !== 200) {
+    throw new Error(`${res.data.code} ${res.data.message}`)
+  }
+
+  return res.data
 }

@@ -1,10 +1,5 @@
-// import { useTransition } from 'react'
-
-import { getAccounts, getUser } from '@/server/actions/whooing'
+import { getAccounts } from '@/server/actions/whooing'
 import { StockAssets } from '@/components/StockAssets'
-import { AllAssets } from '@/components/AllAssets'
-import { StockTable } from '@/components/StockTable'
-import { Button } from "@/components/ui/button"
 import { ItemsTable } from '@/components/ItemsTable'
 import { GlobalTotalPrice } from '@/components/GlobalTotalPrice'
 
@@ -31,6 +26,5 @@ export default async function Home({ params }: {
       </div>
       <ItemsTable accounts={accounts} />
     </div>
-    // </main>
   )
 }

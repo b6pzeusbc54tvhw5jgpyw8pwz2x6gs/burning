@@ -8,7 +8,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 export function GlobalNav() {
   const { data: user } = useUser()
-  console.log("🚀 ~ GlobalNav ~ user:", user)
 
   return (
     <header

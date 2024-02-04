@@ -68,3 +68,7 @@ export const relativeDate = (value: string) => {
     return `${diff}일 전`
   }
 }
+
+export const today = () => {
+  return Number(dayjs().format('YYYYMMDD'))
+}

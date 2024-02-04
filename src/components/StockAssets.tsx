@@ -23,14 +23,13 @@ export const StockAssets = (props: {
         />
       ))}
 
-      <Dialog >
+      <Dialog>
         <DialogTrigger asChild>
           <Button variant="outline">
             + 자산 추가
           </Button>
         </DialogTrigger>
         <AllAssetsDialogContent sectionId={sectionId} />
-
       </Dialog>
     </div>
   )

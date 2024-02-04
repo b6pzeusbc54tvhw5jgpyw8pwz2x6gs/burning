@@ -5,6 +5,8 @@ import { GlobalNav } from "@/components/GlobalNav"
 import { Theme } from '@radix-ui/themes'
 import "./globals.css"
 import { ThemeProvider } from "../lib/theme-provider"
+import { ToastContainer } from 'react-toastify'
+import "react-toastify/dist/ReactToastify.css"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -33,6 +35,7 @@ export default function RootLayout({
               <div className="p-2 lg:py-6 lg:px-12">
                 {children}
               </div>
+              <ToastContainer />
             </Theme>
           </ThemeProvider>
         </Providers>

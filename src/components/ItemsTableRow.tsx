@@ -1,29 +1,17 @@
 'use client'
 
-import { useEffect, useMemo } from 'react'
-import { useAtom, useSetAtom } from 'jotai'
-import { stockAssetsAtom } from '@/states/stock-assets.state'
-import { Account, AccountType } from '@/types/account.type'
-import { AccountEntries, accountEntriesAtom } from '../states/acount-entries.state'
-import { sum, unique } from 'radash'
-import {
-  createColumnHelper,
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-  Column,
-  ColumnDef
-} from '@tanstack/react-table'
-import { putTickerPriceAtom, tickerPricesAtom } from '../states/ticker-price'
-import { formatCurrency, getTicket, relativeDate } from '../util'
 import Link from 'next/link'
+import { useAtom } from 'jotai'
+import { ExternalLink } from 'lucide-react'
+import { stockAssetsAtom } from '@/states/stock-assets.state'
+import { Account } from '@/types/account.type'
+import { formatCurrency, relativeDate } from '@/util'
 import { Item } from '@/types/item.type'
-import { TickerPriceCell } from './TickerPriceCell'
-import { globalTotalPriceAtom } from '../states/global-total-price.state'
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from './ui/table'
+import { TableCell, TableRow } from './ui/table'
 import { ItemsTableCellTickerPrice } from './ItemsTableCellTickerPrice'
 import { ItemsTableCellActions } from './ItemsTableCellActions'
-import { ExternalLink } from 'lucide-react'
+import { ItemsTableCellEvaluatedTotalPrice } from './ItemsTableCellEvaluatedTotalPrice'
+import { ItemsTableCellEvaluatedProfit } from './ItemsTableCellEvaluatedProfit'
 
 const colors = [
   "bg-amber-500/30",
@@ -58,12 +46,6 @@ export const ItemsTableRow = (props: {
     return found ? found.title : 'Unknown'
   }
   const idx = stockAssets.findIndex(sa => sa.account.account_id === accountId)
-
-  const [tickerPrices, setTickerPrices] = useAtom(tickerPricesAtom)
-  const tickerPrice = tickerPrices.find(t => t.ticker === item.ticker)?.price
-
-  const currentPrice = (tickerPrice || 0) * totalQty
-  const profit = currentPrice - totalPrice
 
   return (
     <TableRow className={`${colors[idx]} py-0`}>
@@ -121,24 +103,16 @@ export const ItemsTableRow = (props: {
         item={item}
       />
 
-      <TableCell className="text-right">
-        {isFund
-          ? '-'
-          : tickerPrice
-            ? <><b>{(totalQty * tickerPrice).toLocaleString()}</b>원</>
-            : 'Ticker 정보 필요'
-        }
-      </TableCell>
+      {/* 현재 평가 액 */}
+      <ItemsTableCellEvaluatedTotalPrice
+        item={item}
+      />
 
-      <TableCell className="text-right">
-        {ticker ? (
-          <span className={`${profit >= 0 ? 'text-green-600' : 'text-red-400'}`}>
-            {profit >= 0 ? '+' : '-'} {Math.abs(profit).toLocaleString()}원
-          </span>
-        ) : (
-          '-'
-        )}
-      </TableCell>
+      {/* 현재 평가 손익 */}
+      <ItemsTableCellEvaluatedProfit
+        item={item}
+      />
+
       <ItemsTableCellActions item={item} />
 
     </TableRow>

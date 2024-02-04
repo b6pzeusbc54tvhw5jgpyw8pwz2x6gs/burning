@@ -1,6 +1,6 @@
-import { getAccounts, getAllEntries, getEntries, getSections, getUser } from "@/server/actions/whooing"
+import { getAccounts, getAllEntries, getEntries, getSections, getUser, postEntry } from "@/server/actions/whooing"
 import { getTickerPrice } from "@/server/actions/yahoo-finance"
-import { useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery } from "@tanstack/react-query"
 import { Account } from "../types/account.type"
 import ms from "ms"
 
@@ -42,5 +42,11 @@ export function useTickerPrice(ticker?: string) {
     queryFn: async () => ticker ? getTickerPrice(ticker) : null,
     queryKey: ["tickerPrice", ticker],
     refetchInterval: ms('3m'),
+  })
+}
+
+export function usePostEntry() {
+  return useMutation({
+    mutationFn: (entry: Parameters<typeof postEntry>[0]) => postEntry(entry),
   })
 }

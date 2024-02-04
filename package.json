@@ -25,6 +25,7 @@
     "class-variance-authority": "^0.7.0",
     "classnames": "^2.5.1",
     "clsx": "^2.1.0",
+    "cmdk": "^0.2.1",
     "dayjs": "^1.11.10",
     "jotai": "^2.6.3",
     "lucide-react": "^0.321.0",

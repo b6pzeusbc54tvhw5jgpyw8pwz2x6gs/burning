@@ -3,6 +3,7 @@ import { Entry } from '../types/entry.type'
 import { atom } from 'jotai'
 import { getAllEntries, getEntries } from '../server/actions/whooing'
 import { Account } from '../types/account.type'
+import { stockAssetsAtom } from './stock-assets.state'
 
 export interface AccountEntries {
   sectionId: string
@@ -20,10 +21,18 @@ export const fetchAccountEntriesAtom = atom(
     let prev = get(accountEntriesAtom)
     if (prev.find(p => p.accountId === account_id)) return
 
-    set(accountEntriesAtom, [
+    const stockAssets = get(stockAssetsAtom)
+
+    const updatedForLoading = [
       ...prev,
       { sectionId, accountId: account_id, loading: true }
-    ])
+    ].sort((a, b) => {
+      const aIdx = stockAssets.findIndex(s => s.account.account_id === a.accountId)
+      const bIdx = stockAssets.findIndex(s => s.account.account_id === b.accountId)
+      return aIdx - bIdx
+    })
+
+    set(accountEntriesAtom, updatedForLoading)
 
     const data = await getAllEntries(account)
 

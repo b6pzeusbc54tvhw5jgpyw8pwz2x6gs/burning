@@ -10,6 +10,9 @@ import { TableCell } from "./ui/table"
 import { Input } from "./ui/input"
 import { Button } from "./ui/button"
 import { ChevronRight, RefreshCw } from "lucide-react"
+import { Dialog, DialogTrigger } from "./ui/dialog"
+import { AllAssetsDialogContent } from "./AllAssetsDialogContent"
+import { ValueChangeTransactionFormDialogContent } from "./ValueChangeTransactionFormDialogContent"
 
 const isAvailableAutoUpdate = (ticker: string) => {
   return !ticker.startsWith('비상장-')
@@ -44,9 +47,18 @@ export const ItemsTableCellActions = (props: {
             onClick={() => refetch()}
           />
         </Button>
-        <Button variant="outline" size="sm">
-          📝
-        </Button>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={!item.isFund && !item.ticker}
+            >
+              📝
+            </Button>
+          </DialogTrigger>
+          <ValueChangeTransactionFormDialogContent item={item} />
+        </Dialog>
       </div>
     </TableCell>
   )
