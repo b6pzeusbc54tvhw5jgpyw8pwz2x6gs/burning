@@ -3,7 +3,7 @@ import { nonTickerEvaluatedPricesAtom } from "@/states/non-ticker-evaluated-pric
 import { tickerPricesAtom } from "@/states/ticker-price.state"
 import { Item } from "@/types/item.type"
 
-export const useItemPrice = (item: Item) => {
+export const useItemDetail = (item: Item) => {
   const { sectionId, accountId, name, ticker, totalQty, totalPrice } = item
   const [nonTickerEvaluatedPrices] = useAtom(nonTickerEvaluatedPricesAtom)
   const [tickerPrices] = useAtom(tickerPricesAtom)
@@ -14,6 +14,7 @@ export const useItemPrice = (item: Item) => {
 
   if (itemAsNonTicker) {
     return {
+      nonTickerType: true,
       tickerPrice: undefined,
       evaluatedPrice: itemAsNonTicker.evaluatedPrice,
       evaluatedProfit: itemAsNonTicker.evaluatedPrice - totalPrice,
@@ -24,6 +25,7 @@ export const useItemPrice = (item: Item) => {
   const evaluatedPrice = tickerPrice ? tickerPrice * totalQty : totalPrice
   const evaluatedProfit = evaluatedPrice - totalPrice
   return {
+    nonTickerType: false,
     tickerPrice,
     evaluatedPrice,
     evaluatedProfit,

@@ -13,6 +13,7 @@ import { Table, TableBody, TableHead, TableHeader, TableRow } from './ui/table'
 import { ItemsTableRow } from './ItemsTableRow'
 import { ItemsTableLastRow } from './ItemsTableLastRow'
 import { nonTickerEvaluatedPricesAtom } from '@/states/non-ticker-evaluated-price.state'
+import { tickerPricesAtom } from '@/states/ticker-price.state'
 
 export const ItemsTable = (props: {
   accounts: Record<string, Account[]>
@@ -22,6 +23,7 @@ export const ItemsTable = (props: {
   const [stockAssets, setStockAssets] = useAtom(stockAssetsAtom)
   const [globalTotalPrice, setGlobalTotalPrice] = useAtom(globalTotalPriceAtom)
   const [nonTickerEvaluatedPrices] = useAtom(nonTickerEvaluatedPricesAtom)
+  const [tickerPrices, setTickerPrices] = useAtom(tickerPricesAtom)
 
   const tableData = useMemo(() => {
     const isSelected = (ae: AccountEntries) => (
@@ -51,6 +53,7 @@ export const ItemsTable = (props: {
             && a.name === name
         )
 
+        const isManualTicker = tickerPrices.some(t => t.ticker === getManualTicker(name))
         const isTickerType = !nonTickerEvaluatedPrices.some(p => (
           p.sectionId === cur.sectionId
             && p.accountId === cur.accountId
@@ -70,7 +73,9 @@ export const ItemsTable = (props: {
             totalPrice: (acc[idx]?.totalPrice || 0) + cur.money,
             perAccount: acc[idx]?.perAccount || {},
             totalQty: acc[idx]?.totalQty || 0,
-            ticker: getTicket(cur.memo) || acc[idx]?.ticker || getManualTicker(cur.item),
+            ticker: isManualTicker
+              ? getManualTicker(cur.item)
+              : getTicket(cur.memo) || acc[idx]?.ticker,
             lastItemDate: cur.entry_date,
           }
 
@@ -90,7 +95,7 @@ export const ItemsTable = (props: {
         const from = type === 'buy' ? cur.r_account_id : cur.l_account_id
         const qty = isTickerType
           ? Number(cur.item?.split('(')[1]?.split(/[),]/)[0] || 0)
-          : cur.money
+          : type === 'buy' ? cur.money : -cur.money
         const totalQty = sum(Object.values(acc[idx]?.perAccount || [])) + qty
         const updatedItem: Item = {
           ...acc[idx],
@@ -105,7 +110,9 @@ export const ItemsTable = (props: {
           totalPrice: type === 'buy'
             ? (acc[idx]?.totalPrice || 0) + cur.money
             : (acc[idx]?.totalPrice || 0) - cur.money,
-          ticker: getTicket(cur.memo) || acc[idx]?.ticker,
+          ticker: isManualTicker
+            ? getManualTicker(cur.item)
+            : getTicket(cur.memo) || acc[idx]?.ticker,
           lastItemDate: cur.entry_date,
         }
 
@@ -123,9 +130,9 @@ export const ItemsTable = (props: {
           ...acc.slice(idx + 1)
         ]
       }, [] as Item[])
-      .filter(i => i.totalQty > 0)
+      .filter(i => i.totalPrice > 0)
 
-  }, [accountEntries, stockAssets, nonTickerEvaluatedPrices])
+  }, [accountEntries, stockAssets, nonTickerEvaluatedPrices, tickerPrices])
 
   useEffect(() => {
     setGlobalTotalPrice(sum(tableData.map(item => item.totalPrice)))

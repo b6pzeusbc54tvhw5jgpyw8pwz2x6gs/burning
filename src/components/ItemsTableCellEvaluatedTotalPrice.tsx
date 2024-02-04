@@ -6,7 +6,10 @@ import { useTickerPrice } from "../data/hooks"
 import { TableCell } from "./ui/table"
 import { Input } from "./ui/input"
 import { putNonTickerEvaluatedPricesAtom } from "@/states/non-ticker-evaluated-price.state"
-import { useItemPrice } from "@/hooks/use-item-price"
+import { useItemDetail } from "@/hooks/use-item-price"
+import { Dialog, DialogTrigger } from "./ui/dialog"
+import { Button } from "./ui/button"
+import { TickerTypeSettingDialogContent } from "./TickerTypeSettingDialogContent"
 
 export const ItemsTableCellEvaluatedTotalPrice = (props: {
   item: Item
@@ -19,7 +22,7 @@ export const ItemsTableCellEvaluatedTotalPrice = (props: {
   const { data, dataUpdatedAt, isFetching, error, refetch } = useTickerPrice(ticker)
 
   const putNonTickerEvaluatedPrice = useSetAtom(putNonTickerEvaluatedPricesAtom)
-  const { evaluatedPrice } = useItemPrice(item)
+  const { evaluatedPrice, nonTickerType } = useItemDetail(item)
 
   useEffect(() => {
     if (!ticker || !data) return
@@ -38,12 +41,14 @@ export const ItemsTableCellEvaluatedTotalPrice = (props: {
   return (
     <TableCell className="text-right">
 
-      {(!ticker || ticker.startsWith('manual-ticker-')) ? (
+      {(tickerPrice ? (
+        <><b>{(Math.floor(evaluatedPrice)).toLocaleString()}</b>원</>
+      ) : nonTickerType ? (
         <div className="flex text-right justify-end">
           <Input
             className="h-5 text-right px-1 w-full"
             type="text"
-            value={evaluatedPrice?.toLocaleString()}
+            value={evaluatedPrice ? Math.floor(evaluatedPrice).toLocaleString() : ''}
             onFocus={e => setEditing(true)}
             onChange={e => putNonTickerEvaluatedPrice({
               sectionId,
@@ -56,13 +61,19 @@ export const ItemsTableCellEvaluatedTotalPrice = (props: {
           />
           <span>원</span>
         </div>
-      ) : !ticker ? (
-        'Ticker 정보 필요'
-      ) : !tickerPrice ? (
-        'Ticker 정보 로드 실패'
       ) : (
-        <><b>{(evaluatedPrice).toLocaleString()}</b>원</>
-      )}
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+            >
+              가격 로드 실패
+            </Button>
+          </DialogTrigger>
+          <TickerTypeSettingDialogContent item={item} />
+        </Dialog>
+      ))}
     </TableCell>
   )
 }

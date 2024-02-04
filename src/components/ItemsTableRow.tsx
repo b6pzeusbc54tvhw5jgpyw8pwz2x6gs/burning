@@ -12,6 +12,7 @@ import { ItemsTableCellTickerPrice } from './ItemsTableCellTickerPrice'
 import { ItemsTableCellActions } from './ItemsTableCellActions'
 import { ItemsTableCellEvaluatedTotalPrice } from './ItemsTableCellEvaluatedTotalPrice'
 import { ItemsTableCellEvaluatedProfit } from './ItemsTableCellEvaluatedProfit'
+import { useItemDetail } from '@/hooks/use-item-price'
 
 const colors = [
   "bg-amber-500/30",
@@ -46,6 +47,7 @@ export const ItemsTableRow = (props: {
     return found ? found.title : 'Unknown'
   }
   const idx = stockAssets.findIndex(sa => sa.account.account_id === accountId)
+  const { nonTickerType } = useItemDetail(item)
 
   return (
     <TableRow className={`${colors[idx]} py-0`}>
@@ -55,7 +57,7 @@ export const ItemsTableRow = (props: {
           <span>
             {name}
           </span>
-          {ticker && (
+          {ticker && !ticker.startsWith('manual-ticker-') && (
             <Link
               href={`https://finance.yahoo.com/quote/${ticker}?p=${ticker}&.tsrc=fin-srch`}
               target="_blank"
@@ -66,21 +68,29 @@ export const ItemsTableRow = (props: {
         </div>
       </TableCell>
 
+      {/* 계좌 별 수량 */}
       <TableCell className='text-right'>
-        {Object.keys(perAccount).map(from => (
-          <div key={from}>
-            <span>
-              {getAssetName(from)}
-              {' '}
-              <b>{formatCurrency(perAccount[from])}</b>
-            </span>
-            <span>
-              {ticker ? '주' : '원'}
-            </span>
-          </div>
-        ))}
+        {nonTickerType ? (
+          ''
+        ) : (
+          <>
+            {Object.keys(perAccount).map(from => (
+              <div key={from}>
+                <span>
+                  {getAssetName(from)}
+                  {' '}
+                  <b>{formatCurrency(perAccount[from])}</b>
+                </span>
+                <span>
+                  {ticker ? '주' : '원'}
+                </span>
+              </div>
+            ))}
+          </>
+        )}
       </TableCell>
 
+      {/* 총 수량 */}
       <TableCell className="text-right">
         {ticker
           ? <><b>{totalQty.toLocaleString()}</b>주</>

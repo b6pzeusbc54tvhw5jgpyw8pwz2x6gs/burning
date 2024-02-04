@@ -73,18 +73,18 @@ export const ItemsTableLastRow = (props: {
       <TableCell className="text-right"></TableCell>
 
       <TableCell className="text-right">
-        <b>{lastTotalPrice.toLocaleString()}</b>원
+        <b>{Math.floor(lastTotalPrice).toLocaleString()}</b>원
       </TableCell>
 
       <TableCell className="text-right"></TableCell>
 
       <TableCell className="text-right">
-        <b>{currentTotalPrice.toLocaleString()}</b>원
+        <b>{Math.floor(currentTotalPrice).toLocaleString()}</b>원
       </TableCell>
 
       <TableCell className="text-right">
         <span className={`${profit >= 0 ? 'text-green-600' : 'text-red-400'}`}>
-          {profit >= 0 ? '+' : '-'} {Math.abs(profit).toLocaleString()}원
+          {profit >= 0 ? '+' : '-'} {Math.abs(Math.floor(profit)).toLocaleString()}원
         </span>
       </TableCell>
 

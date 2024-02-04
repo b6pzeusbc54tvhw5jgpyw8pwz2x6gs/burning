@@ -1,3 +1,4 @@
+import { Item } from '@/types/item.type'
 import { atom } from 'jotai'
 import { atomWithStorage } from 'jotai/utils'
 
@@ -42,3 +43,23 @@ export const putNonTickerEvaluatedPricesAtom = atom(
     })
   }
 )
+
+export const removeNonTickerEvaluatedPriceAtom = atom(
+  null,
+  (get, set, item: Item) => {
+    const { accountId, name, sectionId } = item
+    const prev = get(nonTickerEvaluatedPricesAtom)
+    const idx = prev.findIndex(p => (
+      p.sectionId === sectionId
+        && p.accountId === accountId
+        && p.itemName === name
+    ))
+    if (idx < 0) return
+
+    set(nonTickerEvaluatedPricesAtom, [
+      ...prev.slice(0, idx),
+      ...prev.slice(idx + 1),
+    ])
+  }
+)
+

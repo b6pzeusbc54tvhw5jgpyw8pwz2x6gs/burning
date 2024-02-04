@@ -1,7 +1,7 @@
 import { Item } from "../types/item.type"
 import { useTickerPrice } from "../data/hooks"
 import { TableCell } from "./ui/table"
-import { useItemPrice } from "@/hooks/use-item-price"
+import { useItemDetail } from "@/hooks/use-item-price"
 
 export const ItemsTableCellEvaluatedProfit = (props: {
   item: Item
@@ -9,7 +9,7 @@ export const ItemsTableCellEvaluatedProfit = (props: {
   const { item } = props
   const { ticker } = item
   const { isFetching } = useTickerPrice(ticker)
-  const { evaluatedProfit } = useItemPrice(item)
+  const { evaluatedProfit } = useItemDetail(item)
 
   if (ticker && isFetching) {
     return (
@@ -20,7 +20,7 @@ export const ItemsTableCellEvaluatedProfit = (props: {
   return (
     <TableCell className="text-right">
       <span className={`${evaluatedProfit >= 0 ? 'text-green-600' : 'text-red-400'}`}>
-        {evaluatedProfit >= 0 ? '+' : '-'} {Math.abs(evaluatedProfit).toLocaleString()}원
+        {evaluatedProfit >= 0 ? '+' : '-'} {Math.abs(Math.floor(evaluatedProfit)).toLocaleString()}원
       </span>
     </TableCell>
   )

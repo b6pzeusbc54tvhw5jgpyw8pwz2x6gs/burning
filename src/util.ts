@@ -74,5 +74,6 @@ export const today = () => {
 }
 
 export const getManualTicker = (itemName: string) => {
-  return `manual-ticker-${itemName}`.replace(/ /g, '-')
+  const onlyItemName = itemName.split('(')[0]
+  return `manual-ticker-${onlyItemName}`.replace(/ /g, '-')
 }
