@@ -1,36 +1,21 @@
-import { useAtom, useSetAtom } from "jotai"
-import { startTransition, useEffect, useRef, useState, useTransition } from 'react'
-import { putTickerPriceAtom, tickerPricesAtom } from "../states/ticker-price"
+import { useSetAtom } from "jotai"
+import { useEffect, useState } from 'react'
+import { putTickerPriceAtom, } from "../states/ticker-price.state"
 import { Item } from "../types/item.type"
-import Link from "next/link"
-import { getTickerPrice } from "../server/actions/yahoo-finance"
 import { useTickerPrice } from "../data/hooks"
-import { Box, TextField } from '@radix-ui/themes'
 import { TableCell } from "./ui/table"
-import { Input } from "./ui/input"
 import { Button } from "./ui/button"
-import { ChevronRight, RefreshCw } from "lucide-react"
+import { RefreshCw } from "lucide-react"
 import { Dialog, DialogTrigger } from "./ui/dialog"
-import { AllAssetsDialogContent } from "./AllAssetsDialogContent"
 import { ValueChangeTransactionFormDialogContent } from "./ValueChangeTransactionFormDialogContent"
-
-const isAvailableAutoUpdate = (ticker: string) => {
-  return !ticker.startsWith('비상장-')
-}
 
 export const ItemsTableCellActions = (props: {
   item: Item
 }) => {
   const { item } = props
-  const { ticker, tickerType } = item
+  const { ticker } = item
   const putTickerPrice = useSetAtom(putTickerPriceAtom)
-  // const [tickerPrices, setTickerPrices] = useAtom(tickerPricesAtom)
-  // const [isPending, startTransition] = useTransition()
-  // const [defaultValue, setDefaultValue] = useState(() => tickerPrices.find(t => t.ticker === ticker)?.price || '')
-  const [editing, setEditing] = useState(false)
-  const { data, dataUpdatedAt, isFetching, error, refetch } = useTickerPrice(
-    ticker && isAvailableAutoUpdate(ticker) ? ticker : undefined
-  )
+  const { data, refetch } = useTickerPrice(ticker)
 
   useEffect(() => {
     if (!ticker || !data) return
@@ -52,7 +37,7 @@ export const ItemsTableCellActions = (props: {
             <Button
               variant="outline"
               size="sm"
-              disabled={tickerType && !ticker}
+              disabled={!ticker || ticker.startsWith('manual-ticker-')}
             >
               📝
             </Button>

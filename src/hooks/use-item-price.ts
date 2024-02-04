@@ -1,6 +1,6 @@
 import { useAtom } from "jotai"
-import { nonTickerEvaluatedPricesAtom } from "@/states/non-ticker-evaluated-price"
-import { tickerPricesAtom } from "@/states/ticker-price"
+import { nonTickerEvaluatedPricesAtom } from "@/states/non-ticker-evaluated-price.state"
+import { tickerPricesAtom } from "@/states/ticker-price.state"
 import { Item } from "@/types/item.type"
 
 export const useItemPrice = (item: Item) => {

@@ -6,13 +6,13 @@ import { stockAssetsAtom } from '@/states/stock-assets.state'
 import { Account } from '@/types/account.type'
 import { AccountEntries, accountEntriesAtom } from '../states/acount-entries.state'
 import { sum } from 'radash'
-import { getTicket } from '../util'
+import { getManualTicker, getTicket } from '../util'
 import { Item } from '../types/item.type'
 import { globalTotalPriceAtom } from '../states/global-total-price.state'
 import { Table, TableBody, TableHead, TableHeader, TableRow } from './ui/table'
 import { ItemsTableRow } from './ItemsTableRow'
 import { ItemsTableLastRow } from './ItemsTableLastRow'
-import { nonTickerEvaluatedPricesAtom } from '@/states/non-ticker-evaluated-price'
+import { nonTickerEvaluatedPricesAtom } from '@/states/non-ticker-evaluated-price.state'
 
 export const ItemsTable = (props: {
   accounts: Record<string, Account[]>
@@ -51,7 +51,7 @@ export const ItemsTable = (props: {
             && a.name === name
         )
 
-        const tickerType = !nonTickerEvaluatedPrices.some(p => (
+        const isTickerType = !nonTickerEvaluatedPrices.some(p => (
           p.sectionId === cur.sectionId
             && p.accountId === cur.accountId
             && p.itemName === name
@@ -70,9 +70,8 @@ export const ItemsTable = (props: {
             totalPrice: (acc[idx]?.totalPrice || 0) + cur.money,
             perAccount: acc[idx]?.perAccount || {},
             totalQty: acc[idx]?.totalQty || 0,
-            ticker: getTicket(cur.memo) || acc[idx]?.ticker,
+            ticker: getTicket(cur.memo) || acc[idx]?.ticker || getManualTicker(cur.item),
             lastItemDate: cur.entry_date,
-            tickerType,
           }
 
           if (idx === -1) {
@@ -89,7 +88,7 @@ export const ItemsTable = (props: {
         // 매수 또는 매도
         const type = cur.l_account_id === cur.accountId ? 'buy' : 'sell'
         const from = type === 'buy' ? cur.r_account_id : cur.l_account_id
-        const qty = tickerType
+        const qty = isTickerType
           ? Number(cur.item?.split('(')[1]?.split(/[),]/)[0] || 0)
           : cur.money
         const totalQty = sum(Object.values(acc[idx]?.perAccount || [])) + qty
@@ -108,7 +107,6 @@ export const ItemsTable = (props: {
             : (acc[idx]?.totalPrice || 0) - cur.money,
           ticker: getTicket(cur.memo) || acc[idx]?.ticker,
           lastItemDate: cur.entry_date,
-          tickerType,
         }
 
         if (updatedItem.perAccount[from] === 0) {

@@ -6,7 +6,6 @@ export interface StockAsset {
   account: Account
   item?: string
   type?: '자산' | '거래처'
-  stockType?: 'ETF' | '주식' | '코인' | '펀드'
   ticker?: string
   from?: string  // 어느 계좌에서 샀는지
 }

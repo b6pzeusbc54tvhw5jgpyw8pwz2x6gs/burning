@@ -1,6 +1,6 @@
 import { useAtom, useSetAtom } from "jotai"
 import { useEffect, useState } from 'react'
-import { putTickerPriceAtom, tickerPricesAtom } from "../states/ticker-price"
+import { putTickerPriceAtom, tickerPricesAtom } from "../states/ticker-price.state"
 import { Item } from "../types/item.type"
 import { useTickerPrice } from "../data/hooks"
 import { TableCell } from "./ui/table"
@@ -42,9 +42,7 @@ export const ItemsTableCellTickerPrice = (props: {
       <TableCell className="text-right animate-pulse">Loading...</TableCell>
     )
   }
-  // const value = tickerPrice?.toLocaleString() || ''
 
-  // https://finance.yahoo.com/quote/360750.KS?p=360750.KS&.tsrc=fin-srch
   return (
     <TableCell className="text-right">
 

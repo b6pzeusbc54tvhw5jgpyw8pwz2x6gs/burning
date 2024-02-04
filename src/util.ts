@@ -72,3 +72,7 @@ export const relativeDate = (value: string) => {
 export const today = () => {
   return Number(dayjs().format('YYYYMMDD'))
 }
+
+export const getManualTicker = (itemName: string) => {
+  return `manual-ticker-${itemName}`.replace(/ /g, '-')
+}

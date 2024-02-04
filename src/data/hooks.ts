@@ -38,8 +38,13 @@ export function useAllEntries(account: Account) {
 
 export function useTickerPrice(ticker?: string) {
   return useQuery({
-    // enabled: !!ticker,
-    queryFn: async () => ticker ? getTickerPrice(ticker) : null,
+    queryFn: async () => {
+      if (!ticker) return null
+
+      return ticker.startsWith('manual-ticker-')
+        ? null
+        : getTickerPrice(ticker)
+    },
     queryKey: ["tickerPrice", ticker],
     refetchInterval: ms('3m'),
   })

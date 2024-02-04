@@ -1,31 +1,23 @@
 import { useAtom, useSetAtom } from "jotai"
 import { useEffect, useState } from 'react'
-import { putTickerPriceAtom, tickerPricesAtom } from "../states/ticker-price"
+import { putTickerPriceAtom, tickerPricesAtom } from "../states/ticker-price.state"
 import { Item } from "../types/item.type"
 import { useTickerPrice } from "../data/hooks"
 import { TableCell } from "./ui/table"
 import { Input } from "./ui/input"
-import { putNonTickerEvaluatedPricesAtom } from "@/states/non-ticker-evaluated-price"
+import { putNonTickerEvaluatedPricesAtom } from "@/states/non-ticker-evaluated-price.state"
 import { useItemPrice } from "@/hooks/use-item-price"
-
-const isAvailableAutoUpdate = (ticker: string) => {
-  return !ticker.startsWith('비상장-')
-}
 
 export const ItemsTableCellEvaluatedTotalPrice = (props: {
   item: Item
 }) => {
   const { item } = props
-  const { name, sectionId, accountId, ticker, tickerType, totalQty } = item
+  const { name, sectionId, accountId, ticker, totalQty } = item
   const putTickerPrice = useSetAtom(putTickerPriceAtom)
   const [tickerPrices, setTickerPrices] = useAtom(tickerPricesAtom)
   const [editing, setEditing] = useState(false)
-  const { data, dataUpdatedAt, isFetching, error, refetch } = useTickerPrice(
-    ticker && isAvailableAutoUpdate(ticker) ? ticker : undefined
-  )
+  const { data, dataUpdatedAt, isFetching, error, refetch } = useTickerPrice(ticker)
 
-  // const [nonTickerEvaluatedPrices] = useAtom(nonTickerEvaluatedPricesAtom)
-  // const nonTickerEvaluatedPrice = nonTickerEvaluatedPrices.find(p => p.sectionId === sectionId && p.accountId === accountId && p.itemName === name)?.evaluatedPrice
   const putNonTickerEvaluatedPrice = useSetAtom(putNonTickerEvaluatedPricesAtom)
   const { evaluatedPrice } = useItemPrice(item)
 
@@ -37,7 +29,7 @@ export const ItemsTableCellEvaluatedTotalPrice = (props: {
 
   const tickerPrice = tickerPrices.find(t => t.ticker === ticker)?.price
 
-  if (tickerType && isFetching) {
+  if (isFetching) {
     return (
       <TableCell className="text-right animate-pulse">Loading...</TableCell>
     )
@@ -46,7 +38,7 @@ export const ItemsTableCellEvaluatedTotalPrice = (props: {
   return (
     <TableCell className="text-right">
 
-      {!tickerType ? (
+      {(!ticker || ticker.startsWith('manual-ticker-')) ? (
         <div className="flex text-right justify-end">
           <Input
             className="h-5 text-right px-1 w-full"
