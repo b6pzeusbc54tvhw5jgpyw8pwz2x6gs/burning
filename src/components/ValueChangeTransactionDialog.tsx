@@ -71,9 +71,7 @@ export function ValueChangeTransactionDialog(props: {
       sectionId: sectionId,
     })
 
-    // removeAccountEntries(account)
-    await fetchAccountEntries(account)
-
+    fetchAccountEntries(account)
     setOpened(false)
     toast.success('거래가 성공적으로 입력되었습니다.')
   }
