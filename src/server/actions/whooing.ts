@@ -74,7 +74,6 @@ export const getEntries = async (params: {
   endDate: number
 }) => {
   const whooingAPI = getWhooingAPI()
-
   const res = await whooingAPI.get('/api/entries.json_array', { params: {
     section_id: params.sectionId,
     account: 'assets',
@@ -94,10 +93,9 @@ export const getEntries = async (params: {
 export async function getAllEntries(account: Account, initialDate?: number) {
   let startDate = initialDate || Number(account.open_date)
   let endDate = getMaximumEndDate(account)
-
   let result: Entry[] = []
 
-  while (startDate < endDate) {
+  while (startDate <= endDate) {
     const data = await getEntries({
       sectionId: account.sectionId,
       accountId: account.account_id,

@@ -10,25 +10,19 @@ export function GlobalNav() {
   const { data: user } = useUser()
 
   return (
-    <header
-      className='border-b-gray-400 border-b-2'
-    >
+    <header className='border-b-gray-400 border-b-2 h-16 w-full'>
       <nav className="grid h-16 w-full grid-cols-2 items-center justify-center px-8 py-2">
 
         <div className="flex justify-start text-2xl">
-        후잉 - 투자 자산 관리
+          🔥 버닝 - 후잉 연동 자산 관리 시스템
         </div>
 
         <div className="flex justify-end gap-x-2">
           <ModeToggle />
-          {user ? (
-            <Avatar>
-              <AvatarImage src={user.image_url} alt="@shadcn" />
-              <AvatarFallback>CN</AvatarFallback>
-            </Avatar>
-          ) : (
-            <LoginButton />
-          )}
+          <Avatar >
+            <AvatarImage src={user?.image_url} alt="user profile"/>
+            <AvatarFallback>A</AvatarFallback>
+          </Avatar>
         </div>
       </nav>
     </header>

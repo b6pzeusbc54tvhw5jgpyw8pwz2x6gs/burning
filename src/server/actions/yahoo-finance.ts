@@ -9,7 +9,7 @@ export const getTickerPrice = async (ticker: string) => {
   const res = await yahooFinance.quoteSummary(ticker, {
     modules: ['price'],
   })
-  console.log("🚀 ~ getTickerPrice ~ price:", ticker, res.price)
+  // console.log("🚀 ~ getTickerPrice ~ price:", ticker, res.price)
 
   if (!res.price?.regularMarketPrice) {
     throw new Error('no price')

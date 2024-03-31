@@ -1,5 +1,6 @@
 'use client' // Error components must be Client Components
 
+import { LoginButton } from '@/components/LoginButton'
 import { useEffect } from 'react'
 
 export default function Error({
@@ -13,6 +14,22 @@ export default function Error({
     // Log the error to an error reporting service
     console.error(error)
   }, [error])
+
+  console.log(error.message)
+
+  if (error.message.startsWith('WAM_NOT_LOGGED_IN:')) {
+    return (
+      // center middle align ()
+      // <div className="flex flex-col items-center justify-center self-center">
+      <div id="abc" className="flex justify-center items-center flex-grow">
+        <div className="text-center">
+
+          <h2 className='p-4'>후잉 가계부에 로그인 하세요.</h2>
+          <LoginButton />
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div>

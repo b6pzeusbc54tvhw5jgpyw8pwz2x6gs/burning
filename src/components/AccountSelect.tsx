@@ -1,63 +1,57 @@
-import {
-  Calculator,
-  Calendar,
-  CreditCard,
-  Settings,
-  Smile,
-  User,
-} from "lucide-react"
+'use client'
 
-import {
-  Command,
-  CommandDialog,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-  CommandSeparator,
-  CommandShortcut,
-} from "@/components/ui/command"
+import { useEffect, useMemo, useRef, useState } from "react"
+import { CommandForSelect } from "./CommandForSelect"
+import { Button } from "./ui/button"
+import { Input } from "./ui/input"
 import { useAccounts } from "@/data/hooks"
-import { useEffect, useRef } from "react"
+import { useAtom, useSetAtom } from "jotai"
+import { stockAssetsAtom, toggleStockAssetAtom } from "@/states/stock-assets.state"
 
-export function AccountSelect(props: {
+export const AccountSelect = (props: {
   sectionId: string
-  className?: string
-  opened: boolean
-  handleClose: () => void
-  handleSelect: (accountId: string) => void
-}) {
-  const { sectionId, opened, handleClose, handleSelect } = props
+}) => {
+  const { sectionId } = props
+  const [openedAccountSelect, setOpenedAccountSelect] = useState(false)
 
   const { data: accounts} = useAccounts(sectionId)
-  const income = accounts?.income
+  const [seletedAssets, setSelectedAssets] = useAtom(stockAssetsAtom)
+  const toggleStockAsset = useSetAtom(toggleStockAssetAtom)
 
-  const ref = useRef<HTMLInputElement>(null)
+  const selectedItems = useMemo(() => {
+    return seletedAssets.map(a => a.account.account_id)
+  }, [seletedAssets])
 
-  useEffect(() => {
-    ref.current?.focus()
-  }, [])
+  const items = useMemo(() => {
+    return (accounts?.assets || []).map(a => ({
+      value: a.account_id,
+      label: a.title,
+    }))
+  }, [accounts?.assets])
+
+  const handleSelect = (accountId: string) => {
+    const account = accounts?.assets?.find(a => a.account_id === accountId)
+    if (!account) return
+
+    toggleStockAsset({ sectionId, account })
+  }
 
   return (
-    <Command>
-      <CommandInput ref={ref} placeholder="Type a command or search..." />
-      <CommandList>
-        <CommandEmpty>No results found.</CommandEmpty>
-        <CommandGroup heading="수익">
-          {income?.map(account => (
-            <CommandItem
-              key={account.account_id}
-              onSelect={() => {
-                handleSelect(account.account_id)
-                handleClose()
-              }}
-            >
-              <span>{account.title}</span>
-            </CommandItem>
-          ))}
-        </CommandGroup>
-      </CommandList>
-    </Command>
+    <div className="w-full h-12 relative">
+      {openedAccountSelect ? (
+        <CommandForSelect
+          placeHolder="+ 자산 선택"
+          handleClose={() => setOpenedAccountSelect(false)}
+          handleSelect={handleSelect}
+          selectedItems={selectedItems}
+          items={items}
+          multi
+        />
+      ) : (
+        <Input onClick={() => setOpenedAccountSelect(true)}
+          placeholder="+ 자산 선택"
+        />
+      )}
+    </div>
   )
 }

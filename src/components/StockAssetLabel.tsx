@@ -42,6 +42,7 @@ export const StockAssetLabel = (props: {
       if (didFetch.current) return
 
       didFetch.current = true
+      console.log('call fetch')
       fetchAccountEntries(account)
     })
   }, [fetchAccountEntries, account])

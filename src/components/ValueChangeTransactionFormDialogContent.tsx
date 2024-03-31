@@ -8,8 +8,8 @@ import { Item } from "@/types/item.type"
 import { today } from "@/util"
 import { useAtom, useSetAtom } from "jotai"
 import { tickerPricesAtom } from "@/states/ticker-price.state"
-import { AccountSelect } from "./AccountSelect"
-import { useState } from "react"
+import { CommandForSelect } from "./CommandForSelect"
+import { useMemo, useState } from "react"
 import { useErrorToast } from "@/hooks/use-error-toast"
 import { fetchAccountEntriesAtom, removeAccountEntriesAtom } from "@/states/acount-entries.state"
 import { Loader2 } from "lucide-react"
@@ -21,6 +21,13 @@ export function ValueChangeTransactionFormDialogContent(props: {
   const { sectionId, accountId, name, totalQty, totalPrice } = item
 
   const { data: accounts } = useAccounts(item.sectionId)
+  const incomeSelectItems = useMemo(() => {
+    return (accounts?.income || []).map(a => ({
+      value: a.account_id,
+      label: a.title,
+    }))
+  }, [accounts])
+
   const { isPending, mutateAsync: postEntry, error } = usePostEntry()
   const [entryDate, setEntryDate] = useState(() => today())
 
@@ -31,7 +38,7 @@ export function ValueChangeTransactionFormDialogContent(props: {
   useErrorToast(error)
 
   const fetchAccountEntries = useSetAtom(fetchAccountEntriesAtom)
-  const removeAccountEntries = useSetAtom(removeAccountEntriesAtom)
+  // const removeAccountEntries = useSetAtom(removeAccountEntriesAtom)
 
   const handlePost = async () => {
     const account = accounts?.assets?.find(a => a.account_id === accountId)
@@ -52,7 +59,7 @@ export function ValueChangeTransactionFormDialogContent(props: {
       sectionId: sectionId,
     })
 
-    removeAccountEntries(account)
+    // removeAccountEntries(account)
     await fetchAccountEntries(account)
 
     toast.success('거래가 성공적으로 입력되었습니다.')
@@ -67,6 +74,7 @@ export function ValueChangeTransactionFormDialogContent(props: {
   const [openedIncomeSelect, setOpenedIncomeSelect] = useState(false)
 
   const [incomeAccountId, setIncomeAccountId] = useState('')
+
 
   return (
     <DialogContent className="sm:max-w-[920px] gap-0">
@@ -115,11 +123,11 @@ export function ValueChangeTransactionFormDialogContent(props: {
         {openedIncomeSelect ? (
           <div className="basis-3/12 px-1 h-8">
             <div className="absolute w-72">
-              <AccountSelect
-                sectionId={sectionId}
-                opened={openedIncomeSelect}
+              <CommandForSelect
+                placeHolder="수익 항목을 선택하세요"
                 handleClose={() => setOpenedIncomeSelect(false)}
                 handleSelect={accountId => setIncomeAccountId(accountId)}
+                items={incomeSelectItems}
               />
             </div>
           </div>
