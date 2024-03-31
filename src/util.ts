@@ -77,3 +77,14 @@ export const getManualTicker = (itemName: string) => {
   const onlyItemName = itemName.split('(')[0]
   return `manual-ticker-${onlyItemName}`.replace(/ /g, '-')
 }
+
+export const updateItem = <T>(acc: T[], cur: T, idx: number) => {
+  if (idx === -1) {
+    return [...acc, cur]
+  }
+  return [
+    ...acc.slice(0, idx),
+    cur,
+    ...acc.slice(idx + 1)
+  ]
+}

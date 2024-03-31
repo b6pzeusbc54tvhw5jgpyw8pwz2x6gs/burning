@@ -9,6 +9,7 @@ import { Item } from '@/types/item.type'
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from './ui/table'
 import { Button } from './ui/button'
 import { ChevronRight, RefreshCw } from 'lucide-react'
+import { nonTickerEvaluatedPricesAtom, putNonTickerEvaluatedPricesAtom } from '@/states/non-ticker-evaluated-price.state'
 
 const colors = [
   "md:bg-red-500/30",
@@ -44,6 +45,9 @@ export const ItemsTableLastRow = (props: {
 
   const [tickerPrices, setTickerPrices] = useAtom(tickerPricesAtom)
 
+  const [nonTickerPrices] = useAtom(nonTickerEvaluatedPricesAtom)
+  nonTickerPrices.find(v => v.evaluatedPrice)
+
   const lastTotalPrice = useMemo(() => {
     return items.reduce((acc, item) => {
       const price = item.totalPrice || 0
@@ -53,6 +57,16 @@ export const ItemsTableLastRow = (props: {
 
   const currentTotalPrice = useMemo(() => {
     return items.reduce((acc, item) => {
+      const nonTickerPrice = nonTickerPrices.find(v => (
+        v.sectionId === item.sectionId
+        && v.accountId === item.accountId
+        && v.itemName === item.name
+      ))
+      if (nonTickerPrice) {
+        const evaluatedPrice = nonTickerPrice.evaluatedPrice || item.totalPrice
+        return acc + evaluatedPrice
+      }
+
       const tickerPrice = tickerPrices.find(t => t.ticker === item.ticker)?.price
       if (tickerPrice === undefined) {
         return acc + item.totalPrice
@@ -61,7 +75,7 @@ export const ItemsTableLastRow = (props: {
       const price = item.totalQty * tickerPrice
       return acc + price
     }, 0)
-  }, [items, tickerPrices])
+  }, [items, tickerPrices, nonTickerPrices])
 
   const profit = currentTotalPrice - lastTotalPrice
 
@@ -72,12 +86,14 @@ export const ItemsTableLastRow = (props: {
       <TableCell className='text-right'></TableCell>
       <TableCell className="text-right"></TableCell>
 
+      {/* 가계부에 기록된 평가액 */}
       <TableCell className="text-right">
         <b>{Math.floor(lastTotalPrice).toLocaleString()}</b>원
       </TableCell>
 
       <TableCell className="text-right"></TableCell>
 
+      {/* 현재 평가액	*/}
       <TableCell className="text-right">
         <b>{Math.floor(currentTotalPrice).toLocaleString()}</b>원
       </TableCell>

@@ -1,4 +1,5 @@
 import { Item } from '@/types/item.type'
+import { updateItem } from '@/util'
 import { atom } from 'jotai'
 import { atomWithStorage } from 'jotai/utils'
 
@@ -28,18 +29,17 @@ export const putNonTickerEvaluatedPricesAtom = atom(
         p.sectionId === sectionId && p.accountId === accountId && p.itemName === itemName
       ))
 
-      if (idx > -1) {
-        return [
-          ...prev.slice(0, idx),
-          { ...prev[idx], evaluatedPrice, source, updatedAt: Date.now() },
-          ...prev.slice(idx + 1),
-        ]
-      } else {
-        return [
-          ...prev,
-          { sectionId, accountId, itemName, evaluatedPrice, source, updatedAt: Date.now() },
-        ]
+      const updatedItem = {
+        ...prev[idx],
+        sectionId,
+        accountId,
+        itemName,
+        evaluatedPrice,
+        source,
+        updatedAt: Date.now(),
       }
+
+      return updateItem(prev, updatedItem, idx)
     })
   }
 )

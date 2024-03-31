@@ -3,10 +3,10 @@
 import { useEffect, useMemo } from 'react'
 import { useAtom } from 'jotai'
 import { stockAssetsAtom } from '@/states/stock-assets.state'
-import { Account } from '@/types/account.type'
+import { AllAccounts } from '@/types/account.type'
 import { AccountEntries, accountEntriesAtom } from '../states/acount-entries.state'
 import { sum } from 'radash'
-import { getManualTicker, getTicket } from '../util'
+import { getManualTicker, getTicket, updateItem } from '../util'
 import { Item } from '../types/item.type'
 import { globalTotalPriceAtom } from '../states/global-total-price.state'
 import { Table, TableBody, TableHead, TableHeader, TableRow } from './ui/table'
@@ -16,9 +16,9 @@ import { nonTickerEvaluatedPricesAtom } from '@/states/non-ticker-evaluated-pric
 import { tickerPricesAtom } from '@/states/ticker-price.state'
 
 export const ItemsTable = (props: {
-  accounts: Record<string, Account[]>
+  allAccounts: AllAccounts
 }) => {
-  const { accounts } = props
+  const { allAccounts } = props
   const [accountEntries] = useAtom(accountEntriesAtom)
   const [stockAssets, setStockAssets] = useAtom(stockAssetsAtom)
   const [globalTotalPrice, setGlobalTotalPrice] = useAtom(globalTotalPriceAtom)
@@ -46,12 +46,34 @@ export const ItemsTable = (props: {
         return o
       })
       .reduce((acc, cur) => {
+        const account = allAccounts.assets?.find(a => a.account_id === cur.accountId)
+        if (!account) return acc
+
         const name = cur.item.split('(')[0]
-        const idx = acc.findIndex(a =>
-          a.sectionId === cur.sectionId
+        const idx = acc.findIndex(a => {
+          if (account.category === 'normal') {
+            return a.sectionId === cur.sectionId && a.accountId === cur.accountId
+          }
+
+          return a.sectionId === cur.sectionId
             && a.accountId === cur.accountId
             && a.name === name
-        )
+        })
+
+        if (account.category === 'normal') {
+          const updatedItem: Item = {
+            ...acc[idx],
+            accountId: cur.accountId,
+            sectionId: cur.sectionId,
+            name: account.title,
+            totalPrice: cur.total,
+            perAccount: {},
+            lastItemDate: cur.entry_date,
+            totalQty: -1,
+          }
+
+          return updateItem(acc, updatedItem, idx)
+        }
 
         const isManualTicker = tickerPrices.some(t => t.ticker === getManualTicker(name))
         const isTickerType = !nonTickerEvaluatedPrices.some(p => (
@@ -79,15 +101,7 @@ export const ItemsTable = (props: {
             lastItemDate: cur.entry_date,
           }
 
-          if (idx === -1) {
-            return [...acc, updatedItem]
-          }
-
-          return [
-            ...acc.slice(0, idx),
-            updatedItem,
-            ...acc.slice(idx + 1)
-          ]
+          return updateItem(acc, updatedItem, idx)
         }
 
         // 매수 또는 매도
@@ -120,15 +134,7 @@ export const ItemsTable = (props: {
           delete updatedItem.perAccount[from]
         }
 
-        if (idx === -1) {
-          return [...acc, updatedItem]
-        }
-
-        return [
-          ...acc.slice(0, idx),
-          updatedItem,
-          ...acc.slice(idx + 1)
-        ]
+        return updateItem(acc, updatedItem, idx)
       }, [] as Item[])
       .filter(i => i.totalPrice > 0)
 
@@ -168,14 +174,14 @@ export const ItemsTable = (props: {
       <TableBody>
         {tableData.map((item, idx) => (
           <ItemsTableRow
-            accounts={accounts}
+            accounts={allAccounts}
             key={item.accountId + '-' + item.name}
             item={item}
           />
         ))}
 
         <ItemsTableLastRow
-          accounts={accounts}
+          accounts={allAccounts}
           items={tableData}
         />
       </TableBody>

@@ -64,7 +64,7 @@ export const ItemsTableCellActions = (props: {
         <Button
           variant="outline"
           size="sm"
-          disabled={!ticker || ticker.startsWith('manual-ticker-')}
+          // disabled={!ticker || ticker.startsWith('manual-ticker-')}
           onClick={handleOpenVCTDialog}
         >
           📝

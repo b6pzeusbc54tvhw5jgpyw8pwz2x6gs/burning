@@ -5,7 +5,7 @@ import { redirect } from "next/navigation"
 import { z } from 'zod'
 import { getWhooingAPI } from "@/util.server"
 import { zUser } from "../../types/user.type"
-import { Account, zAccount, zAccountType } from '../../types/account.type'
+import { Account, zAccount, zAccountType, zAllAccounts } from '../../types/account.type'
 import { zSection } from "../../types/section.type"
 import { Entry, zEntry } from "../../types/entry.type"
 import { getMaximumEndDate } from "../../util"
@@ -52,19 +52,19 @@ export async function getSections() {
   return zSection.array().parse(res.data.results)
 }
 
-export const getAccounts = async (sectionId: string) => {
+export const getAllAccounts = async (sectionId: string) => {
   const whooingAPI = getWhooingAPI()
   const params = { section_id: sectionId }
   const res = await whooingAPI.get('/api/accounts.json_array', { params })
 
-  const zResultsSchema = z.record(
-    zAccountType,
-    zAccount.extend({
-      sectionId: z.string().default(sectionId)
-    }).array()
-  )
+  const addedSectionId = Object.keys(res.data.results).reduce((acc, key) => {
+    return {
+      ...acc,
+      [key]: res.data.results[key].map((a: any) => ({ ...a, sectionId }))
+    }
+  }, {})
 
-  return zResultsSchema.parse(res.data.results)
+  return zAllAccounts.parse(addedSectionId)
 }
 
 export const getEntries = async (params: {

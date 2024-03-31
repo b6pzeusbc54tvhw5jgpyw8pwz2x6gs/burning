@@ -1,4 +1,4 @@
-import { getAccounts } from '@/server/actions/whooing'
+import { getAllAccounts } from '@/server/actions/whooing'
 import { StockAssets } from '@/components/StockAssets'
 import { ItemsTable } from '@/components/ItemsTable'
 import { GlobalTotalPrice } from '@/components/GlobalTotalPrice'
@@ -13,7 +13,7 @@ export default async function Home({ params }: {
   }
 }) {
   const { sectionId } = params
-  const accounts = await getAccounts(sectionId)
+  const accounts = await getAllAccounts(sectionId)
 
 
   return (
@@ -31,7 +31,7 @@ export default async function Home({ params }: {
         <GlobalTotalPrice />
         {`원)`}
       </div>
-      <ItemsTable accounts={accounts} />
+      <ItemsTable allAccounts={accounts} />
     </div>
   )
 }

@@ -1,4 +1,4 @@
-import { getAccounts, getAllEntries, getEntries, getSections, getUser, postEntry } from "@/server/actions/whooing"
+import { getAllAccounts, getAllEntries, getEntries, getSections, getUser, postEntry } from "@/server/actions/whooing"
 import { getTickerPrice } from "@/server/actions/yahoo-finance"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { Account } from "../types/account.type"
@@ -22,7 +22,7 @@ export function useSections() {
 
 export function useAccounts(sectionId: string) {
   return useQuery({
-    queryFn: async () => getAccounts(sectionId),
+    queryFn: async () => getAllAccounts(sectionId),
     queryKey: ["accounts", sectionId],
     refetchInterval: ms('3m'),
   })

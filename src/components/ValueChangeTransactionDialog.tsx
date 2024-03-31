@@ -14,6 +14,7 @@ import { useErrorToast } from "@/hooks/use-error-toast"
 import { fetchAccountEntriesAtom, removeAccountEntriesAtom } from "@/states/acount-entries.state"
 import { Loader2 } from "lucide-react"
 import { lastSelectedIncomeAtom } from "@/states/last-selected-income.state"
+import { nonTickerEvaluatedPricesAtom } from "@/states/non-ticker-evaluated-price.state"
 
 export function ValueChangeTransactionDialog(props: {
   opened: boolean
@@ -21,7 +22,7 @@ export function ValueChangeTransactionDialog(props: {
   item: Item
 }) {
   const { item, opened, setOpened } = props
-  const { sectionId, accountId, name, totalQty, totalPrice } = item
+  const { sectionId, accountId, name, totalQty, totalPrice, ticker } = item
 
   const { data: accounts } = useAccounts(item.sectionId)
   const incomeSelectItems = useMemo(() => {
@@ -77,10 +78,23 @@ export function ValueChangeTransactionDialog(props: {
     toast.success('거래가 성공적으로 입력되었습니다.')
   }
 
-  const [tickerPrices, setTickerPrices] = useAtom(tickerPricesAtom)
-  const tickerPrice = tickerPrices.find(t => t.ticker === item.ticker)?.price
+  const [tickerPrices] = useAtom(tickerPricesAtom)
+  const [nonTickerPrices] = useAtom(nonTickerEvaluatedPricesAtom)
 
-  const currentPrice = (tickerPrice || 0) * totalQty
+  const currentPrice = useMemo(() => {
+    const nonTickerPrice = nonTickerPrices.find(n => (
+      n.sectionId === sectionId && n.accountId === accountId && n.itemName === name
+    ))
+    if (nonTickerPrice) {
+      return nonTickerPrice.evaluatedPrice
+    }
+
+    const tickerPrice = tickerPrices.find(t => t.ticker === ticker)?.price
+    return (tickerPrice || 0) * totalQty
+
+  }, [tickerPrices, nonTickerPrices, sectionId, accountId, name, totalQty, ticker])
+
+  // const currentPrice = (tickerPrice || 0) * totalQty
   const profit = currentPrice - totalPrice
 
   return (
@@ -103,12 +117,14 @@ export function ValueChangeTransactionDialog(props: {
         </div>
 
         <div className="flex justify-between gap-2">
+          {/* 날짜 */}
           <Input
             className="basis-2/12 px-1 h-8 mt-1"
             value={entryDate}
             onChange={e => setEntryDate(Number(e.target.value))}
           />
 
+          {/* 아이템 */}
           <Input
             className="basis-6/12 px-1 h-8 mt-1"
             type="string"
@@ -116,18 +132,21 @@ export function ValueChangeTransactionDialog(props: {
             value={item.name}
           />
 
+          {/* 금액 */}
           <Input
             className="basis-2/12 px-1 h-8 mt-1 text-right"
             disabled
             value={profit.toLocaleString()}
           />
 
+          {/* 왼쪽 */}
           <Input
             className="basis-3/12 px-1 h-8 mt-1"
             disabled
             value={getAccountName(item.accountId, 'assets')}
           />
 
+          {/* 오른쪽 */}
           {openedIncomeSelect ? (
             <div className="basis-3/12 px-1 h-8">
               <div className="absolute w-72">
