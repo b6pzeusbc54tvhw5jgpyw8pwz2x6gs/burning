@@ -7,8 +7,10 @@ import { TableCell } from "./ui/table"
 import { Button } from "./ui/button"
 import { Eraser, RefreshCw } from "lucide-react"
 import { Dialog, DialogTrigger } from "./ui/dialog"
-import { ValueChangeTransactionFormDialogContent } from "./ValueChangeTransactionFormDialogContent"
+import { ValueChangeTransactionDialog } from "./ValueChangeTransactionDialog"
 import { removeNonTickerEvaluatedPriceAtom } from "@/states/non-ticker-evaluated-price.state"
+import { useItemDetail } from "@/hooks/use-item-price"
+import { toast } from "react-toastify"
 
 export const ItemsTableCellActions = (props: {
   item: Item
@@ -16,6 +18,7 @@ export const ItemsTableCellActions = (props: {
   const { item } = props
   const { ticker } = item
   const putTickerPrice = useSetAtom(putTickerPriceAtom)
+  const [openedVCTDialog, setOpenedVCTDialog] = useState(false)
   const { data, refetch } = useTickerPrice(ticker)
 
   const removeTickerPrice = useSetAtom(removeTickerPriceAtom)
@@ -27,6 +30,16 @@ export const ItemsTableCellActions = (props: {
     }
 
     removeNonTickerEvaluatedPrice(item)
+  }
+
+  const { evaluatedProfit } = useItemDetail(item)
+  const handleOpenVCTDialog = () => {
+    if (evaluatedProfit < 1 && evaluatedProfit > -1) {
+      toast.warn('손익이 1원 미만입니다')
+      return
+    }
+
+    setOpenedVCTDialog(true)
   }
 
   useEffect(() => {
@@ -48,18 +61,19 @@ export const ItemsTableCellActions = (props: {
             onClick={() => refetch()}
           />
         </Button>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={!ticker || ticker.startsWith('manual-ticker-')}
-            >
-              📝
-            </Button>
-          </DialogTrigger>
-          <ValueChangeTransactionFormDialogContent item={item} />
-        </Dialog>
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={!ticker || ticker.startsWith('manual-ticker-')}
+          onClick={handleOpenVCTDialog}
+        >
+          📝
+        </Button>
+        <ValueChangeTransactionDialog
+          item={item}
+          opened={openedVCTDialog}
+          setOpened={setOpenedVCTDialog}
+        />
         <Button
           variant="outline"
           size="sm"
