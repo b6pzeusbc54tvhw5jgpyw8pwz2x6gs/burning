@@ -74,6 +74,7 @@ export const ItemsTableCellTickerPrice = (props: {
           onFocus={e => setEditing(true)}
           onChange={e => putTickerPrice(ticker, Number(e.target.value?.replace(/,/g,'')), 'manual')}
           onBlur={e => setEditing(false)}
+          disabled={!item.ticker?.startsWith('manual-ticker-')}
         />
         <span>원</span>
       </div>

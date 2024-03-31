@@ -138,7 +138,7 @@ export const ItemsTable = (props: {
       }, [] as Item[])
       .filter(i => i.totalPrice > 0)
 
-  }, [accountEntries, stockAssets, nonTickerEvaluatedPrices, tickerPrices])
+  }, [accountEntries, stockAssets, nonTickerEvaluatedPrices, tickerPrices, allAccounts])
 
   useEffect(() => {
     setGlobalTotalPrice(sum(tableData.map(item => item.totalPrice)))
