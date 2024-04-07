@@ -3,8 +3,15 @@
 import { getSections } from '@/server/actions/whooing'
 import Link from "next/link"
 import { Card, CardDescription, CardHeader, CardTitle } from "../components/ui/card"
+import { isLogged } from '@/util.server'
+import { ErrorNotLogged } from './error'
 
 export default async function Home() {
+  const { result: logged } = await isLogged()
+  if (!logged) {
+    return <ErrorNotLogged />
+  }
+
   const sections = await getSections()
 
   return (

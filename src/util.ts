@@ -88,3 +88,11 @@ export const updateItem = <T>(acc: T[], cur: T, idx: number) => {
     ...acc.slice(idx + 1)
   ]
 }
+
+// 20240303 같은 base 날짜에 days를 더한 날짜를 반환
+// 예를들어 20240303에 3을 더하면 20240306을 반환
+export const dateSum = (base: string, days: number) => {
+  const date = new Date(`${base.slice(0, 4)}-${base.slice(4, 6)}-${base.slice(6, 8)}T00:00:00.000Z`)
+  const result = new Date(date.getTime() + ms(`${days}d`))
+  return result.toISOString().split('T')[0].replace(/-/g, '')
+}

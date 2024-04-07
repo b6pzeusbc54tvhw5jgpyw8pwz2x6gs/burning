@@ -41,3 +41,14 @@ export const getWhooingAPI = () => {
 
   return whooingAPI
 }
+
+export const isLogged = async () => {
+  const cookieStore = cookies()
+  const result = !!cookieStore.get('user_id')?.value
+    && !!cookieStore.get('token')?.value
+    && !!cookieStore.get('token_secret')?.value
+
+  return {
+    result
+  }
+}

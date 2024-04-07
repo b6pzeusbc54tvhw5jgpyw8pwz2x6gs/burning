@@ -5,6 +5,7 @@ import { getAllEntries, getEntries } from '../server/actions/whooing'
 import { Account } from '../types/account.type'
 import { stockAssetsAtom } from './stock-assets.state'
 import { last, unique } from 'radash'
+import { dateSum } from '@/util'
 
 // entry_id 가 유니크.
 const mergeEntries = (oldItems: Entry[], newItems: Entry[], updatedFirstEntryDate?: string) => {
@@ -47,12 +48,12 @@ export const fetchAccountEntriesAtom = atom(
 
     set(accountEntriesAtom, updatedForLoading)
 
-    const lastEntryDate = exitingItem
-      ? last(exitingItem.entries)?.entry_date.split('.')[0]
+    // 마지막 데이터 기준으로 2주 전 데이터까지를 갱신.
+    const day2WeeksAgo = exitingItem
+      ? dateSum(last(exitingItem.entries)?.entry_date.split('.')[0]!, -14)
       : undefined
-    const initialDate = lastEntryDate ? Number(lastEntryDate) : undefined
 
-    const data = await getAllEntries(account, initialDate)
+    const data = await getAllEntries(account, Number(day2WeeksAgo) || undefined)
 
     prev = get(accountEntriesAtom)
     const idx = prev.findIndex(p => p.accountId === account_id)
@@ -61,7 +62,7 @@ export const fetchAccountEntriesAtom = atom(
     const fetchedItem = {
       ...updatedItem,
       loading: false,
-      entries: mergeEntries(updatedItem.entries, data, lastEntryDate),
+      entries: mergeEntries(updatedItem.entries, data, day2WeeksAgo),
     }
 
     set(accountEntriesAtom, [
