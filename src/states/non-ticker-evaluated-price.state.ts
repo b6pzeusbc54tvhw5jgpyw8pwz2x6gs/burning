@@ -1,4 +1,4 @@
-import { Item } from '@/types/item.type'
+import { TableRowItem } from '@/types/item.type'
 import { updateItem } from '@/util'
 import { atom } from 'jotai'
 import { atomWithStorage } from 'jotai/utils'
@@ -46,7 +46,7 @@ export const putNonTickerEvaluatedPricesAtom = atom(
 
 export const removeNonTickerEvaluatedPriceAtom = atom(
   null,
-  (get, set, item: Item) => {
+  (get, set, item: TableRowItem) => {
     const { accountId, name, sectionId } = item
     const prev = get(nonTickerEvaluatedPricesAtom)
     const idx = prev.findIndex(p => (

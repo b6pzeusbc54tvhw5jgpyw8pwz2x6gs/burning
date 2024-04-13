@@ -5,7 +5,7 @@ import { StockAsset, stockAssetsAtom } from '@/states/stock-assets.state'
 import { getEntries } from '../server/actions/whooing'
 import { Account } from '../types/account.type'
 import { getMaximumEndDate } from '../util'
-import { accountEntriesAtom, fetchAccountEntriesAtom, removeAccountEntriesAtom } from '../states/acount-entries.state'
+import { entriesByAccountAtom, fetchEntriesByAccountAtom, removeAccountEntriesAtom } from '../states/acount-entries.state'
 import { startTransition, useEffect, useRef, useTransition } from 'react'
 import { Button } from './ui/button'
 // import { accountEntriesAtom } from '../states/acount-entries.state'
@@ -29,7 +29,7 @@ export const StockAssetLabel = (props: {
   const [isPending, startTransition] = useTransition()
   // const [accountEntries, setAccountEntries] = useAtom(accountEntriesAtom)
 
-  const fetchAccountEntries = useSetAtom(fetchAccountEntriesAtom)
+  const fetchAccountEntries = useSetAtom(fetchEntriesByAccountAtom)
   const handleRemove = (a: Account) => {
     setStockAssets(prev => prev.filter(p => p.account.account_id !== a.account_id))
     removeAccountEntries(a)

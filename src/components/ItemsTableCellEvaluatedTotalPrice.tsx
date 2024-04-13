@@ -1,7 +1,7 @@
 import { useAtom, useSetAtom } from "jotai"
 import { useEffect, useState } from 'react'
 import { putTickerPriceAtom, tickerPricesAtom } from "../states/ticker-price.state"
-import { Item } from "../types/item.type"
+import { TableRowItem } from "../types/item.type"
 import { useTickerPrice } from "../data/hooks"
 import { TableCell } from "./ui/table"
 import { Input } from "./ui/input"
@@ -12,7 +12,7 @@ import { Button } from "./ui/button"
 import { TickerTypeSettingDialogContent } from "./TickerTypeSettingDialogContent"
 
 export const ItemsTableCellEvaluatedTotalPrice = (props: {
-  item: Item
+  item: TableRowItem
 }) => {
   const { item } = props
   const { name, sectionId, accountId, ticker, totalQty } = item

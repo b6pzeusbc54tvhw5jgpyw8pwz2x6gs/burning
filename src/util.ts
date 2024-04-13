@@ -16,7 +16,9 @@ export const getMaximumEndDate = (account: Account) => {
 
   const maximumEndDate = new Date(date.getTime() - ms('1d'))
 
-  let result = Number(maximumEndDate.toISOString().split('T')[0].replace(/-/g, ''))
+  // let result = Number(maximumEndDate.toISOString().split('T')[0].replace(/-/g, ''))
+  let result = Number(dayjs(maximumEndDate).format('YYYYMMDD'))
+
   if (result > account.close_date) {
     result = account.close_date
   }
@@ -35,6 +37,15 @@ export const getTicket = (memo: string) => {
   if (!match) return null
 
   return match[1]
+}
+
+export const getTicketByMemos = (memo: string[]) => {
+  while (memo.length > 0) {
+    const ticker = getTicket(memo.shift()!)
+    if (ticker) return ticker
+  }
+
+  return null
 }
 
 export const formatCurrency = (value: number) => {
@@ -91,8 +102,19 @@ export const updateItem = <T>(acc: T[], cur: T, idx: number) => {
 
 // 20240303 같은 base 날짜에 days를 더한 날짜를 반환
 // 예를들어 20240303에 3을 더하면 20240306을 반환
-export const dateSum = (base: string, days: number) => {
-  const date = new Date(`${base.slice(0, 4)}-${base.slice(4, 6)}-${base.slice(6, 8)}T00:00:00.000Z`)
+export const dateSum = <T extends string | number | Date>(base: T, days: number): T => {
+  const baseStr = base instanceof Date
+    ? dayjs(base).format('YYYYMMDD') // 로컬 시간의 날짜가 나옴
+    : String(base)
+
+  const date = new Date(`${baseStr.slice(0, 4)}-${baseStr.slice(4, 6)}-${baseStr.slice(6, 8)}`)
+  date.setHours(0, 0, 0, 0)
+
   const result = new Date(date.getTime() + ms(`${days}d`))
-  return result.toISOString().split('T')[0].replace(/-/g, '')
+
+  return typeof base === 'string'
+    ? dayjs(result).format('YYYYMMDD') as T
+    : typeof base === 'number'
+      ? (Number(dayjs(result).format('YYYYMMDD')) as T)
+      : (result as T)
 }

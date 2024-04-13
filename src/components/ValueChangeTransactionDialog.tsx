@@ -4,14 +4,14 @@ import { Button } from "./ui/button"
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
 import { Input } from "./ui/input"
 import { Textarea } from "./ui/textarea"
-import { Item } from "@/types/item.type"
+import { TableRowItem } from "@/types/item.type"
 import { today } from "@/util"
 import { useAtom, useSetAtom } from "jotai"
 import { tickerPricesAtom } from "@/states/ticker-price.state"
 import { CommandForSelect } from "./CommandForSelect"
 import { useMemo, useState } from "react"
 import { useErrorToast } from "@/hooks/use-error-toast"
-import { fetchAccountEntriesAtom, removeAccountEntriesAtom } from "@/states/acount-entries.state"
+import { fetchEntriesByAccountAtom, removeAccountEntriesAtom } from "@/states/acount-entries.state"
 import { Loader2 } from "lucide-react"
 import { lastSelectedIncomeAtom } from "@/states/last-selected-income.state"
 import { nonTickerEvaluatedPricesAtom } from "@/states/non-ticker-evaluated-price.state"
@@ -19,7 +19,7 @@ import { nonTickerEvaluatedPricesAtom } from "@/states/non-ticker-evaluated-pric
 export function ValueChangeTransactionDialog(props: {
   opened: boolean
   setOpened: (opened: boolean) => void
-  item: Item
+  item: TableRowItem
 }) {
   const { item, opened, setOpened } = props
   const { sectionId, accountId, name, totalQty, totalPrice, ticker } = item
@@ -41,7 +41,7 @@ export function ValueChangeTransactionDialog(props: {
 
   useErrorToast(error)
 
-  const fetchAccountEntries = useSetAtom(fetchAccountEntriesAtom)
+  const fetchAccountEntries = useSetAtom(fetchEntriesByAccountAtom)
 
   const [openedIncomeSelect, setOpenedIncomeSelect] = useState(false)
   const [incomeAccountId, setIncomeAccountId] = useAtom(lastSelectedIncomeAtom)

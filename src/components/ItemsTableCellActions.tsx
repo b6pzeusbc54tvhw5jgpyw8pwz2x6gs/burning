@@ -1,7 +1,7 @@
 import { useSetAtom } from "jotai"
 import { useEffect, useState } from 'react'
 import { putTickerPriceAtom, removeTickerPriceAtom, } from "../states/ticker-price.state"
-import { Item } from "../types/item.type"
+import { TableRowItem } from "../types/item.type"
 import { useTickerPrice } from "../data/hooks"
 import { TableCell } from "./ui/table"
 import { Button } from "./ui/button"
@@ -13,7 +13,7 @@ import { useItemDetail } from "@/hooks/use-item-price"
 import { toast } from "react-toastify"
 
 export const ItemsTableCellActions = (props: {
-  item: Item
+  item: TableRowItem
 }) => {
   const { item } = props
   const { ticker } = item

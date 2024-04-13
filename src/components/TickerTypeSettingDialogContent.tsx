@@ -1,7 +1,7 @@
 import { Button } from "./ui/button"
 import { DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
 import { Input } from "./ui/input"
-import { Item } from "@/types/item.type"
+import { TableRowItem } from "@/types/item.type"
 import { getManualTicker, today } from "@/util"
 import { useAtom, useSetAtom } from "jotai"
 import { putTickerPriceAtom, removeTickerPriceAtom, tickerPricesAtom } from "@/states/ticker-price.state"
@@ -17,7 +17,7 @@ import { toast } from "react-toastify"
 type TickerType = 'auto-ticker' | 'manual-ticker' | 'non-ticker'
 
 export function TickerTypeSettingDialogContent(props: {
-  item: Item
+  item: TableRowItem
 }) {
   const { item } = props
   const { sectionId, accountId, name, totalQty, totalPrice } = item

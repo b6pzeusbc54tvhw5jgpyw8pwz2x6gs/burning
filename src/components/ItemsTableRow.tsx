@@ -6,7 +6,7 @@ import { ExternalLink } from 'lucide-react'
 import { stockAssetsAtom } from '@/states/stock-assets.state'
 import { Account } from '@/types/account.type'
 import { formatCurrency, relativeDate } from '@/util'
-import { Item } from '@/types/item.type'
+import { TableRowItem } from '@/types/item.type'
 import { TableCell, TableRow } from './ui/table'
 import { ItemsTableCellTickerPrice } from './ItemsTableCellTickerPrice'
 import { ItemsTableCellActions } from './ItemsTableCellActions'
@@ -35,7 +35,7 @@ const colors = [
 ]
 
 export const ItemsTableRow = (props: {
-  item: Item
+  item: TableRowItem
   accounts: Record<string, Account[]>
 }) => {
   const { item, accounts } = props

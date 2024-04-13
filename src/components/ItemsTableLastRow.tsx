@@ -5,7 +5,7 @@ import { useAtom, useSetAtom } from 'jotai'
 import { stockAssetsAtom } from '@/states/stock-assets.state'
 import { Account, AccountType } from '@/types/account.type'
 import { putTickerPriceAtom, tickerPricesAtom } from '../states/ticker-price.state'
-import { Item } from '@/types/item.type'
+import { TableRowItem } from '@/types/item.type'
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from './ui/table'
 import { Button } from './ui/button'
 import { ChevronRight, RefreshCw } from 'lucide-react'
@@ -32,7 +32,7 @@ const colors = [
 ]
 
 export const ItemsTableLastRow = (props: {
-  items: Item[]
+  items: TableRowItem[]
   accounts: Record<string, Account[]>
 }) => {
   const { items, accounts } = props

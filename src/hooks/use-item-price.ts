@@ -1,9 +1,9 @@
 import { useAtom } from "jotai"
 import { nonTickerEvaluatedPricesAtom } from "@/states/non-ticker-evaluated-price.state"
 import { tickerPricesAtom } from "@/states/ticker-price.state"
-import { Item } from "@/types/item.type"
+import { TableRowItem } from "@/types/item.type"
 
-export const useItemDetail = (item: Item) => {
+export const useItemDetail = (item: TableRowItem) => {
   const { sectionId, accountId, name, ticker, totalQty, totalPrice } = item
   const [nonTickerEvaluatedPrices] = useAtom(nonTickerEvaluatedPricesAtom)
   const [tickerPrices] = useAtom(tickerPricesAtom)

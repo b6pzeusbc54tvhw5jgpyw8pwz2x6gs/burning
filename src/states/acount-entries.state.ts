@@ -1,10 +1,9 @@
 import { atomWithStorage } from 'jotai/utils'
-import { Entry } from '../types/entry.type'
 import { atom } from 'jotai'
-import { getAllEntries, getEntries } from '../server/actions/whooing'
+import { last } from 'radash'
+import { Entry } from '../types/entry.type'
+import { getAllEntries } from '../server/actions/whooing'
 import { Account } from '../types/account.type'
-import { stockAssetsAtom } from './stock-assets.state'
-import { last, unique } from 'radash'
 import { dateSum } from '@/util'
 
 // entry_id 가 유니크.
@@ -16,74 +15,47 @@ const mergeEntries = (oldItems: Entry[], newItems: Entry[], updatedFirstEntryDat
   ]
 }
 
-export interface AccountEntries {
-  sectionId: string
-  accountId: string
-  loading: boolean
-  entries: Entry[]
-}
+// key는 ${sectionId}-${accountId}
+export type EntriesByAccount = Record<string, Entry[]>
 
-export const accountEntriesAtom = atomWithStorage<AccountEntries[]>('account-entries', [])
+export const entriesByAccountAtom = atomWithStorage<EntriesByAccount>('entries-by-account', {})
+export const entriesByAccountLoadingAtom = atom<Record<string, boolean>>({})
 
-export const fetchAccountEntriesAtom = atom(
-  null,
-  async (get, set, account: Account) => {
-    const { sectionId, account_id } = account
-    let prev = get(accountEntriesAtom)
+export const fetchEntriesByAccountAtom = atom(null, async (get, set, account: Account) => {
+  const { sectionId, account_id } = account
+  const key = `${sectionId}-${account_id}`
 
-    const exitingItem = prev.find(p => p.accountId === account_id)
-    const updatedItem = exitingItem
-      ? { ...exitingItem, loading: true }
-      : { sectionId, accountId: account_id, loading: true, entries: [] }
+  // 이미 로딩 중이면 return
+  if (get(entriesByAccountLoadingAtom)[key]) return
 
-    const stockAssets = get(stockAssetsAtom)
-    const updatedForLoading = prev
-      .filter(p => p.accountId !== account_id)
-      .concat(updatedItem)
-      .sort((a, b) => {
-        const aIdx = stockAssets.findIndex(s => s.account.account_id === a.accountId)
-        const bIdx = stockAssets.findIndex(s => s.account.account_id === b.accountId)
-        return aIdx - bIdx
-      })
+  // loading on
+  set(entriesByAccountLoadingAtom, p => ({ ...p, [key]: true }))
 
-    set(accountEntriesAtom, updatedForLoading)
+  let prev = get(entriesByAccountAtom)
+  const exitingItem = prev[key]
 
-    // 마지막 데이터 기준으로 2주 전 데이터까지를 갱신.
-    const day2WeeksAgo = exitingItem
-      ? dateSum(last(exitingItem.entries)?.entry_date.split('.')[0]!, -14)
-      : undefined
+  // 마지막 데이터 기준으로 2주 전 데이터까지를 갱신.
+  const day2WeeksAgo = exitingItem
+    ? dateSum(last(exitingItem)?.entry_date.split('.')[0]!, -14)
+    : undefined
+  const data = await getAllEntries(account, Number(day2WeeksAgo) || undefined)
 
-    const data = await getAllEntries(account, Number(day2WeeksAgo) || undefined)
+  const updatedEntries = mergeEntries(exitingItem || [], data, day2WeeksAgo)
+  set(entriesByAccountAtom, p => ({ ...p, [key]: updatedEntries }))
 
-    prev = get(accountEntriesAtom)
-    const idx = prev.findIndex(p => p.accountId === account_id)
-    if (idx < 0) return
+  // loading off
+  set(entriesByAccountLoadingAtom, p => ({ ...p, [key]: false }))
+})
 
-    const fetchedItem = {
-      ...updatedItem,
-      loading: false,
-      entries: mergeEntries(updatedItem.entries, data, day2WeeksAgo),
-    }
+export const removeAccountEntriesAtom = atom(null, (get, set, account: Account) => {
+  const { sectionId, account_id } = account
+  const key = `${sectionId}-${account_id}`
 
-    set(accountEntriesAtom, [
-      ...prev.slice(0, idx),
-      fetchedItem,
-      ...prev.slice(idx + 1),
-    ])
-  }
-)
+  // 이미 없으면 return
+  const prev = get(entriesByAccountAtom)
+  if (!prev[key]) return
 
-export const removeAccountEntriesAtom = atom(
-  null,
-  (get, set, account: Account) => {
-    const { sectionId, account_id } = account
-    const prev = get(accountEntriesAtom)
-    const idx = prev.findIndex(p => p.sectionId === sectionId && p.accountId === account_id)
-    if (idx < 0) return
-
-    set(accountEntriesAtom, [
-      ...prev.slice(0, idx),
-      ...prev.slice(idx + 1),
-    ])
-  }
-)
+  const updated = { ...prev }
+  delete updated[key]
+  set(entriesByAccountAtom, updated)
+})

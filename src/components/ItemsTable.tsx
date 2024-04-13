@@ -1,144 +1,113 @@
 'use client'
 
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useAtom } from 'jotai'
 import { stockAssetsAtom } from '@/states/stock-assets.state'
 import { AllAccounts } from '@/types/account.type'
-import { AccountEntries, accountEntriesAtom } from '../states/acount-entries.state'
-import { sum } from 'radash'
-import { getManualTicker, getTicket, updateItem } from '../util'
-import { Item } from '../types/item.type'
+import { entriesByAccountAtom, entriesByAccountLoadingAtom } from '../states/acount-entries.state'
+import { sum, group, invert, last } from 'radash'
+import { getManualTicker, getTicket, getTicketByMemos, updateItem } from '../util'
+import { DateTradingInfo, TableRowItem, InvestableItem } from '../types/item.type'
 import { globalTotalPriceAtom } from '../states/global-total-price.state'
 import { Table, TableBody, TableHead, TableHeader, TableRow } from './ui/table'
 import { ItemsTableRow } from './ItemsTableRow'
 import { ItemsTableLastRow } from './ItemsTableLastRow'
 import { nonTickerEvaluatedPricesAtom } from '@/states/non-ticker-evaluated-price.state'
 import { tickerPricesAtom } from '@/states/ticker-price.state'
+import { Entry } from '@/types/entry.type'
+import { useTableData } from '@/hooks/use-table-data'
 
 export const ItemsTable = (props: {
   allAccounts: AllAccounts
 }) => {
   const { allAccounts } = props
-  const [accountEntries] = useAtom(accountEntriesAtom)
+
+  // local에 불러온 모든 account별 entry.
+  const [entriesByAccount] = useAtom(entriesByAccountAtom)
+
+  // 투자 자산 목록으로 선택된 Asset들. TODO: 나중에 유가 증권형 자산으로 바꿔야함.
   const [stockAssets, setStockAssets] = useAtom(stockAssetsAtom)
   const [globalTotalPrice, setGlobalTotalPrice] = useAtom(globalTotalPriceAtom)
   const [nonTickerEvaluatedPrices] = useAtom(nonTickerEvaluatedPricesAtom)
   const [tickerPrices, setTickerPrices] = useAtom(tickerPricesAtom)
 
-  const tableData = useMemo(() => {
-    const isSelected = (ae: AccountEntries) => (
-      !!stockAssets.find(sa => (
-        sa.sectionId === ae.sectionId && sa.account.account_id === ae.accountId
-      ))
-    )
+  const [currentDate, setCurrentDate] = useState('20240413')
 
-    return accountEntries
-      .filter(ae => ae.entries)
-      .filter(isSelected)
-      .map(ae => (ae.entries || []).map(e => ({
-        ...e,
-        sectionId: ae.sectionId,
-        accountId: ae.accountId,
-      })))
-      .flat()
-      .map(o => {
-        // console.log("🚀 ~ tableData ~ o:", o)
-        return o
-      })
-      .reduce((acc, cur) => {
-        const account = allAccounts.assets?.find(a => a.account_id === cur.accountId)
-        if (!account) return acc
+  // 유가 증권형 자산은 모두 "거래처" 타입.
+  const investableEntries: Record<string, Entry[]> = useMemo(() => {
+    const keys = Object.keys(entriesByAccount)
+    return keys.reduce((acc, key) => {
+      const [, accountId] = key.split('-')
+      const selected = stockAssets.some(sa => sa.account.account_id === accountId)
+      if (!selected) {
+        return acc
+      }
 
-        const name = cur.item.split('(')[0]
-        const idx = acc.findIndex(a => {
-          if (account.category === 'normal') {
-            return a.sectionId === cur.sectionId && a.accountId === cur.accountId
-          }
+      if (allAccounts.assets?.find(a => a.account_id === accountId)?.category !== 'client') {
+        return acc
+      }
 
-          return a.sectionId === cur.sectionId
-            && a.accountId === cur.accountId
-            && a.name === name
-        })
+      return { ...acc, [key]: entriesByAccount[key] }
+    }, {} satisfies Record<string, Entry[]>)
+  }, [entriesByAccount, stockAssets, allAccounts])
 
-        if (account.category === 'normal') {
-          const updatedItem: Item = {
-            ...acc[idx],
-            accountId: cur.accountId,
-            sectionId: cur.sectionId,
-            name: account.title,
-            totalPrice: cur.total,
-            perAccount: {},
-            lastItemDate: cur.entry_date,
-            totalQty: -1,
-          }
+  const investableItems: InvestableItem[] = useMemo(() => {
+    const keys = Object.keys(investableEntries)
 
-          return updateItem(acc, updatedItem, idx)
-        }
+    // entriesByItemName의 key는 ${setiongId}-${accountId}-${itemName} 형태
+    const entriesByItemName: Record<string, Entry[]> = keys.reduce((acc, key) => {
+      const entries = investableEntries[key]
+      return {
+        ...acc,
+        ...entries.reduce((acc, entry) => {
+          const itemKey = `${key}-${entry.item.split('(')[0]}`
+          return { ...acc, [itemKey]: [...(acc[itemKey] || []), entry] }
+        }, {} as Record<string, Entry[]>)
+      }
+    }, {} as Record<string, Entry[]>)
 
-        const isManualTicker = tickerPrices.some(t => t.ticker === getManualTicker(name))
-        const isTickerType = !nonTickerEvaluatedPrices.some(p => (
-          p.sectionId === cur.sectionId
-            && p.accountId === cur.accountId
-            && p.itemName === name
-        ))
+    const itemKeys = Object.keys(entriesByItemName)
+    return itemKeys.map(key => {
+      const [sectionId, accountId, ...rest] = key.split('-')
+      const itemName = rest.join('-')
+      const entries = entriesByItemName[key]
+      const ticker = getTicketByMemos(entries.map(e => e.memo)) || key
 
-        if (
-          cur.l_account_id === cur.accountId
-            && (cur.r_account === 'income' || cur.r_account === 'capital')
-        ) {
-          // 자산 가치 변동 또는 기초 잔액
-          const updatedItem: Item = {
-            ...acc[idx],
-            sectionId: cur.sectionId,
-            accountId: cur.accountId,
-            name,
-            totalPrice: (acc[idx]?.totalPrice || 0) + cur.money,
-            perAccount: acc[idx]?.perAccount || {},
-            totalQty: acc[idx]?.totalQty || 0,
-            ticker: isManualTicker
-              ? getManualTicker(cur.item)
-              : getTicket(cur.memo) || acc[idx]?.ticker,
-            lastItemDate: cur.entry_date,
-          }
+      const groupedByDate = group(entries, e => e.entry_date)
+      const dates = Object.keys(groupedByDate)
+      const tradingInfos = dates.reduce<DateTradingInfo[]>((acc, date) => {
+        const prev = last(acc)
+        const openQty = prev
+          ? prev.openQty + sum(prev.buy.map(b => b.qty)) - sum(prev.sell.map(s => s.qty))
+          : 0
 
-          return updateItem(acc, updatedItem, idx)
-        }
+        const entries = groupedByDate[date]!
+        const buy = entries
+          .filter(e => e.l_account_id === accountId)
+          .map(entry => ({
+            qty: Number(entry.item.split('(')[1]?.split(/[),]/)[0] || 0),
+            price: entry.money,
+            accountId: entry.r_account_id,
+          }))
+        const sell = entries
+          .filter(e => e.r_account_id === accountId)
+          .map(entry => ({
+            qty: Number(entry.item.split('(')[1]?.split(/[),]/)[0] || 0),
+            price: entry.money,
+            accountId: entry.l_account_id,
+          }))
 
-        // 매수 또는 매도
-        const type = cur.l_account_id === cur.accountId ? 'buy' : 'sell'
-        const from = type === 'buy' ? cur.r_account_id : cur.l_account_id
-        const qty = isTickerType
-          ? Number(cur.item?.split('(')[1]?.split(/[),]/)[0] || 0)
-          : type === 'buy' ? cur.money : -cur.money
-        const totalQty = sum(Object.values(acc[idx]?.perAccount || [])) + qty
-        const updatedItem: Item = {
-          ...acc[idx],
-          sectionId: cur.sectionId,
-          accountId: cur.accountId,
-          name,
-          perAccount: {
-            ...acc[idx]?.perAccount,
-            [from]: ((acc[idx] || {}).perAccount?.[from] || 0) + qty
-          },
-          totalQty,
-          totalPrice: type === 'buy'
-            ? (acc[idx]?.totalPrice || 0) + cur.money
-            : (acc[idx]?.totalPrice || 0) - cur.money,
-          ticker: isManualTicker
-            ? getManualTicker(cur.item)
-            : getTicket(cur.memo) || acc[idx]?.ticker,
-          lastItemDate: cur.entry_date,
-        }
+        return [
+          ...acc,
+          { date, openQty, buy, sell },
+        ]
+      }, [])
 
-        if (updatedItem.perAccount[from] === 0) {
-          delete updatedItem.perAccount[from]
-        }
+      return { sectionId, accountId, ticker, itemName, tradingInfos }
+    })
+  }, [investableEntries])
 
-        return updateItem(acc, updatedItem, idx)
-      }, [] as Item[])
-      .filter(i => i.totalPrice > 0)
-
-  }, [accountEntries, stockAssets, nonTickerEvaluatedPrices, tickerPrices, allAccounts])
+  const tableData = useTableData(investableItems)
 
   useEffect(() => {
     setGlobalTotalPrice(sum(tableData.map(item => item.totalPrice)))
