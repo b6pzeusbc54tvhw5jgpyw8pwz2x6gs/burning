@@ -34,3 +34,41 @@ export const getTickerPrice = async (ticker: string) => {
 
   return res.price.regularMarketPrice
 }
+
+interface ItemHistorical {
+  date: string
+  open: number
+  high: number
+  low: number
+  close: number
+  adjClose: number
+  volume: number
+}
+
+type ItemHistoricalByDate = Record<string, [number, number, number, number, number | undefined, number]>
+
+export const listTickerPricesByRange = async (ticker: string, from: string, to: string) => {
+  const result = await yahooFinance.historical(ticker, {
+    period1: from,
+    period2: to,
+    interval: '1d',
+  })
+
+  const itemHistoricalByDate = result.reduce<ItemHistoricalByDate>((acc, cur) => {
+    const date = cur.date.toISOString().split('T')[0].replace(/-/g, '')
+    const open = cur.open
+    const high = cur.high
+    const low = cur.low
+    const close = cur.close
+    const adjClose = cur.adjClose
+    const volume = cur.volume
+
+    return {
+      ...acc,
+      [date]: [open, high, low, close, adjClose, volume],
+    }
+
+  }, {} as ItemHistoricalByDate)
+
+  return itemHistoricalByDate
+}

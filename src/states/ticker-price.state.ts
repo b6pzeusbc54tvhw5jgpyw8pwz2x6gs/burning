@@ -1,14 +1,14 @@
 import { atom } from 'jotai'
 import { atomWithStorage } from 'jotai/utils'
 
-interface TickerPrice {
+interface TickerInfo {
   ticker: string     // id. manual-ticker 는 `manual-ticker-${item.name}` 형태로 저장
   updatedAt: number
   source: 'manual' | 'yahoo'
   price: number
 }
 
-export const tickerPricesAtom = atomWithStorage<TickerPrice[]>('ticker-prices', [])
+export const tickerPricesAtom = atomWithStorage<TickerInfo[]>('ticker-prices', [])
 
 export const putTickerPriceAtom = atom(
   null,

@@ -2,7 +2,6 @@ import { useAtom, useSetAtom } from "jotai"
 import { useEffect, useState } from 'react'
 import { putTickerPriceAtom, tickerPricesAtom } from "../states/ticker-price.state"
 import { TableRowItem } from "../types/item.type"
-import { useTickerPrice } from "../data/hooks"
 import { TableCell } from "./ui/table"
 import { Input } from "./ui/input"
 import { putNonTickerEvaluatedPricesAtom } from "@/states/non-ticker-evaluated-price.state"
@@ -10,29 +9,32 @@ import { useItemDetail } from "@/hooks/use-item-price"
 import { Dialog, DialogTrigger } from "./ui/dialog"
 import { Button } from "./ui/button"
 import { TickerTypeSettingDialogContent } from "./TickerTypeSettingDialogContent"
+import { itemHistoricalsByTickerAtom, itemHistoricalsByTickerLoadingAtom } from "@/states/ticker-historical.state"
 
 export const ItemsTableCellEvaluatedTotalPrice = (props: {
   item: TableRowItem
 }) => {
   const { item } = props
   const { name, sectionId, accountId, ticker, totalQty } = item
-  const putTickerPrice = useSetAtom(putTickerPriceAtom)
   const [tickerPrices, setTickerPrices] = useAtom(tickerPricesAtom)
   const [editing, setEditing] = useState(false)
-  const { data, dataUpdatedAt, isFetching, error, refetch } = useTickerPrice(ticker)
 
   const putNonTickerEvaluatedPrice = useSetAtom(putNonTickerEvaluatedPricesAtom)
   const { evaluatedPrice, nonTickerType } = useItemDetail(item)
 
-  useEffect(() => {
-    if (!ticker || !data) return
+  const [itemHistoricalsByTicker] = useAtom(itemHistoricalsByTickerAtom)
+  const [itemHistoricalsByTickerLoading] = useAtom(itemHistoricalsByTickerLoadingAtom)
 
-    putTickerPrice(ticker, data, 'yahoo')
-  }, [putTickerPrice, ticker, data])
+  // useEffect(() => {
+  //   if (!ticker || !data) return
 
+  //   putTickerPrice(ticker, data, 'yahoo')
+  // }, [putTickerPrice, ticker, data])
+
+  // const tickerPrice = tickerPrices.find(t => t.ticker === ticker)?.price
   const tickerPrice = tickerPrices.find(t => t.ticker === ticker)?.price
 
-  if (isFetching) {
+  if (itemHistoricalsByTickerLoading[ticker || '']) {
     return (
       <TableCell className="text-right animate-pulse">Loading...</TableCell>
     )

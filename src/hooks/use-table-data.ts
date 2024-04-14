@@ -1,7 +1,50 @@
 import { currentDateAtom, endDateAtom, startDateAtom } from "@/states/date.state"
+import { ItemHistoricalByDate, itemHistoricalsByTickerAtom } from "@/states/ticker-historical.state"
 import { InvestableItem, TableRowItem } from "@/types/item.type"
+import { dateSum } from "@/util"
 import dayjs from "dayjs"
 import { useAtom } from "jotai"
+
+/**
+ * base로부터 가장 가까운 entry 기록 날짜를 구한다.
+ */
+export const getLastItemDate = (base: string, itemHistoricals?: ItemHistoricalByDate) => {
+  if (!itemHistoricals || Object.keys(itemHistoricals).length < 1) {
+    return null
+  }
+
+  // TODO: object는 순서를 보장하지 않으므로, 서버에서 배열 상태에서 min, max를 보내주어야함.
+  const minDate = Object.keys(itemHistoricals)[0]
+
+  let selectedDate = base
+  while (itemHistoricals[selectedDate] === undefined) {
+    if (selectedDate < minDate) {
+      return 0
+    }
+
+    selectedDate = dateSum(selectedDate, -1)
+  }
+
+  return selectedDate
+
+}
+
+/**
+ * example: date: 20220301
+ * 유틸로 보내자
+ */
+export const getTickerPrice = (date: string, itemHistoricals?: ItemHistoricalByDate) => {
+  if (!itemHistoricals) {
+    return 0
+  }
+
+  const selectedDate = getLastItemDate(date, itemHistoricals)
+  if (!selectedDate) {
+    return 0
+  }
+
+  return itemHistoricals[selectedDate][3]  // Close 가격
+}
 
 export const useTableData = (items: InvestableItem[]): TableRowItem[] => {
   const [startDate] = useAtom(startDateAtom)
@@ -12,14 +55,11 @@ export const useTableData = (items: InvestableItem[]): TableRowItem[] => {
   const to = dayjs(endDate).format('YYYYMMDD')
   const date = dayjs(currentDate).format('YYYYMMDD')
 
-  const tickerPrices = {
-    '005930.KS': 85000,
-    'AAPL': 120,
-  }
+  const [itemHistoricalsByTicker] = useAtom(itemHistoricalsByTickerAtom)
 
   // 가장 가까운 날짜의 거래 정보를 가져옴.
   const tableRows: TableRowItem[] = items
-    // from ~ to 사이 데이터 있는 것만 필터해야함.
+    // from ~ to 사이 데이터 있는 것만 필터.
     .filter(item=> item.tradingInfos.some(t => t.date >= from))
     .filter(item=> item.tradingInfos.some(t => t.date <= to))
     .filter(item=> {
@@ -32,9 +72,15 @@ export const useTableData = (items: InvestableItem[]): TableRowItem[] => {
       const latestIdx = idx === -1 ? item.tradingInfos.length - 1 : idx - 1
       const tradingInfo = item.tradingInfos[latestIdx]
 
+      // console.log(date, tradingInfo.openQty, tradingInfo.buy.reduce((acc, cur) => acc + cur.qty, 0), tradingInfo.sell.reduce((acc, cur) => acc + cur.qty, 0))
       const totalQty = tradingInfo.openQty
         + tradingInfo.buy.reduce((acc, cur) => acc + cur.qty, 0)
         + tradingInfo.sell.reduce((acc, cur) => acc + cur.qty, 0)
+
+      const itemHistoricals = itemHistoricalsByTicker[item.ticker]
+      const tickerPrice = getTickerPrice(date, itemHistoricals)
+
+      const lastItemDate = getLastItemDate(date, itemHistoricals)
 
       return {
         sectionId: item.sectionId,
@@ -42,10 +88,10 @@ export const useTableData = (items: InvestableItem[]): TableRowItem[] => {
         name: item.itemName,
         perAccount: {},
         totalQty,
-        // TODO: 가격 정보 가져오기
-        totalPrice: totalQty * 100,
+        // totalPrice: totalQty * tickerPrice,  // FIXME: 여긴 가계부 데이터인 것 같다.
+        totalPrice: tradingInfo.lastWrittenPrice,
         ticker: item.ticker,
-        lastItemDate: date,
+        lastItemDate: lastItemDate || '20230101',
       }
     })
 

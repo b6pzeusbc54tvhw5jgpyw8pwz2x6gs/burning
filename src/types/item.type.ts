@@ -29,6 +29,8 @@ export interface DateTradingInfo {
     accountId: string // 매도한 계좌
   }[]
 
+  lastWrittenPrice: number  // 가계부에 기록된 마지막 가격
+
   // 이건 yahoo 에서 가져오는 API 결과 데이터로 따로 가지고 있으면 될듯.
   // openPrice: number    // 시작 가격
   // closePrice: number   // 종가

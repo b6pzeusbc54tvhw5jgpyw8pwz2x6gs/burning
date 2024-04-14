@@ -1,12 +1,10 @@
 import { useSetAtom } from "jotai"
-import { useEffect, useState } from 'react'
-import { putTickerPriceAtom, removeTickerPriceAtom, } from "../states/ticker-price.state"
+import { useState } from 'react'
+import { removeTickerPriceAtom, } from "../states/ticker-price.state"
 import { TableRowItem } from "../types/item.type"
-import { useTickerPrice } from "../data/hooks"
 import { TableCell } from "./ui/table"
 import { Button } from "./ui/button"
 import { Eraser, RefreshCw } from "lucide-react"
-import { Dialog, DialogTrigger } from "./ui/dialog"
 import { ValueChangeTransactionDialog } from "./ValueChangeTransactionDialog"
 import { removeNonTickerEvaluatedPriceAtom } from "@/states/non-ticker-evaluated-price.state"
 import { useItemDetail } from "@/hooks/use-item-price"
@@ -17,9 +15,7 @@ export const ItemsTableCellActions = (props: {
 }) => {
   const { item } = props
   const { ticker } = item
-  const putTickerPrice = useSetAtom(putTickerPriceAtom)
   const [openedVCTDialog, setOpenedVCTDialog] = useState(false)
-  const { data, refetch } = useTickerPrice(ticker)
 
   const removeTickerPrice = useSetAtom(removeTickerPriceAtom)
   const removeNonTickerEvaluatedPrice = useSetAtom(removeNonTickerEvaluatedPriceAtom)
@@ -42,11 +38,11 @@ export const ItemsTableCellActions = (props: {
     setOpenedVCTDialog(true)
   }
 
-  useEffect(() => {
-    if (!ticker || !data) return
+  // useEffect(() => {
+  //   if (!ticker || !data) return
 
-    putTickerPrice(ticker, data, 'yahoo')
-  }, [putTickerPrice, ticker, data])
+  //   putTickerPrice(ticker, data, 'yahoo')
+  // }, [putTickerPrice, ticker, data])
 
   return (
     <TableCell className="text-right">
@@ -58,7 +54,7 @@ export const ItemsTableCellActions = (props: {
         >
           <RefreshCw
             className="h-4 w-4"
-            onClick={() => refetch()}
+            onClick={() => toast.info('구현 해야함')}
           />
         </Button>
         <Button

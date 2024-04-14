@@ -1,29 +1,25 @@
-import { useSetAtom } from "jotai"
+import { useAtom, useSetAtom } from "jotai"
 import { useEffect, useState } from 'react'
-import { putTickerPriceAtom } from "../states/ticker-price.state"
+// import { putTickerPriceAtom } from "../states/ticker-price.state"
 import { TableRowItem } from "../types/item.type"
-import { useTickerPrice } from "../data/hooks"
 import { TableCell } from "./ui/table"
 import { Input } from "./ui/input"
 import { Dialog, DialogTrigger } from "./ui/dialog"
 import { Button } from "./ui/button"
 import { TickerTypeSettingDialogContent } from "./TickerTypeSettingDialogContent"
 import { useItemDetail } from "@/hooks/use-item-price"
+import { itemHistoricalsByTickerAtom, itemHistoricalsByTickerLoadingAtom } from "@/states/ticker-historical.state"
 
 export const ItemsTableCellTickerPrice = (props: {
   item: TableRowItem
 }) => {
   const { item } = props
   const { ticker } = item
-  const putTickerPrice = useSetAtom(putTickerPriceAtom)
+  // const putTickerPrice = useSetAtom(putTickerPriceAtom)
   const [editing, setEditing] = useState(false)
-  const { data, dataUpdatedAt, isFetching, error, refetch } = useTickerPrice(ticker)
 
-  useEffect(() => {
-    if (!ticker || !data) return
-
-    putTickerPrice(ticker, data, 'yahoo')
-  }, [putTickerPrice, ticker, data])
+  const [itemHistoricalsByTicker] = useAtom(itemHistoricalsByTickerAtom)
+  const [itemHistoricalsByTickerLoading] = useAtom(itemHistoricalsByTickerLoadingAtom)
 
   const { nonTickerType, tickerPrice } = useItemDetail(item)
 
@@ -51,7 +47,7 @@ export const ItemsTableCellTickerPrice = (props: {
     )
   }
 
-  if (isFetching) {
+  if (itemHistoricalsByTickerLoading[ticker || '']) {
     return (
       <TableCell className="text-right animate-pulse">Loading...</TableCell>
     )
@@ -72,7 +68,7 @@ export const ItemsTableCellTickerPrice = (props: {
           type="text"
           value={tickerPrice ? Math.floor(tickerPrice).toLocaleString() : ''}
           onFocus={e => setEditing(true)}
-          onChange={e => putTickerPrice(ticker, Number(e.target.value?.replace(/,/g,'')), 'manual')}
+          // onChange={e => putTickerPrice(ticker, Number(e.target.value?.replace(/,/g,'')), 'manual')}
           onBlur={e => setEditing(false)}
           disabled={!item.ticker?.startsWith('manual-ticker-')}
         />

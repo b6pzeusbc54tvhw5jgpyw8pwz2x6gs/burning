@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
   cookieStore.set('user_id', user_id)
   cookieStore.set('token_secret', token_secret)
 
-  console.log(accessTokenRes.data)
+  // console.log(accessTokenRes.data)
 
   redirect('/')
 }

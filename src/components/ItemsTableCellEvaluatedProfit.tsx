@@ -1,17 +1,18 @@
 import { TableRowItem } from "../types/item.type"
-import { useTickerPrice } from "../data/hooks"
 import { TableCell } from "./ui/table"
 import { useItemDetail } from "@/hooks/use-item-price"
+import { useAtom } from "jotai"
+import { itemHistoricalsByTickerLoadingAtom } from "@/states/ticker-historical.state"
 
 export const ItemsTableCellEvaluatedProfit = (props: {
   item: TableRowItem
 }) => {
   const { item } = props
   const { ticker } = item
-  const { isFetching } = useTickerPrice(ticker)
+  const [itemHistoricalsByTickerLoading] = useAtom(itemHistoricalsByTickerLoadingAtom)
   const { evaluatedProfit } = useItemDetail(item)
 
-  if (ticker && isFetching) {
+  if (ticker && itemHistoricalsByTickerLoading[ticker]) {
     return (
       <TableCell className="text-right animate-pulse">Loading...</TableCell>
     )

@@ -4,7 +4,7 @@ import { Input } from "./ui/input"
 import { TableRowItem } from "@/types/item.type"
 import { getManualTicker, today } from "@/util"
 import { useAtom, useSetAtom } from "jotai"
-import { putTickerPriceAtom, removeTickerPriceAtom, tickerPricesAtom } from "@/states/ticker-price.state"
+import { removeTickerPriceAtom, tickerPricesAtom } from "@/states/ticker-price.state"
 import { useState } from "react"
 import { Loader2 } from "lucide-react"
 import { Label } from "@/components/ui/label"
@@ -25,7 +25,7 @@ export function TickerTypeSettingDialogContent(props: {
   const [autoTicker, setAutoTicker] = useState(item.ticker || '')
   const [nonTickerEvaluatedPrice, setNonTickerEvaluatedPrice] = useState(() => totalPrice)
   const [manualTickerPrice, setManualTickerPrice] = useState(() => Math.floor(totalPrice / totalQty))
-  const putTickerPrice = useSetAtom(putTickerPriceAtom)
+  // const putTickerPrice = useSetAtom(putTickerPriceAtom)
   const removeTickerPrice = useSetAtom(removeTickerPriceAtom)
   const putNonTickerEvaluatedPrice = useSetAtom(putNonTickerEvaluatedPricesAtom)
 
@@ -34,11 +34,11 @@ export function TickerTypeSettingDialogContent(props: {
   }
 
   const handleManualTickerPrice = async () => {
-    const ticker = getManualTicker(name)
-    if (item.ticker) {
-      removeTickerPrice(item.ticker)
-    }
-    putTickerPrice(ticker, manualTickerPrice, 'manual')
+    // const ticker = getManualTicker(name)
+    // if (item.ticker) {
+    //   removeTickerPrice(item.ticker)
+    // }
+    // putTickerPrice(ticker, manualTickerPrice, 'manual')
   }
 
   const handleNonTickerEvaluatedPrice = async () => {

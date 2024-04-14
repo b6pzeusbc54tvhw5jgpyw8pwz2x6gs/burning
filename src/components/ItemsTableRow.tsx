@@ -13,6 +13,8 @@ import { ItemsTableCellActions } from './ItemsTableCellActions'
 import { ItemsTableCellEvaluatedTotalPrice } from './ItemsTableCellEvaluatedTotalPrice'
 import { ItemsTableCellEvaluatedProfit } from './ItemsTableCellEvaluatedProfit'
 import { useItemDetail } from '@/hooks/use-item-price'
+import { currentDateAtom } from '@/states/date.state'
+import dayjs from 'dayjs'
 
 const colors = [
   "bg-amber-500/30",
@@ -48,6 +50,9 @@ export const ItemsTableRow = (props: {
   }
   const idx = stockAssets.findIndex(sa => sa.account.account_id === accountId)
   const { nonTickerType } = useItemDetail(item)
+
+  const [currentDate] = useAtom(currentDateAtom)
+  const currentDateStr = dayjs(currentDate).format('YYYY-MM-DD')
 
   return (
     <TableRow className={`${colors[idx]} py-0`}>
@@ -101,10 +106,10 @@ export const ItemsTableRow = (props: {
       {/* 기록된 평가액 */}
       <TableCell className="text-right">
         <div>
-          <b>{totalPrice.toLocaleString()}</b>원
+          <b>{Math.floor(totalPrice).toLocaleString()}</b>원
         </div>
         <div className='text-gray-400'>
-          {relativeDate(item.lastItemDate)}
+          {relativeDate(item.lastItemDate, currentDateStr)}
         </div>
       </TableCell>
 

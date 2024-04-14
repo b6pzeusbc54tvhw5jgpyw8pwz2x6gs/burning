@@ -52,7 +52,7 @@ export const formatCurrency = (value: number) => {
   return value.toLocaleString()
 }
 
-export const relativeDate = (value: string) => {
+export const relativeDate = (value: string, base?: string) => {
   const yyyyMMdd = value.split('.')[0]
   const yyyy = yyyyMMdd.slice(0, 4)
   const MM = yyyyMMdd.slice(4, 6)
@@ -60,7 +60,7 @@ export const relativeDate = (value: string) => {
 
   const date = dayjs(`${yyyy}-${MM}-${dd}`)
 
-  const now = dayjs().format()
+  const now = base || dayjs().format()
   const todayYYYY = now.slice(0, 4)
   const todayMM = now.slice(5, 7)
   const todaydd = now.slice(8, 10)
@@ -84,9 +84,9 @@ export const today = () => {
   return Number(dayjs().format('YYYYMMDD'))
 }
 
-export const getManualTicker = (itemName: string) => {
+export const getManualTicker = (sectionId: string, accountId: string, itemName: string) => {
   const onlyItemName = itemName.split('(')[0]
-  return `manual-ticker-${onlyItemName}`.replace(/ /g, '-')
+  return `manual-${sectionId}-${accountId}-${onlyItemName}`.replace(/ /g, '-')
 }
 
 export const updateItem = <T>(acc: T[], cur: T, idx: number) => {

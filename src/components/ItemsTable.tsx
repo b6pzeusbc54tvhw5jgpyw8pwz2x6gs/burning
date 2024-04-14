@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { useAtom } from 'jotai'
+import { useAtom, useSetAtom } from 'jotai'
 import { stockAssetsAtom } from '@/states/stock-assets.state'
 import { AllAccounts } from '@/types/account.type'
 import { entriesByAccountAtom, entriesByAccountLoadingAtom } from '../states/acount-entries.state'
@@ -16,6 +16,7 @@ import { nonTickerEvaluatedPricesAtom } from '@/states/non-ticker-evaluated-pric
 import { tickerPricesAtom } from '@/states/ticker-price.state'
 import { Entry } from '@/types/entry.type'
 import { useTableData } from '@/hooks/use-table-data'
+import { putAndFetchItemHistoricalsAtom } from '@/states/ticker-historical.state'
 
 export const ItemsTable = (props: {
   allAccounts: AllAccounts
@@ -71,17 +72,28 @@ export const ItemsTable = (props: {
       const [sectionId, accountId, ...rest] = key.split('-')
       const itemName = rest.join('-')
       const entries = entriesByItemName[key]
-      const ticker = getTicketByMemos(entries.map(e => e.memo)) || key
+      const ticker = getTicketByMemos(entries.map(e => e.memo))
+        || getManualTicker(sectionId, accountId, itemName)
 
       const groupedByDate = group(entries, e => e.entry_date)
       const dates = Object.keys(groupedByDate)
       const tradingInfos = dates.reduce<DateTradingInfo[]>((acc, date) => {
         const prev = last(acc)
         const openQty = prev
-          ? prev.openQty + sum(prev.buy.map(b => b.qty)) - sum(prev.sell.map(s => s.qty))
+          ? prev.openQty + sum(prev.buy.map(b => b.qty)) + sum(prev.sell.map(s => s.qty))
           : 0
 
+        // last written price. 가계부에 기록된 마지막 가격.
+        const prevLastWrittenPrice = prev ? prev.lastWrittenPrice : 0
+
+
         const entries = groupedByDate[date]!
+        const lastWrittenPrice = entries.reduce((acc, cur) => {
+          return cur.r_account_id === accountId
+            ? acc - cur.money
+            : acc + cur.money
+        }, prevLastWrittenPrice)
+
         const buy = entries
           .filter(e => e.l_account_id === accountId)
           .map(entry => ({
@@ -92,20 +104,28 @@ export const ItemsTable = (props: {
         const sell = entries
           .filter(e => e.r_account_id === accountId)
           .map(entry => ({
-            qty: Number(entry.item.split('(')[1]?.split(/[),]/)[0] || 0),
+            qty: Number(entry.item.split('(')[1]?.split(/[),]/)[0] || 0), // 일반 매도 거래의 경우 마이너스 값이 있어야함.
             price: entry.money,
             accountId: entry.l_account_id,
           }))
 
         return [
           ...acc,
-          { date, openQty, buy, sell },
+          // 마지막 가계부 기록 금액.
+          { date, openQty, buy, sell, lastWrittenPrice },
         ]
       }, [])
 
       return { sectionId, accountId, ticker, itemName, tradingInfos }
     })
   }, [investableEntries])
+
+  const putAndFetchItemHistoricals = useSetAtom(putAndFetchItemHistoricalsAtom)
+  useEffect(() => {
+    investableItems
+      .filter(item => item.ticker.split('-')[2] !== 'manual')
+      .forEach(item => putAndFetchItemHistoricals(item.ticker))
+  }, [investableItems, putAndFetchItemHistoricals])
 
   const tableData = useTableData(investableItems)
 

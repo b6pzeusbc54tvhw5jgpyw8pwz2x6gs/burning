@@ -1,6 +1,6 @@
 "use client"
 
-import * as React from "react"
+import { useEffect, useMemo  } from "react"
 import { CalendarIcon } from "@radix-ui/react-icons"
 import { addDays, format } from "date-fns"
 import { DateRange, SelectRangeEventHandler } from "react-day-picker"
@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/popover"
 import { useAtom } from "jotai"
 import { endDateAtom, startDateAtom } from "@/states/date.state"
+import axios from "axios"
 
 export function DateRangePicker({
   className,
@@ -22,7 +23,7 @@ export function DateRangePicker({
   const [from, setFrom] = useAtom(startDateAtom)
   const [to, setTo] = useAtom(endDateAtom)
 
-  const date = React.useMemo(() => {
+  const date = useMemo(() => {
     return { from, to }
   }, [from, to])
 
@@ -39,6 +40,14 @@ export function DateRangePicker({
       setTo(date.to)
     }
   }
+
+  useEffect(() => {
+    // axios.get('/api/ticker-prices/005930.KS?from=2024-01-01&to=2024-04-13')
+    //   .then(r => {
+    //     console.log(r)
+    //   })
+  }, [])
+
   return (
     <div className={cn("grid gap-2", className)}>
       <Popover>
