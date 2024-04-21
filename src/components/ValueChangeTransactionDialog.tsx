@@ -15,6 +15,7 @@ import { fetchEntriesByAccountAtom, removeAccountEntriesAtom } from "@/states/ac
 import { Loader2 } from "lucide-react"
 import { lastSelectedIncomeAtom } from "@/states/last-selected-income.state"
 import { nonTickerEvaluatedPricesAtom } from "@/states/non-ticker-evaluated-price.state"
+import { useItemDetail } from "@/hooks/use-item-price"
 
 export function ValueChangeTransactionDialog(props: {
   opened: boolean
@@ -45,6 +46,7 @@ export function ValueChangeTransactionDialog(props: {
 
   const [openedIncomeSelect, setOpenedIncomeSelect] = useState(false)
   const [incomeAccountId, setIncomeAccountId] = useAtom(lastSelectedIncomeAtom)
+  const itemDetail = useItemDetail(item)
 
   const handlePost = async () => {
     const account = accounts?.assets?.find(a => a.account_id === accountId)
@@ -59,9 +61,10 @@ export function ValueChangeTransactionDialog(props: {
       return
     }
 
+
     await postEntry({
       item: name,
-      money: profit,
+      money: itemDetail.evaluatedProfit,
       lAccount: 'assets',
       lAccountId: accountId,
       rAccount: 'income',
@@ -76,24 +79,23 @@ export function ValueChangeTransactionDialog(props: {
     toast.success('거래가 성공적으로 입력되었습니다.')
   }
 
-  const [tickerPrices] = useAtom(tickerPricesAtom)
-  const [nonTickerPrices] = useAtom(nonTickerEvaluatedPricesAtom)
+  // const [tickerPrices] = useAtom(tickerPricesAtom)
+  // const [nonTickerPrices] = useAtom(nonTickerEvaluatedPricesAtom)
 
-  const currentPrice = useMemo(() => {
-    const nonTickerPrice = nonTickerPrices.find(n => (
-      n.sectionId === sectionId && n.accountId === accountId && n.itemName === name
-    ))
-    if (nonTickerPrice) {
-      return nonTickerPrice.evaluatedPrice
-    }
+  // const currentPrice = useMemo(() => {
+  //   const nonTickerPrice = nonTickerPrices.find(n => (
+  //     n.sectionId === sectionId && n.accountId === accountId && n.itemName === name
+  //   ))
+  //   if (nonTickerPrice) {
+  //     return nonTickerPrice.evaluatedPrice
+  //   }
 
-    const tickerPrice = tickerPrices.find(t => t.ticker === ticker)?.price
-    return (tickerPrice || 0) * totalQty
+  //   const tickerPrice = tickerPrices.find(t => t.ticker === ticker)?.price
+  //   return (tickerPrice || 0) * totalQty
 
-  }, [tickerPrices, nonTickerPrices, sectionId, accountId, name, totalQty, ticker])
+  // }, [tickerPrices, nonTickerPrices, sectionId, accountId, name, totalQty, ticker])
 
   // const currentPrice = (tickerPrice || 0) * totalQty
-  const profit = currentPrice - totalPrice
 
   return (
     <Dialog open={opened} onOpenChange={setOpened}>
@@ -134,7 +136,7 @@ export function ValueChangeTransactionDialog(props: {
           <Input
             className="basis-2/12 px-1 h-8 mt-1 text-right"
             disabled
-            value={profit.toLocaleString()}
+            value={itemDetail.evaluatedProfit.toLocaleString()}
           />
 
           {/* 왼쪽 */}
