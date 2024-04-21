@@ -10,6 +10,9 @@ import { Dialog, DialogTrigger } from "./ui/dialog"
 import { Button } from "./ui/button"
 import { TickerTypeSettingDialogContent } from "./TickerTypeSettingDialogContent"
 import { itemHistoricalsByTickerAtom, itemHistoricalsByTickerLoadingAtom } from "@/states/ticker-historical.state"
+import { getTickerPrice } from "@/hooks/use-table-data"
+import { currentDateAtom } from "@/states/date.state"
+import dayjs from "dayjs"
 
 export const ItemsTableCellEvaluatedTotalPrice = (props: {
   item: TableRowItem
@@ -19,20 +22,16 @@ export const ItemsTableCellEvaluatedTotalPrice = (props: {
   const [tickerPrices, setTickerPrices] = useAtom(tickerPricesAtom)
   const [editing, setEditing] = useState(false)
 
+  const [currentDate] = useAtom(currentDateAtom)
+  const currentDateStr = dayjs(currentDate).format('YYYYMMDD')
+
   const putNonTickerEvaluatedPrice = useSetAtom(putNonTickerEvaluatedPricesAtom)
   const { evaluatedPrice, nonTickerType } = useItemDetail(item)
 
   const [itemHistoricalsByTicker] = useAtom(itemHistoricalsByTickerAtom)
   const [itemHistoricalsByTickerLoading] = useAtom(itemHistoricalsByTickerLoadingAtom)
 
-  // useEffect(() => {
-  //   if (!ticker || !data) return
-
-  //   putTickerPrice(ticker, data, 'yahoo')
-  // }, [putTickerPrice, ticker, data])
-
-  // const tickerPrice = tickerPrices.find(t => t.ticker === ticker)?.price
-  const tickerPrice = tickerPrices.find(t => t.ticker === ticker)?.price
+  const tickerPrice = getTickerPrice(currentDateStr, itemHistoricalsByTicker[ticker || ''])
 
   if (itemHistoricalsByTickerLoading[ticker || '']) {
     return (

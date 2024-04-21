@@ -88,10 +88,15 @@ export const useTableData = (items: InvestableItem[]): TableRowItem[] => {
         name: item.itemName,
         perAccount: {},
         totalQty,
-        // totalPrice: totalQty * tickerPrice,  // FIXME: 여긴 가계부 데이터인 것 같다.
         totalPrice: tradingInfo.lastWrittenPrice,
         ticker: item.ticker,
-        lastItemDate: lastItemDate || '20230101',
+
+        // ticker는 언제 날짜 가격인지 추가 필요.
+        // tickerPriceDate:
+
+        // 마지막 가계부 업데이트 날짜여예함.
+        // lastItemDate: lastItemDate || '20230101',
+        lastItemDate: tradingInfo.date,
       }
     })
 
