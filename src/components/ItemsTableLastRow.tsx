@@ -10,6 +10,7 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 import { Button } from './ui/button'
 import { ChevronRight, RefreshCw } from 'lucide-react'
 import { nonTickerEvaluatedPricesAtom, putNonTickerEvaluatedPricesAtom } from '@/states/non-ticker-evaluated-price.state'
+import { itemHistoricalsByTickerAtom } from '@/states/ticker-historical.state'
 
 const colors = [
   "md:bg-red-500/30",
@@ -47,6 +48,8 @@ export const ItemsTableLastRow = (props: {
 
   const [nonTickerPrices] = useAtom(nonTickerEvaluatedPricesAtom)
   nonTickerPrices.find(v => v.evaluatedPrice)
+
+  const [itemHistoricalsByTicker] = useAtom(itemHistoricalsByTickerAtom)
 
   const lastTotalPrice = useMemo(() => {
     return items.reduce((acc, item) => {

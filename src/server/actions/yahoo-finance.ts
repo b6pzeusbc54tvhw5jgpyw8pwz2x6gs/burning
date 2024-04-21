@@ -1,5 +1,6 @@
 "use server"
 
+import { dateSum } from '@/util'
 // import { createSafeActionClient } from "next-safe-action"
 import yahooFinance from 'yahoo-finance2'
 
@@ -47,10 +48,17 @@ interface ItemHistorical {
 
 type ItemHistoricalByDate = Record<string, [number, number, number, number, number | undefined, number]>
 
+/**
+ *
+ * @param ticker ex: AAPL
+ * @param from ex: 2022-01-01
+ * @param to ex: 2022-01-31
+ * @returns
+ */
 export const listTickerPricesByRange = async (ticker: string, from: string, to: string) => {
   const result = await yahooFinance.historical(ticker, {
     period1: from,
-    period2: to,
+    period2: dateSum(to, 1),
     interval: '1d',
   })
 

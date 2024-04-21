@@ -103,9 +103,12 @@ export const updateItem = <T>(acc: T[], cur: T, idx: number) => {
 // 20240303 같은 base 날짜에 days를 더한 날짜를 반환
 // 예를들어 20240303에 3을 더하면 20240306을 반환
 export const dateSum = <T extends string | number | Date>(base: T, days: number): T => {
+  const isIncludeHyphen = typeof base === 'string' && base.split('-').length === 3
   const baseStr = base instanceof Date
     ? dayjs(base).format('YYYYMMDD') // 로컬 시간의 날짜가 나옴
-    : String(base)
+    : isIncludeHyphen
+      ? String(base.split('-').join(''))
+      : String(base)
 
   const date = new Date(`${baseStr.slice(0, 4)}-${baseStr.slice(4, 6)}-${baseStr.slice(6, 8)}`)
   date.setHours(0, 0, 0, 0)
@@ -113,7 +116,7 @@ export const dateSum = <T extends string | number | Date>(base: T, days: number)
   const result = new Date(date.getTime() + ms(`${days}d`))
 
   return typeof base === 'string'
-    ? dayjs(result).format('YYYYMMDD') as T
+    ? dayjs(result).format(isIncludeHyphen ? 'YYYY-MM-DD' : 'YYYYMMDD') as T
     : typeof base === 'number'
       ? (Number(dayjs(result).format('YYYYMMDD')) as T)
       : (result as T)
