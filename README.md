@@ -1,4 +1,4 @@
-# Whoong stock manager
+# Whooing stock manager
 Whooing 가계부 연동 투자 자산 관리 서비스
 
 ## Getting Started
