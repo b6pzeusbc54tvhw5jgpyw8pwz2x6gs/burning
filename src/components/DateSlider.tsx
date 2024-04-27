@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils"
 import { Slider } from "@/components/ui/slider"
 import { currentDateAtom, endDateAtom, startDateAtom } from "@/states/date.state"
 import { useAtom } from "jotai"
-import { dateSum } from "@/util"
+import { dateSum } from "@/utils/date.util"
 
 type SliderProps = React.ComponentProps<typeof Slider>
 

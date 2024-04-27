@@ -6,7 +6,6 @@ import { stockAssetsAtom } from '@/states/stock-assets.state'
 import { AllAccounts } from '@/types/account.type'
 import { entriesByAccountAtom, entriesByAccountLoadingAtom } from '../states/acount-entries.state'
 import { sum, group, invert, last } from 'radash'
-import { getManualTicker, getTicket, getTicketByMemos, updateItem } from '../util'
 import { DateTradingInfo, TableRowItem, InvestableItem } from '../types/item.type'
 import { globalTotalPriceAtom } from '../states/global-total-price.state'
 import { Table, TableBody, TableHead, TableHeader, TableRow } from './ui/table'
@@ -17,6 +16,7 @@ import { tickerPricesAtom } from '@/states/ticker-price.state'
 import { Entry } from '@/types/entry.type'
 import { useTableData } from '@/hooks/use-table-data'
 import { putAndFetchItemHistoricalsAtom } from '@/states/ticker-historical.state'
+import { getManualTicker, getTicketByMemos } from '@/utils/ticker-name.util'
 
 export const ItemsTable = (props: {
   allAccounts: AllAccounts

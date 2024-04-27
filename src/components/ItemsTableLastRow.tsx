@@ -37,6 +37,7 @@ export const ItemsTableLastRow = (props: {
   accounts: Record<string, Account[]>
 }) => {
   const { items, accounts } = props
+  console.log("🚀 ~ items:", items)
   const assets = accounts.assets
   const [stockAssets, setStockAssets] = useAtom(stockAssetsAtom)
   const getAssetName = (accountId: string) => {

@@ -1,5 +1,5 @@
 import { TableRowItem } from '@/types/item.type'
-import { updateItem } from '@/util'
+import { updateItem } from '@/utils/array.util'
 import { atom } from 'jotai'
 import { atomWithStorage } from 'jotai/utils'
 

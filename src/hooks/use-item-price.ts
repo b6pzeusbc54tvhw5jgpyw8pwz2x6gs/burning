@@ -1,11 +1,10 @@
 import { useAtom } from "jotai"
+import dayjs from "dayjs"
 import { nonTickerEvaluatedPricesAtom } from "@/states/non-ticker-evaluated-price.state"
-import { tickerPricesAtom } from "@/states/ticker-price.state"
 import { TableRowItem } from "@/types/item.type"
 import { itemHistoricalsByTickerAtom } from "@/states/ticker-historical.state"
 import { currentDateAtom } from "@/states/date.state"
-import { getTickerPrice } from "./use-table-data"
-import dayjs from "dayjs"
+import { getTickerPrice } from "@/utils/ticker-price.util"
 
 export const useItemDetail = (item: TableRowItem) => {
   const [currentDate] = useAtom(currentDateAtom)

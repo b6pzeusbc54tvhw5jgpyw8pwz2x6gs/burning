@@ -4,7 +4,7 @@ import { last } from 'radash'
 import { Entry } from '../types/entry.type'
 import { getAllEntries } from '../server/actions/whooing'
 import { Account } from '../types/account.type'
-import { dateSum } from '@/util'
+import { dateSum } from '@/utils/date.util'
 
 // entry_id 가 유니크.
 const mergeEntries = (oldItems: Entry[], newItems: Entry[], updatedFirstEntryDate?: string) => {

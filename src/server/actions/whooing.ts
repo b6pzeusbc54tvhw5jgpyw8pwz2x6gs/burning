@@ -3,12 +3,12 @@
 import axios from "axios"
 import { redirect } from "next/navigation"
 import { z } from 'zod'
-import { getWhooingAPI } from "@/util.server"
+import { getWhooingAPI } from "@/utils/server.util"
 import { zUser } from "../../types/user.type"
 import { Account, zAccount, zAccountType, zAllAccounts } from '../../types/account.type'
 import { zSection } from "../../types/section.type"
 import { Entry, zEntry } from "../../types/entry.type"
-import { getMaximumEndDate } from "../../util"
+import { getMaximumEndDate } from "../../utils/date.util"
 
 const APP_URL = process.env.APP_URL
 const WHOOING_APP_ID = process.env.WHOOING_APP_ID || ''

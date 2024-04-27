@@ -14,9 +14,6 @@ export async function GET(req: NextRequest) {
   const ticker = req.nextUrl.pathname.split('/').pop()
   const from = searchParams.get('from')
   const to = searchParams.get('to')
-  console.log("🚀 ~ GET ~ to:", to)
-  console.log("🚀 ~ GET ~ from:", from)
-  console.log("🚀 ~ GET ~ ticker:", ticker)
   if (!ticker || !from || !to) {
     return NextResponse.error()
   }

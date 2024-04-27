@@ -1,12 +1,12 @@
 "use server"
 
-import { dateSum } from '@/util'
+import { dateSum } from '@/utils/date.util'
 // import { createSafeActionClient } from "next-safe-action"
 import yahooFinance from 'yahoo-finance2'
 
 // export const action = createSafeActionClient()
 
-export const getTickerPrice = async (ticker: string) => {
+export const getRealtimeTickerPrice = async (ticker: string) => {
   const res = await yahooFinance.quoteSummary(ticker, {
     modules: ['price'],
   })

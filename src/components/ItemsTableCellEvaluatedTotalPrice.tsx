@@ -10,9 +10,9 @@ import { Dialog, DialogTrigger } from "./ui/dialog"
 import { Button } from "./ui/button"
 import { TickerTypeSettingDialogContent } from "./TickerTypeSettingDialogContent"
 import { itemHistoricalsByTickerAtom, itemHistoricalsByTickerLoadingAtom } from "@/states/ticker-historical.state"
-import { getTickerPrice } from "@/hooks/use-table-data"
 import { currentDateAtom } from "@/states/date.state"
 import dayjs from "dayjs"
+import { getTickerPrice } from "@/utils/ticker-price.util"
 
 export const ItemsTableCellEvaluatedTotalPrice = (props: {
   item: TableRowItem

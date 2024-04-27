@@ -1,5 +1,5 @@
 import ms from 'ms'
-import { Account } from './types/account.type'
+import { Account } from '../types/account.type'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
@@ -29,23 +29,6 @@ export const getMaximumEndDate = (account: Account) => {
   }
 
   return result
-}
-
-// example: [TICKER=005930.KS]
-export const getTicket = (memo: string) => {
-  const match = memo.match(/\[TICKER=(.+)\]/)
-  if (!match) return null
-
-  return match[1]
-}
-
-export const getTicketByMemos = (memo: string[]) => {
-  while (memo.length > 0) {
-    const ticker = getTicket(memo.shift()!)
-    if (ticker) return ticker
-  }
-
-  return null
 }
 
 export const formatCurrency = (value: number) => {
@@ -82,22 +65,6 @@ export const relativeDate = (value: string, base?: string) => {
 
 export const today = () => {
   return Number(dayjs().format('YYYYMMDD'))
-}
-
-export const getManualTicker = (sectionId: string, accountId: string, itemName: string) => {
-  const onlyItemName = itemName.split('(')[0]
-  return `manual-${sectionId}-${accountId}-${onlyItemName}`.replace(/ /g, '-')
-}
-
-export const updateItem = <T>(acc: T[], cur: T, idx: number) => {
-  if (idx === -1) {
-    return [...acc, cur]
-  }
-  return [
-    ...acc.slice(0, idx),
-    cur,
-    ...acc.slice(idx + 1)
-  ]
 }
 
 // 20240303 같은 base 날짜에 days를 더한 날짜를 반환

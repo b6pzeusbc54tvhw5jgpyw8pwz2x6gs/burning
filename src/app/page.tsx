@@ -3,7 +3,7 @@
 import { getSections } from '@/server/actions/whooing'
 import Link from "next/link"
 import { Card, CardDescription, CardHeader, CardTitle } from "../components/ui/card"
-import { isLogged } from '@/util.server'
+import { isLogged } from '@/utils/server.util'
 import { ErrorNotLogged } from './error'
 
 export default async function Home() {

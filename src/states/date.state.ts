@@ -1,5 +1,5 @@
 import { atom } from 'jotai'
-import { dateSum } from '@/util'
+import { dateSum } from '@/utils/date.util'
 
 const initial = new Date()
 initial.setHours(0, 0, 0, 0)

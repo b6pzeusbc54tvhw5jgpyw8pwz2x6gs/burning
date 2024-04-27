@@ -5,7 +5,7 @@ import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, Di
 import { Input } from "./ui/input"
 import { Textarea } from "./ui/textarea"
 import { TableRowItem } from "@/types/item.type"
-import { today } from "@/util"
+import { today } from "@/utils/date.util"
 import { useAtom, useSetAtom } from "jotai"
 import { tickerPricesAtom } from "@/states/ticker-price.state"
 import { CommandForSelect } from "./CommandForSelect"
