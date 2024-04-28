@@ -15,6 +15,7 @@ import { ItemsTableCellEvaluatedProfit } from './ItemsTableCellEvaluatedProfit'
 import { useItemDetail } from '@/hooks/use-item-price'
 import { currentDateAtom } from '@/states/date.state'
 import dayjs from 'dayjs'
+import { isAutoTicker, isManualTicker } from '@/utils/ticker-name.util'
 
 const colors = [
   "bg-amber-500/30",
@@ -49,7 +50,7 @@ export const ItemsTableRow = (props: {
     return found ? found.title : 'Unknown'
   }
   const idx = stockAssets.findIndex(sa => sa.account.account_id === accountId)
-  const { nonTickerType } = useItemDetail(item)
+  // const { nonTickerType } = useItemDetail(item)
 
   const [currentDate] = useAtom(currentDateAtom)
   const currentDateStr = dayjs(currentDate).format('YYYY-MM-DD')
@@ -75,9 +76,7 @@ export const ItemsTableRow = (props: {
 
       {/* 계좌 별 수량 */}
       <TableCell className='text-right'>
-        {nonTickerType ? (
-          ''
-        ) : (
+        {(isAutoTicker(ticker) || isManualTicker(ticker)) ? (
           <>
             {Object.keys(perAccount).map(from => (
               <div key={from}>
@@ -92,12 +91,12 @@ export const ItemsTableRow = (props: {
               </div>
             ))}
           </>
-        )}
+        ) : '-'}
       </TableCell>
 
       {/* 총 수량 */}
       <TableCell className="text-right">
-        {ticker
+        {(isAutoTicker(ticker) || isManualTicker(ticker))
           ? <><b>{totalQty.toLocaleString()}</b>주</>
           : '-'
         }

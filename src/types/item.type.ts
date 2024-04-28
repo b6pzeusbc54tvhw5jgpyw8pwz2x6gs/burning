@@ -45,7 +45,7 @@ export interface DateTradingInfo {
 export interface InvestableItem {
   sectionId: string    // 후잉 section id
   accountId: string    // item이 들어있는 account id
-  ticker: string       // 156156.KS
   itemName: string     // TIGER 나스닥100
   tradingInfos: DateTradingInfo[]
+  ticker?: string       // 156156.KS
 }

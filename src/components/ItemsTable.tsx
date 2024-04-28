@@ -57,10 +57,10 @@ export const ItemsTable = (props: {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {tableData.map((item, idx) => (
+        {tableData.map(item => (
           <ItemsTableRow
             accounts={allAccounts}
-            key={item.accountId + '-' + item.name}
+            key={item.sectionId + '-' + item.accountId + '-' + item.name}
             item={item}
           />
         ))}

@@ -2,14 +2,16 @@ import { group, last, sum } from "radash"
 import { useEffect, useMemo } from "react"
 import { Entry } from "@/types/entry.type"
 import { DateTradingInfo, InvestableItem } from "@/types/item.type"
-import { getManualTicker, getTicketByMemos } from "@/utils/ticker-name.util"
-import { useSetAtom } from "jotai"
+import { getTicketByMemos, getUndefinedTicker, isAutoTicker } from "@/utils/ticker-name.util"
+import { useAtom, useSetAtom } from "jotai"
 import { putAndFetchItemHistoricalsAtom } from "@/states/ticker-historical.state"
+import { tickerNameByItemKeyAtom } from "@/states/ticker-name.state"
 
 export const useInvestableItems = (
   investableEntries: Record<string, Entry[]>
 ): InvestableItem[] => {
   const putAndFetchItemHistoricals = useSetAtom(putAndFetchItemHistoricalsAtom)
+  const [tickerNameByItemKey] = useAtom(tickerNameByItemKeyAtom)
 
   const investableItems = useMemo(() => {
     const keys = Object.keys(investableEntries)
@@ -31,8 +33,9 @@ export const useInvestableItems = (
       const [sectionId, accountId, ...rest] = key.split('-')
       const itemName = rest.join('-')
       const entries = entriesByItemName[key]
-      const ticker = getTicketByMemos(entries.map(e => e.memo))
-          || getManualTicker(sectionId, accountId, itemName)
+      const ticker = tickerNameByItemKey[key]
+      // || getTicketByMemos(entries.map(e => e.memo))
+      // || getUndefinedTicker(sectionId, accountId, itemName)
 
       const groupedByDate = group(entries, e => e.entry_date)
       const dates = Object.keys(groupedByDate)
@@ -76,13 +79,13 @@ export const useInvestableItems = (
 
       return { sectionId, accountId, ticker, itemName, tradingInfos }
     })
-  }, [investableEntries])
+  }, [investableEntries, tickerNameByItemKey])
 
   // 추가된 Ticker가 있으면 패치한다.
   // putAndFetchItemHistoricals에 중복 호출 방지 로직이 있으므로 여러번 호출해도 문제 없음.
   useEffect(() => {
     investableItems
-      .filter(item => !item.ticker.startsWith('manual-'))
+      .filter(item => isAutoTicker(item.ticker))
       .forEach(item => putAndFetchItemHistoricals(item.ticker))
   }, [investableItems, putAndFetchItemHistoricals])
 

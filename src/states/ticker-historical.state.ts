@@ -2,6 +2,7 @@ import axios from "axios"
 import dayjs from "dayjs"
 import { atom } from "jotai"
 import { atomWithStorage } from "jotai/utils"
+import { getTickerPrice } from "@/utils/ticker-price.util"
 
 type Open = number
 type High = number
@@ -43,19 +44,23 @@ export const putAndFetchItemHistoricalsAtom = atom(null, async (get, set, ticker
  * 티커별 날짜별 가격 정보를 저장하는 atom.
  */
 export const manualTickerItemHistoricalsByTickerAtom = atomWithStorage<
-  Record<string, Record<string, number>>
+  Record<string, Record<string, ItemHistorical>>
 >('manual-ticker-item-historicals-by-ticker', {})
 
 export const putManualTickerItemHistoricalAtom = atom(null, async (get, set, ticker: string, date: Date, price: number) => {
   const dateStr = dayjs(date).format('YYYYMMDD')
 
-  set(manualTickerItemHistoricalsByTickerAtom, prev => ({
-    ...prev,
-    [ticker]: {
-      ...prev[ticker],
-      [dateStr]: price,
-    },
-  }))
+  set(manualTickerItemHistoricalsByTickerAtom, prev => {
+    const open = getTickerPrice(date, prev[ticker])
+
+    return {
+      ...prev,
+      [ticker]: {
+        ...prev[ticker],
+        [dateStr]: [open, price, price, price, price, 0],
+      },
+    }
+  })
 })
 
 /**
@@ -63,17 +68,21 @@ export const putManualTickerItemHistoricalAtom = atom(null, async (get, set, tic
  * 예를들어 펀드나 예금, 혹은 계좌 내 주식을 따로 관리하지 않고 계좌를 통으로 관리하는 경우.
  */
 export const nonTickerItemHistoricalsByTickerAtom = atomWithStorage<
-  Record<string, Record<string, number>>
+  Record<string, Record<string, ItemHistorical>>
 >('non-ticker-item-historicals-by-ticker', {})
 
 export const putFundTypeItemHistoricalAtom = atom(null, async (get, set, ticker: string, date: Date, price: number) => {
   const dateStr = dayjs(date).format('YYYYMMDD')
 
-  set(manualTickerItemHistoricalsByTickerAtom, prev => ({
-    ...prev,
-    [ticker]: {
-      ...prev[ticker],
-      [dateStr]: price,
-    },
-  }))
+  set(manualTickerItemHistoricalsByTickerAtom, prev => {
+    const open = getTickerPrice(date, prev[ticker])
+
+    return {
+      ...prev,
+      [ticker]: {
+        ...prev[ticker],
+        [dateStr]: [open, price, price, price, price, 0],
+      },
+    }
+  })
 })

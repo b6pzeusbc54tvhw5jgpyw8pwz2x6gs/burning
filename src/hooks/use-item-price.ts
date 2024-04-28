@@ -1,42 +1,32 @@
 import { useAtom } from "jotai"
-import dayjs from "dayjs"
-import { nonTickerEvaluatedPricesAtom } from "@/states/non-ticker-evaluated-price.state"
 import { TableRowItem } from "@/types/item.type"
-import { itemHistoricalsByTickerAtom } from "@/states/ticker-historical.state"
-import { currentDateAtom } from "@/states/date.state"
+import { itemHistoricalsByTickerAtom, manualTickerItemHistoricalsByTickerAtom, nonTickerItemHistoricalsByTickerAtom } from "@/states/ticker-historical.state"
 import { getTickerPrice } from "@/utils/ticker-price.util"
+import { isManualTicker, isNonTickerTypeTicker, isUndefinedTicker } from "@/utils/ticker-name.util"
 
-export const useItemDetail = (item: TableRowItem) => {
-  const [currentDate] = useAtom(currentDateAtom)
+export const useItemDetail = (item: TableRowItem, date: Date) => {
+  const { ticker, totalQty, totalPrice } = item
   const [itemHistoricalsByTicker] = useAtom(itemHistoricalsByTickerAtom)
+  const [manualTickerItemHistoricalsByTicker] = useAtom(manualTickerItemHistoricalsByTickerAtom)
+  const [nonTickerItemHistoricalsByTicker] = useAtom(nonTickerItemHistoricalsByTickerAtom)
 
-  const { sectionId, accountId, name, ticker, totalQty, totalPrice } = item
-  const [nonTickerEvaluatedPrices] = useAtom(nonTickerEvaluatedPricesAtom)
-  // const [tickerPrices] = useAtom(tickerPricesAtom)
-
-  const itemAsNonTicker = nonTickerEvaluatedPrices.find(n => (
-    n.sectionId === sectionId && n.accountId === accountId && n.itemName === name
-  ))
-
-  if (itemAsNonTicker) {
+  if (isUndefinedTicker(ticker)) {
     return {
-      nonTickerType: true,
-      tickerPrice: undefined,
-      evaluatedPrice: itemAsNonTicker.evaluatedPrice,
-      evaluatedProfit: itemAsNonTicker.evaluatedPrice - totalPrice,
+      tickerPrice: 0,
+      evaluatedPrice: totalPrice,
+      evaluatedProfit: 0,
     }
   }
 
-  // const tickerPrice = tickerPrices.find(t => t.ticker === ticker)?.price
+  const itemHistoricals =
+    isManualTicker(ticker) ? manualTickerItemHistoricalsByTicker[ticker]
+      : isNonTickerTypeTicker(ticker) ? nonTickerItemHistoricalsByTicker[ticker]
+        : itemHistoricalsByTicker[ticker]
 
-  const itemHistoricals = itemHistoricalsByTicker[ticker || '']
-  const date = dayjs(currentDate).format('YYYYMMDD')
   const tickerPrice = getTickerPrice(date, itemHistoricals)
-
   const evaluatedPrice = tickerPrice ? tickerPrice * totalQty : totalPrice
   const evaluatedProfit = evaluatedPrice - totalPrice
   return {
-    nonTickerType: false,
     tickerPrice,
     evaluatedPrice,
     evaluatedProfit,

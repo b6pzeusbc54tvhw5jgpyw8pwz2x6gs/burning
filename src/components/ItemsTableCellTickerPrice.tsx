@@ -9,6 +9,9 @@ import { Button } from "./ui/button"
 import { TickerTypeSettingDialogContent } from "./TickerTypeSettingDialogContent"
 import { useItemDetail } from "@/hooks/use-item-price"
 import { itemHistoricalsByTickerAtom, itemHistoricalsByTickerLoadingAtom } from "@/states/ticker-historical.state"
+import { isAutoTicker, isManualTicker, isNonTickerTypeTicker, isUndefinedTicker } from "@/utils/ticker-name.util"
+import { currentDateAtom } from "@/states/date.state"
+import { ManualTickerPriceDialogContent } from "./ManualTickerPriceDialogContent"
 
 export const ItemsTableCellTickerPrice = (props: {
   item: TableRowItem
@@ -17,19 +20,18 @@ export const ItemsTableCellTickerPrice = (props: {
   const { ticker } = item
   // const putTickerPrice = useSetAtom(putTickerPriceAtom)
   const [editing, setEditing] = useState(false)
-
   const [itemHistoricalsByTicker] = useAtom(itemHistoricalsByTickerAtom)
   const [itemHistoricalsByTickerLoading] = useAtom(itemHistoricalsByTickerLoadingAtom)
+  const [currentDate] = useAtom(currentDateAtom)
+  const { tickerPrice } = useItemDetail(item, currentDate)
 
-  const { nonTickerType, tickerPrice } = useItemDetail(item)
-
-  if (nonTickerType) {
-    return <TableCell className="text-right"></TableCell>
+  if (itemHistoricalsByTickerLoading[ticker || '']) {
+    return (
+      <TableCell className="text-right animate-pulse">Loading...</TableCell>
+    )
   }
 
-  // manual-ticker- 이면서 tickerPrice가 없는 경우는 처음 자산 추가했을 때
-  // 처음에는 memo에 ticker정보를 안써놨다면 기본적으로 manual-ticker로 설정.
-  if (!tickerPrice && !ticker?.startsWith('manual-ticker-')) {
+  if (isUndefinedTicker(ticker)) {
     return (
       <TableCell className="text-right">
         <Dialog>
@@ -47,17 +49,27 @@ export const ItemsTableCellTickerPrice = (props: {
     )
   }
 
-  if (itemHistoricalsByTickerLoading[ticker || '']) {
-    return (
-      <TableCell className="text-right animate-pulse">Loading...</TableCell>
-    )
+  if (isNonTickerTypeTicker(ticker)) {
+    return <TableCell className="text-right"></TableCell>
   }
 
-  if (!ticker) {
-    return (
-      <TableCell className="text-right">No ticker error!</TableCell>
-    )
-  }
+  // if (isManualTicker(ticker)) {
+  //   return (
+  //     <TableCell className="text-right">
+  //       <Dialog>
+  //         <DialogTrigger asChild>
+  //           <Button
+  //             variant="outline"
+  //             size="sm"
+  //           >
+  //             {Math.floor(tickerPrice).toLocaleString()}
+  //           </Button>
+  //         </DialogTrigger>
+  //         <ManualTickerPriceDialogContent item={item} />
+  //       </Dialog>
+  //     </TableCell>
+  //   )
+  // }
 
   return (
     <TableCell className="text-right">
@@ -66,11 +78,11 @@ export const ItemsTableCellTickerPrice = (props: {
         <Input
           className="h-5 text-right px-1 w-full"
           type="text"
-          value={tickerPrice ? Math.floor(tickerPrice).toLocaleString() : ''}
+          value={Math.floor(tickerPrice).toLocaleString()}
           onFocus={e => setEditing(true)}
           // onChange={e => putTickerPrice(ticker, Number(e.target.value?.replace(/,/g,'')), 'manual')}
           onBlur={e => setEditing(false)}
-          disabled={!item.ticker?.startsWith('manual-ticker-')}
+          disabled={isAutoTicker(ticker)}
         />
         <span>원</span>
       </div>

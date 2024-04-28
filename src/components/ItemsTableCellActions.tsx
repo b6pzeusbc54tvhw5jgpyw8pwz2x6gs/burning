@@ -1,4 +1,4 @@
-import { useSetAtom } from "jotai"
+import { useAtom, useSetAtom } from "jotai"
 import { useState } from 'react'
 import { removeTickerPriceAtom, } from "../states/ticker-price.state"
 import { TableRowItem } from "../types/item.type"
@@ -9,6 +9,8 @@ import { ValueChangeTransactionDialog } from "./ValueChangeTransactionDialog"
 import { removeNonTickerEvaluatedPriceAtom } from "@/states/non-ticker-evaluated-price.state"
 import { useItemDetail } from "@/hooks/use-item-price"
 import { toast } from "react-toastify"
+import { currentDateAtom } from "@/states/date.state"
+import { removeTickerNameAtom } from "@/states/ticker-name.state"
 
 export const ItemsTableCellActions = (props: {
   item: TableRowItem
@@ -20,15 +22,20 @@ export const ItemsTableCellActions = (props: {
   const removeTickerPrice = useSetAtom(removeTickerPriceAtom)
   const removeNonTickerEvaluatedPrice = useSetAtom(removeNonTickerEvaluatedPriceAtom)
 
-  const handleReset = () => {
-    if (ticker) {
-      removeTickerPrice(ticker)
-    }
+  const removeTickerName = useSetAtom(removeTickerNameAtom)
 
-    removeNonTickerEvaluatedPrice(item)
+  const handleReset = () => {
+    // if (ticker) {
+    //   removeTickerPrice(ticker)
+    // }
+    // removeNonTickerEvaluatedPrice(item)
+
+    const itemKey = `${item.sectionId}-${item.accountId}-${item.name}`
+    removeTickerName(itemKey)
   }
 
-  const { evaluatedProfit } = useItemDetail(item)
+  const [date] = useAtom(currentDateAtom)
+  const { evaluatedProfit } = useItemDetail(item, date)
   const handleOpenVCTDialog = () => {
     if (evaluatedProfit < 1 && evaluatedProfit > -1) {
       toast.warn('손익이 1원 미만입니다')

@@ -23,7 +23,6 @@ export const getLastItemDate = (base: string, itemHistoricals?: ItemHistoricalBy
   }
 
   return selectedDate
-
 }
 
 /**
