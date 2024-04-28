@@ -1,5 +1,6 @@
 import { ItemHistoricalByDate } from "@/states/ticker-historical.state"
 import { dateSum } from "./date.util"
+import dayjs from "dayjs"
 
 /**
  * base로부터 가장 가까운 entry 기록 날짜를 구한다.
@@ -26,15 +27,20 @@ export const getLastItemDate = (base: string, itemHistoricals?: ItemHistoricalBy
 }
 
 /**
- * example: date: 20220301
+ * @param date: Date | string (ex: '20220301')
  * 유틸로 보내자
  */
-export const getTickerPrice = (date: string, itemHistoricals?: ItemHistoricalByDate) => {
+export const getTickerPrice = (
+  date: Date | string,
+  itemHistoricals?: ItemHistoricalByDate
+) => {
+  const dateStr = typeof date === 'string' ? date : dayjs(date).format('YYYYMMDD')
+
   if (!itemHistoricals) {
     return 0
   }
 
-  const selectedDate = getLastItemDate(date, itemHistoricals)
+  const selectedDate = getLastItemDate(dateStr, itemHistoricals)
   if (!selectedDate) {
     return 0
   }

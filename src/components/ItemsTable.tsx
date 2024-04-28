@@ -1,148 +1,44 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
-import { useAtom, useSetAtom } from 'jotai'
-import { stockAssetsAtom } from '@/states/stock-assets.state'
+import { useEffect } from 'react'
+import { useAtom } from 'jotai'
 import { AllAccounts } from '@/types/account.type'
-import { entriesByAccountAtom, entriesByAccountLoadingAtom } from '../states/acount-entries.state'
-import { sum, group, invert, last } from 'radash'
-import { DateTradingInfo, TableRowItem, InvestableItem } from '../types/item.type'
+import { sum } from 'radash'
 import { globalTotalPriceAtom } from '../states/global-total-price.state'
 import { Table, TableBody, TableHead, TableHeader, TableRow } from './ui/table'
 import { ItemsTableRow } from './ItemsTableRow'
 import { ItemsTableLastRow } from './ItemsTableLastRow'
 import { nonTickerEvaluatedPricesAtom } from '@/states/non-ticker-evaluated-price.state'
-import { tickerPricesAtom } from '@/states/ticker-price.state'
-import { Entry } from '@/types/entry.type'
 import { useTableData } from '@/hooks/use-table-data'
-import { putAndFetchItemHistoricalsAtom } from '@/states/ticker-historical.state'
-import { getManualTicker, getTicketByMemos } from '@/utils/ticker-name.util'
+import { useInvestableItems } from '@/hooks/use-investable-items'
+import { useInvestableEntries } from '@/hooks/use-investable-entries'
 
 export const ItemsTable = (props: {
   allAccounts: AllAccounts
 }) => {
   const { allAccounts } = props
 
-  // local에 불러온 모든 account별 entry.
-  const [entriesByAccount] = useAtom(entriesByAccountAtom)
-
-  // 투자 자산 목록으로 선택된 Asset들. TODO: 나중에 유가 증권형 자산으로 바꿔야함.
-  const [stockAssets, setStockAssets] = useAtom(stockAssetsAtom)
-  const [globalTotalPrice, setGlobalTotalPrice] = useAtom(globalTotalPriceAtom)
+  const [, setGlobalTotalPrice] = useAtom(globalTotalPriceAtom)
   const [nonTickerEvaluatedPrices] = useAtom(nonTickerEvaluatedPricesAtom)
-  const [tickerPrices, setTickerPrices] = useAtom(tickerPricesAtom)
 
-  const [currentDate, setCurrentDate] = useState('20240413')
-
-  // 유가 증권형 자산은 모두 "거래처" 타입.
-  const investableEntries: Record<string, Entry[]> = useMemo(() => {
-    const keys = Object.keys(entriesByAccount)
-    return keys.reduce((acc, key) => {
-      const [, accountId] = key.split('-')
-      const selected = stockAssets.some(sa => sa.account.account_id === accountId)
-      if (!selected) {
-        return acc
-      }
-
-      if (allAccounts.assets?.find(a => a.account_id === accountId)?.category !== 'client') {
-        return acc
-      }
-
-      return { ...acc, [key]: entriesByAccount[key] }
-    }, {} satisfies Record<string, Entry[]>)
-  }, [entriesByAccount, stockAssets, allAccounts])
-
-  const investableItems: InvestableItem[] = useMemo(() => {
-    const keys = Object.keys(investableEntries)
-
-    // entriesByItemName의 key는 ${setiongId}-${accountId}-${itemName} 형태
-    const entriesByItemName: Record<string, Entry[]> = keys.reduce((acc, key) => {
-      const entries = investableEntries[key]
-      return {
-        ...acc,
-        ...entries.reduce((acc, entry) => {
-          const itemKey = `${key}-${entry.item.split('(')[0]}`
-          return { ...acc, [itemKey]: [...(acc[itemKey] || []), entry] }
-        }, {} as Record<string, Entry[]>)
-      }
-    }, {} as Record<string, Entry[]>)
-
-    const itemKeys = Object.keys(entriesByItemName)
-    return itemKeys.map(key => {
-      const [sectionId, accountId, ...rest] = key.split('-')
-      const itemName = rest.join('-')
-      const entries = entriesByItemName[key]
-      const ticker = getTicketByMemos(entries.map(e => e.memo))
-        || getManualTicker(sectionId, accountId, itemName)
-
-      const groupedByDate = group(entries, e => e.entry_date)
-      const dates = Object.keys(groupedByDate)
-      const tradingInfos = dates.reduce<DateTradingInfo[]>((acc, date) => {
-        const prev = last(acc)
-        const openQty = prev
-          ? prev.openQty + sum(prev.buy.map(b => b.qty)) + sum(prev.sell.map(s => s.qty))
-          : 0
-
-        // last written price. 가계부에 기록된 마지막 가격.
-        const prevLastWrittenPrice = prev ? prev.lastWrittenPrice : 0
-
-
-        const entries = groupedByDate[date]!
-        const lastWrittenPrice = entries.reduce((acc, cur) => {
-          return cur.r_account_id === accountId
-            ? acc - cur.money
-            : acc + cur.money
-        }, prevLastWrittenPrice)
-
-        const buy = entries
-          .filter(e => e.l_account_id === accountId)
-          .map(entry => ({
-            qty: Number(entry.item.split('(')[1]?.split(/[),]/)[0] || 0),
-            price: entry.money,
-            accountId: entry.r_account_id,
-          }))
-        const sell = entries
-          .filter(e => e.r_account_id === accountId)
-          .map(entry => ({
-            qty: Number(entry.item.split('(')[1]?.split(/[),]/)[0] || 0), // 일반 매도 거래의 경우 마이너스 값이 있어야함.
-            price: entry.money,
-            accountId: entry.l_account_id,
-          }))
-
-        return [
-          ...acc,
-          // 마지막 가계부 기록 금액.
-          { date, openQty, buy, sell, lastWrittenPrice },
-        ]
-      }, [])
-
-      return { sectionId, accountId, ticker, itemName, tradingInfos }
-    })
-  }, [investableEntries])
-
-  const putAndFetchItemHistoricals = useSetAtom(putAndFetchItemHistoricalsAtom)
-  useEffect(() => {
-    investableItems
-      .filter(item => item.ticker.split('-')[2] !== 'manual')
-      .forEach(item => putAndFetchItemHistoricals(item.ticker))
-  }, [investableItems, putAndFetchItemHistoricals])
-
+  const investableEntries = useInvestableEntries(allAccounts)
+  const investableItems = useInvestableItems(investableEntries)
   const tableData = useTableData(investableItems)
 
   useEffect(() => {
     setGlobalTotalPrice(sum(tableData.map(item => item.totalPrice)))
   }, [tableData, setGlobalTotalPrice])
 
-  const getRowSpan = (idx: number) => {
-    // 다음 항목들이 몇개나 동일한 accountId를 사용하는지 반환.
-    // 각 accountId별로 첫번째 항목에만 rowSpan을 적용하고, 나머지는 null 반환.
-    const accountIds = tableData.map(t => t.accountId)
-    const accountId = accountIds[idx]
+  // const getRowSpan = (idx: number) => {
+  //   // 다음 항목들이 몇개나 동일한 accountId를 사용하는지 반환.
+  //   // 각 accountId별로 첫번째 항목에만 rowSpan을 적용하고, 나머지는 null 반환.
+  //   const accountIds = tableData.map(t => t.accountId)
+  //   const accountId = accountIds[idx]
 
-    if (accountIds[idx - 1] === accountId) return null
+  //   if (accountIds[idx - 1] === accountId) return null
 
-    return accountIds.filter(a => a === accountId).length
-  }
+  //   return accountIds.filter(a => a === accountId).length
+  // }
 
   return (
 
@@ -169,10 +65,7 @@ export const ItemsTable = (props: {
           />
         ))}
 
-        <ItemsTableLastRow
-          accounts={allAccounts}
-          items={tableData}
-        />
+        <ItemsTableLastRow items={tableData} />
       </TableBody>
     </Table>
 

@@ -2,15 +2,14 @@
 
 import { useEffect, useMemo } from 'react'
 import { useAtom, useSetAtom } from 'jotai'
-import { stockAssetsAtom } from '@/states/stock-assets.state'
-import { Account, AccountType } from '@/types/account.type'
-import { tickerPricesAtom } from '../states/ticker-price.state'
 import { TableRowItem } from '@/types/item.type'
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from './ui/table'
 import { Button } from './ui/button'
 import { ChevronRight, RefreshCw } from 'lucide-react'
 import { nonTickerEvaluatedPricesAtom, putNonTickerEvaluatedPricesAtom } from '@/states/non-ticker-evaluated-price.state'
 import { itemHistoricalsByTickerAtom } from '@/states/ticker-historical.state'
+import { getTickerPrice } from '@/utils/ticker-price.util'
+import { currentDateAtom } from '@/states/date.state'
 
 const colors = [
   "md:bg-red-500/30",
@@ -34,32 +33,20 @@ const colors = [
 
 export const ItemsTableLastRow = (props: {
   items: TableRowItem[]
-  accounts: Record<string, Account[]>
 }) => {
-  const { items, accounts } = props
-  console.log("🚀 ~ items:", items)
-  const assets = accounts.assets
-  const [stockAssets, setStockAssets] = useAtom(stockAssetsAtom)
-  const getAssetName = (accountId: string) => {
-    const found = assets.find(a => a.account_id === accountId)
-    return found ? found.title : 'Unknown'
-  }
-
-  const [tickerPrices, setTickerPrices] = useAtom(tickerPricesAtom)
-
+  const { items } = props
+  const [date] = useAtom(currentDateAtom)
   const [nonTickerPrices] = useAtom(nonTickerEvaluatedPricesAtom)
   nonTickerPrices.find(v => v.evaluatedPrice)
 
   const [itemHistoricalsByTicker] = useAtom(itemHistoricalsByTickerAtom)
 
-  const lastTotalPrice = useMemo(() => {
-    return items.reduce((acc, item) => {
-      const price = item.totalPrice || 0
-      return acc + price
-    }, 0)
+  // Date 기준 가장 최신 가계부에 기록된 평가액.
+  const lastWrittenTotalPrice = useMemo(() => {
+    return items.reduce((acc, item) => acc + item.totalPrice, 0)
   }, [items])
 
-  const currentTotalPrice = useMemo(() => {
+  const currentEvaluatedTotalPrice = useMemo(() => {
     return items.reduce((acc, item) => {
       const nonTickerPrice = nonTickerPrices.find(v => (
         v.sectionId === item.sectionId
@@ -71,17 +58,18 @@ export const ItemsTableLastRow = (props: {
         return acc + evaluatedPrice
       }
 
-      const tickerPrice = tickerPrices.find(t => t.ticker === item.ticker)?.price
+      const tickerPrice = getTickerPrice(date, itemHistoricalsByTicker[item.ticker || ''])
       if (tickerPrice === undefined) {
+        // tickerPrice가 없으면, 가계부 가격을 그대로 사용.
         return acc + item.totalPrice
       }
 
       const price = item.totalQty * tickerPrice
       return acc + price
     }, 0)
-  }, [items, tickerPrices, nonTickerPrices])
+  }, [items, itemHistoricalsByTicker, nonTickerPrices, date])
 
-  const profit = currentTotalPrice - lastTotalPrice
+  const profit = currentEvaluatedTotalPrice - lastWrittenTotalPrice
 
   return (
     <TableRow className={`py-0`}>
@@ -92,14 +80,14 @@ export const ItemsTableLastRow = (props: {
 
       {/* 가계부에 기록된 평가액 */}
       <TableCell className="text-right">
-        <b>{Math.floor(lastTotalPrice).toLocaleString()}</b>원
+        <b>{Math.floor(lastWrittenTotalPrice).toLocaleString()}</b>원
       </TableCell>
 
       <TableCell className="text-right"></TableCell>
 
       {/* 현재 평가액	*/}
       <TableCell className="text-right">
-        <b>{Math.floor(currentTotalPrice).toLocaleString()}</b>원
+        <b>{Math.floor(currentEvaluatedTotalPrice).toLocaleString()}</b>원
       </TableCell>
 
       <TableCell className="text-right">

@@ -1,6 +1,7 @@
 import axios from "axios"
 import dayjs from "dayjs"
 import { atom } from "jotai"
+import { atomWithStorage } from "jotai/utils"
 
 type Open = number
 type High = number
@@ -35,5 +36,44 @@ export const putAndFetchItemHistoricalsAtom = atom(null, async (get, set, ticker
 
   set(itemHistoricalsByTickerAtom, prev => ({ ...prev, [ticker]: data }))
   set(itemHistoricalsByTickerLoadingAtom, prev => ({ ...prev, [ticker]: false }))
-  console.log(get(itemHistoricalsByTickerAtom))
+})
+
+/**
+ * 비상장 주식이나 비트 모빅 같이 Yahoo API로 1주당 가격을 불러올 수 없는 자산의
+ * 티커별 날짜별 가격 정보를 저장하는 atom.
+ */
+export const manualTickerItemHistoricalsByTickerAtom = atomWithStorage<
+  Record<string, Record<string, number>>
+>('manual-ticker-item-historicals-by-ticker', {})
+
+export const putManualTickerItemHistoricalAtom = atom(null, async (get, set, ticker: string, date: Date, price: number) => {
+  const dateStr = dayjs(date).format('YYYYMMDD')
+
+  set(manualTickerItemHistoricalsByTickerAtom, prev => ({
+    ...prev,
+    [ticker]: {
+      ...prev[ticker],
+      [dateStr]: price,
+    },
+  }))
+})
+
+/**
+ * 1주의 가격이 있는게 아닌 전체 평가액의 수익률로 관리하는 자산의 가격을 저장하는 atom.
+ * 예를들어 펀드나 예금, 혹은 계좌 내 주식을 따로 관리하지 않고 계좌를 통으로 관리하는 경우.
+ */
+export const nonTickerItemHistoricalsByTickerAtom = atomWithStorage<
+  Record<string, Record<string, number>>
+>('non-ticker-item-historicals-by-ticker', {})
+
+export const putFundTypeItemHistoricalAtom = atom(null, async (get, set, ticker: string, date: Date, price: number) => {
+  const dateStr = dayjs(date).format('YYYYMMDD')
+
+  set(manualTickerItemHistoricalsByTickerAtom, prev => ({
+    ...prev,
+    [ticker]: {
+      ...prev[ticker],
+      [dateStr]: price,
+    },
+  }))
 })
