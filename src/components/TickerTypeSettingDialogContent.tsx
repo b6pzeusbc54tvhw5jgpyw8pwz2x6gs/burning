@@ -20,12 +20,12 @@ export function TickerTypeSettingDialogContent(props: {
   item: TableRowItem
 }) {
   const { item } = props
-  const { ticker, sectionId, accountId, name, totalQty, totalPrice } = item
+  const { tickerFromMemos, sectionId, accountId, name, totalQty, totalPrice } = item
 
   const addTickerName = useSetAtom(addTickerNameAtom)
   const [tickerNameByItemKey] = useAtom(tickerNameByItemKeyAtom)
 
-  const [autoTicker, setAutoTicker] = useState(tickerNameByItemKey[ticker || ''])
+  const [autoTicker, setAutoTicker] = useState(tickerFromMemos || '')
   const [nonTickerEvaluatedPrice, setNonTickerEvaluatedPrice] = useState(() => totalPrice)
   const [manualTickerPrice, setManualTickerPrice] = useState(() => Math.floor(totalPrice / totalQty))
   // const putTickerPrice = useSetAtom(putTickerPriceAtom)
@@ -33,9 +33,6 @@ export function TickerTypeSettingDialogContent(props: {
   const putNonTickerEvaluatedPrice = useSetAtom(putNonTickerEvaluatedPricesAtom)
   const putManualTickerItemHistorical = useSetAtom(putManualTickerItemHistoricalAtom)
   const [currentDate] = useAtom(currentDateAtom)
-
-
-
 
   const handleAutoTicker = async () => {
     const itemKey = `${sectionId}-${accountId}-${name}`
@@ -74,9 +71,7 @@ export function TickerTypeSettingDialogContent(props: {
   const [incomeAccountId, setIncomeAccountId] = useState('')
   const [tickerType, setTickerType] = useState<TickerType>('auto-ticker')
 
-  const disabled = tickerType === 'auto-ticker' ? !autoTicker
-    : tickerType === 'manual-ticker' ? !manualTickerPrice
-      : !nonTickerEvaluatedPrice
+  const disabled = tickerType === 'auto-ticker' ? !autoTicker : false
 
   return (
     <DialogContent className="sm:max-w-[800px] sm:min-h-[420px] gap-0 items-start">

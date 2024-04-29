@@ -38,7 +38,7 @@ export const useTableData = (items: InvestableItem[]): TableRowItem[] => {
         + tradingInfo.buy.reduce((acc, cur) => acc + cur.qty, 0)
         + tradingInfo.sell.reduce((acc, cur) => acc + cur.qty, 0)
 
-      const itemHistoricals = itemHistoricalsByTicker[item.ticker]
+      const itemHistoricals = itemHistoricalsByTicker[item.ticker || '']
       const tickerPrice = getTickerPrice(date, itemHistoricals)
 
       const lastItemDate = getLastItemDate(date, itemHistoricals)
@@ -51,6 +51,7 @@ export const useTableData = (items: InvestableItem[]): TableRowItem[] => {
         totalQty,
         totalPrice: tradingInfo.lastWrittenPrice,
         ticker: item.ticker,
+        tickerFromMemos: item.tickerFromMemos,
 
         // ticker는 언제 날짜 가격인지 추가 필요.
         // tickerPriceDate:

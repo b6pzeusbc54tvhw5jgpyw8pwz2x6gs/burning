@@ -7,13 +7,13 @@ export const getTicket = (memo: string) => {
   return match[1]
 }
 
-export const getTicketByMemos = (memo: string[]) => {
+export const getTickerByMemos = (memo: string[]) => {
   while (memo.length > 0) {
     const ticker = getTicket(memo.shift()!)
     if (ticker) return ticker
   }
 
-  return null
+  return undefined
 }
 
 export const getManualTicker = (itemKey: string) => {

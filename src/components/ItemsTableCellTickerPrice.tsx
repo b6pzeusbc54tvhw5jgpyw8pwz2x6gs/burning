@@ -56,17 +56,6 @@ export const ItemsTableCellTickerPrice = (props: {
   // if (isManualTicker(ticker)) {
   //   return (
   //     <TableCell className="text-right">
-  //       <Dialog>
-  //         <DialogTrigger asChild>
-  //           <Button
-  //             variant="outline"
-  //             size="sm"
-  //           >
-  //             {Math.floor(tickerPrice).toLocaleString()}
-  //           </Button>
-  //         </DialogTrigger>
-  //         <ManualTickerPriceDialogContent item={item} />
-  //       </Dialog>
   //     </TableCell>
   //   )
   // }
@@ -86,6 +75,14 @@ export const ItemsTableCellTickerPrice = (props: {
         />
         <span>원</span>
       </div>
+      {isManualTicker(ticker) && (
+        <Dialog>
+          <DialogTrigger asChild>
+            <div>update</div>
+          </DialogTrigger>
+          <ManualTickerPriceDialogContent item={item} />
+        </Dialog>
+      )}
     </TableCell>
   )
 }

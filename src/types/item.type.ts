@@ -7,8 +7,10 @@ export interface TableRowItem {
   }
   totalQty: number
   totalPrice: number
-  ticker?: string
   lastItemDate: string
+
+  ticker?: string
+  tickerFromMemos?: string
 }
 
 /*
@@ -48,4 +50,5 @@ export interface InvestableItem {
   itemName: string     // TIGER 나스닥100
   tradingInfos: DateTradingInfo[]
   ticker?: string       // 156156.KS
+  tickerFromMemos?: string // 메모에서 추출한 ticker. Ticker 입력 받을 때 자동 완성 시켜주는 용도.
 }

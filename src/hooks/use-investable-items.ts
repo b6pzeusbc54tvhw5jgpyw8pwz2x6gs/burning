@@ -2,7 +2,7 @@ import { group, last, sum } from "radash"
 import { useEffect, useMemo } from "react"
 import { Entry } from "@/types/entry.type"
 import { DateTradingInfo, InvestableItem } from "@/types/item.type"
-import { getTicketByMemos, getUndefinedTicker, isAutoTicker } from "@/utils/ticker-name.util"
+import { getTickerByMemos, isAutoTicker } from "@/utils/ticker-name.util"
 import { useAtom, useSetAtom } from "jotai"
 import { putAndFetchItemHistoricalsAtom } from "@/states/ticker-historical.state"
 import { tickerNameByItemKeyAtom } from "@/states/ticker-name.state"
@@ -13,11 +13,10 @@ export const useInvestableItems = (
   const putAndFetchItemHistoricals = useSetAtom(putAndFetchItemHistoricalsAtom)
   const [tickerNameByItemKey] = useAtom(tickerNameByItemKeyAtom)
 
-  const investableItems = useMemo(() => {
-    const keys = Object.keys(investableEntries)
+  const keys = useMemo(() => Object.keys(investableEntries), [investableEntries])
 
-    // entriesByItemName의 key는 ${setiongId}-${accountId}-${itemName} 형태
-    const entriesByItemName: Record<string, Entry[]> = keys.reduce((acc, key) => {
+  const entriesByItemName: Record<string, Entry[]> = useMemo(() => {
+    return keys.reduce((acc, key) => {
       const entries = investableEntries[key]
       return {
         ...acc,
@@ -27,18 +26,25 @@ export const useInvestableItems = (
         }, {} as Record<string, Entry[]>)
       }
     }, {} as Record<string, Entry[]>)
+  }, [investableEntries, keys])
+
+  const investableItems = useMemo(() => {
 
     const itemKeys = Object.keys(entriesByItemName)
+
     return itemKeys.map(key => {
       const [sectionId, accountId, ...rest] = key.split('-')
       const itemName = rest.join('-')
       const entries = entriesByItemName[key]
       const ticker = tickerNameByItemKey[key]
+      const tickerFromMemos = ticker ? undefined : getTickerByMemos(entries.map(e => e.memo))
       // || getTicketByMemos(entries.map(e => e.memo))
       // || getUndefinedTicker(sectionId, accountId, itemName)
 
       const groupedByDate = group(entries, e => e.entry_date)
       const dates = Object.keys(groupedByDate)
+
+      // tradingInfos를 구하자.
       const tradingInfos = dates.reduce<DateTradingInfo[]>((acc, date) => {
         const prev = last(acc)
         const openQty = prev
@@ -77,9 +83,16 @@ export const useInvestableItems = (
         ]
       }, [])
 
-      return { sectionId, accountId, ticker, itemName, tradingInfos }
+      return {
+        sectionId,
+        accountId,
+        ticker,
+        itemName,
+        tradingInfos,
+        tickerFromMemos,
+      }
     })
-  }, [investableEntries, tickerNameByItemKey])
+  }, [entriesByItemName, tickerNameByItemKey])
 
   // 추가된 Ticker가 있으면 패치한다.
   // putAndFetchItemHistoricals에 중복 호출 방지 로직이 있으므로 여러번 호출해도 문제 없음.

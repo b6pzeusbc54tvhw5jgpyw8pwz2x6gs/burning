@@ -12,6 +12,7 @@ import { itemHistoricalsByTickerAtom, itemHistoricalsByTickerLoadingAtom } from 
 import { currentDateAtom } from "@/states/date.state"
 import dayjs from "dayjs"
 import { getTickerPrice } from "@/utils/ticker-price.util"
+import { isManualTicker, isNonTickerTypeTicker } from "@/utils/ticker-name.util"
 
 export const ItemsTableCellEvaluatedTotalPrice = (props: {
   item: TableRowItem
@@ -24,7 +25,7 @@ export const ItemsTableCellEvaluatedTotalPrice = (props: {
   const currentDateStr = dayjs(currentDate).format('YYYYMMDD')
 
   const putNonTickerEvaluatedPrice = useSetAtom(putNonTickerEvaluatedPricesAtom)
-  const { evaluatedPrice, nonTickerType } = useItemDetail(item)
+  const { evaluatedPrice } = useItemDetail(item, currentDate)
 
   const [itemHistoricalsByTicker] = useAtom(itemHistoricalsByTickerAtom)
   const [itemHistoricalsByTickerLoading] = useAtom(itemHistoricalsByTickerLoadingAtom)
@@ -42,7 +43,7 @@ export const ItemsTableCellEvaluatedTotalPrice = (props: {
 
       {(tickerPrice ? (
         <><b>{(Math.floor(evaluatedPrice)).toLocaleString()}</b>원</>
-      ) : nonTickerType ? (
+      ) : isNonTickerTypeTicker(ticker) ? (
         <div className="flex text-right justify-end">
           <Input
             className="h-5 text-right px-1 w-full"
@@ -61,17 +62,9 @@ export const ItemsTableCellEvaluatedTotalPrice = (props: {
           <span>원</span>
         </div>
       ) : (
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button
-              variant="outline"
-              size="sm"
-            >
-              가격 로드 실패
-            </Button>
-          </DialogTrigger>
-          <TickerTypeSettingDialogContent item={item} />
-        </Dialog>
+        <div>
+          {isManualTicker(ticker) ? '1주 당 가격 입력 필요' : 'Ticker 정보 로드 실패'}
+        </div>
       ))}
     </TableCell>
   )
