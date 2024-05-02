@@ -64,14 +64,14 @@ export const useInvestableItems = (
         const buy = entries
           .filter(e => e.l_account_id === accountId)
           .map(entry => ({
-            qty: Number(entry.item.split('(')[1]?.split(/[),]/)[0] || 0),
+            qty: Number(entry.item.split('(')[1]?.split(/[),]/)[0]) || 0,
             price: entry.money,
             accountId: entry.r_account_id,
           }))
         const sell = entries
           .filter(e => e.r_account_id === accountId)
           .map(entry => ({
-            qty: Number(entry.item.split('(')[1]?.split(/[),]/)[0] || 0), // 일반 매도 거래의 경우 마이너스 값이 있어야함.
+            qty: Number(entry.item.split('(')[1]?.split(/[),]/)[0]) || 0, // 일반 매도 거래의 경우 마이너스 값이 있어야함.
             price: entry.money,
             accountId: entry.l_account_id,
           }))
