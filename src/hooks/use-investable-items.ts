@@ -1,4 +1,4 @@
-import { group, last, sum } from "radash"
+import { group, last, sum, unique } from "radash"
 import { useEffect, useMemo } from "react"
 import { Entry } from "@/types/entry.type"
 import { DateTradingInfo, InvestableItem } from "@/types/item.type"
@@ -6,6 +6,52 @@ import { getTickerByMemos, isAutoTicker } from "@/utils/ticker-name.util"
 import { useAtom, useSetAtom } from "jotai"
 import { putAndFetchItemHistoricalsAtom } from "@/states/ticker-historical.state"
 import { tickerNameByItemKeyAtom } from "@/states/ticker-name.state"
+
+const getOpenQtyPerAccount = (prev?: DateTradingInfo) => {
+  if (!prev) return {}
+
+  // 여기부터
+  const accountIds = unique([
+    ...Object.keys(prev.openQtyPerAccount),
+    ...prev.buy.map(b => b.accountId),
+    ...prev.sell.map(b => b.accountId),
+  ])
+
+  return accountIds.reduce((acc, accountId) => {
+    const buyQty = sum(prev.buy.filter(b => b.accountId === accountId).map(b => b.qty))
+    const sellQty = sum(prev.sell.filter(b => b.accountId === accountId).map(b => b.qty))
+    return {
+      ...acc,
+      [accountId]: (prev.openQtyPerAccount[accountId] || 0) + buyQty + sellQty,
+    }
+  }, prev.openQtyPerAccount as Record<string, number>)
+}
+
+const getCloseQtyPerAccount = (
+  openQtyPerAccount: Record<string, number>,
+  buy: { qty: number, accountId: string }[],
+  sell: { qty: number, accountId: string }[]
+) => {
+  const accountIds = unique([
+    ...Object.keys(openQtyPerAccount),
+    ...buy.map(b => b.accountId),
+    ...sell.map(b => b.accountId),
+  ])
+
+  const result = accountIds.reduce((acc, accountId) => {
+    const buyQty = sum(buy.filter(b => b.accountId === accountId).map(b => b.qty))
+    const sellQty = sum(sell.filter(b => b.accountId === accountId).map(b => b.qty))
+    return {
+      ...acc,
+      [accountId]: (openQtyPerAccount[accountId] || 0) + buyQty + sellQty,
+    }
+  }, openQtyPerAccount)
+
+  // number가 0인건 제거.
+  return Object.keys(result).reduce((acc, accountId) => {
+    return result[accountId] === 0 ? acc : { ...acc, [accountId]: result[accountId] }
+  }, {})
+}
 
 export const useInvestableItems = (
   investableEntries: Record<string, Entry[]>
@@ -28,7 +74,7 @@ export const useInvestableItems = (
     }, {} as Record<string, Entry[]>)
   }, [investableEntries, keys])
 
-  const investableItems = useMemo(() => {
+  const investableItems: InvestableItem[] = useMemo(() => {
 
     const itemKeys = Object.keys(entriesByItemName)
 
@@ -46,10 +92,11 @@ export const useInvestableItems = (
 
       // tradingInfos를 구하자.
       const tradingInfos = dates.reduce<DateTradingInfo[]>((acc, date) => {
-        const prev = last(acc)
+        const prev = last(acc) || undefined
         const openQty = prev
           ? prev.openQty + sum(prev.buy.map(b => b.qty)) + sum(prev.sell.map(s => s.qty))
           : 0
+
 
         // last written price. 가계부에 기록된 마지막 가격.
         const prevLastWrittenPrice = prev ? prev.lastWrittenPrice : 0
@@ -76,10 +123,21 @@ export const useInvestableItems = (
             accountId: entry.l_account_id,
           }))
 
+        const openQtyPerAccount = getOpenQtyPerAccount(prev)
+        const closeQtyPerAccount = getCloseQtyPerAccount(openQtyPerAccount, buy, sell)
+
         return [
           ...acc,
           // 마지막 가계부 기록 금액.
-          { date, openQty, buy, sell, lastWrittenPrice },
+          {
+            date,
+            openQty,
+            openQtyPerAccount,
+            closeQtyPerAccount,
+            buy,
+            sell,
+            lastWrittenPrice,
+          },
         ]
       }, [])
 
@@ -99,7 +157,7 @@ export const useInvestableItems = (
   useEffect(() => {
     investableItems
       .filter(item => isAutoTicker(item.ticker))
-      .forEach(item => putAndFetchItemHistoricals(item.ticker))
+      .forEach(item => putAndFetchItemHistoricals(item.ticker!))  // autoTicker만 남겨서 단언할 수 있음.
   }, [investableItems, putAndFetchItemHistoricals])
 
   return investableItems

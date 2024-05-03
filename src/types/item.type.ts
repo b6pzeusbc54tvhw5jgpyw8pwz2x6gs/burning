@@ -20,6 +20,13 @@ export interface DateTradingInfo {
   date: string         // 날짜. ex: 2021-01-01
   openQty: number      // 시작 수량
   // closeQty: number     // 종료 수량. 계산하면 되서 필요 없음
+  openQtyPerAccount: {  // 계좌별 시작 수량
+    [from: string]: number
+  }
+  closeQtyPerAccount: {  // 계좌별 끝 수량
+    [from: string]: number
+  }
+
   buy: {
     qty: number       // 매수 수량
     price: number     // 주당 매수 가격

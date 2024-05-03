@@ -1,11 +1,11 @@
 import { currentDateAtom, endDateAtom, startDateAtom } from "@/states/date.state"
 import { ItemHistoricalByDate, itemHistoricalsByTickerAtom } from "@/states/ticker-historical.state"
-import { InvestableItem, TableRowItem } from "@/types/item.type"
+import { DateTradingInfo, InvestableItem, TableRowItem } from "@/types/item.type"
 import { dateSum } from "@/utils/date.util"
 import { getLastItemDate, getTickerPrice } from "@/utils/ticker-price.util"
 import dayjs from "dayjs"
 import { useAtom } from "jotai"
-
+import { sum, unique } from "radash"
 
 export const useTableData = (items: InvestableItem[]): TableRowItem[] => {
   const [startDate] = useAtom(startDateAtom)
@@ -38,6 +38,8 @@ export const useTableData = (items: InvestableItem[]): TableRowItem[] => {
         + tradingInfo.buy.reduce((acc, cur) => acc + cur.qty, 0)
         + tradingInfo.sell.reduce((acc, cur) => acc + cur.qty, 0)
 
+      const perAccount = tradingInfo.openQtyPerAccount
+
       const itemHistoricals = itemHistoricalsByTicker[item.ticker || '']
       const tickerPrice = getTickerPrice(date, itemHistoricals)
 
@@ -47,7 +49,7 @@ export const useTableData = (items: InvestableItem[]): TableRowItem[] => {
         sectionId: item.sectionId,
         accountId: item.accountId,
         name: item.itemName,
-        perAccount: {},
+        perAccount: tradingInfo.closeQtyPerAccount,
         totalQty,
         totalPrice: tradingInfo.lastWrittenPrice,
         ticker: item.ticker,

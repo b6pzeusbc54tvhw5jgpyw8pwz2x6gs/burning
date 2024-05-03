@@ -85,9 +85,7 @@ export const ItemsTableRow = (props: {
                   {' '}
                   <b>{formatCurrency(perAccount[from])}</b>
                 </span>
-                <span>
-                  {ticker ? '주' : '원'}
-                </span>
+                <span>주</span>
               </div>
             ))}
           </>
