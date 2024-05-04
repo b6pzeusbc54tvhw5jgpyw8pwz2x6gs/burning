@@ -5,6 +5,21 @@ import { dateSum } from '@/utils/date.util'
 import yahooFinance from 'yahoo-finance2'
 
 // export const action = createSafeActionClient()
+const getRateToKRW = async (currency: string) => {
+  const res = await yahooFinance.quoteSummary(`${currency}KRW=X`, {
+    modules: ['price'],
+  })
+
+  const rate = res?.price?.marketState === 'CLOSED'
+    ? res.price.regularMarketPreviousClose
+    : res?.price?.regularMarketPrice
+
+  if (!rate) {
+    throw new Error('No rate')
+  }
+
+  return rate
+}
 
 export const getRealtimeTickerPrice = async (ticker: string) => {
   const res = await yahooFinance.quoteSummary(ticker, {
@@ -62,13 +77,19 @@ export const listTickerPricesByRange = async (ticker: string, from: string, to: 
     interval: '1d',
   })
 
+  const summary = await yahooFinance.quoteSummary(ticker, { modules: ['price'] })
+  // 환율
+  const rate = summary.price!.currency === 'KRW'
+    ? 1
+    : await getRateToKRW(summary.price!.currency!)
+
   const itemHistoricalByDate = result.reduce<ItemHistoricalByDate>((acc, cur) => {
     const date = cur.date.toISOString().split('T')[0].replace(/-/g, '')
-    const open = cur.open
-    const high = cur.high
-    const low = cur.low
-    const close = cur.close
-    const adjClose = cur.adjClose
+    const open = cur.open * rate
+    const high = cur.high * rate
+    const low = cur.low * rate
+    const close = cur.close * rate
+    const adjClose = cur.adjClose ? cur.adjClose * rate : undefined
     const volume = cur.volume
 
     return {

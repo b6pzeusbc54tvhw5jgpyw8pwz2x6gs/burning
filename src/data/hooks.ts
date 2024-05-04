@@ -1,7 +1,6 @@
-import { getAllAccounts, getAllEntries, getSections, getUser, postEntry } from "@/server/actions/whooing"
-import { useMutation, useQuery } from "@tanstack/react-query"
-import { Account } from "../types/account.type"
 import ms from "ms"
+import { useMutation, useQuery } from "@tanstack/react-query"
+import { getAllAccounts, getSections, getUser, postEntry } from "@/server/actions/whooing"
 
 export function useUser() {
   return useQuery({
@@ -23,14 +22,6 @@ export function useAccounts(sectionId: string) {
   return useQuery({
     queryFn: async () => getAllAccounts(sectionId),
     queryKey: ["accounts", sectionId],
-    refetchInterval: ms('3m'),
-  })
-}
-
-export function useAllEntries(account: Account) {
-  return useQuery({
-    queryFn: async () => getAllEntries(account),
-    queryKey: ["allEntries", account],
     refetchInterval: ms('3m'),
   })
 }

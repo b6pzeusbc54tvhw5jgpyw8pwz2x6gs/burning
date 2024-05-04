@@ -1,5 +1,4 @@
 import ms from 'ms'
-import { Account } from '../types/account.type'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
@@ -8,27 +7,33 @@ dayjs.extend(utc)
 dayjs.extend(timezone)
 dayjs.tz.setDefault()
 
-export const getMaximumEndDate = (account: Account) => {
-  const strDate = String(account.open_date)
+/**
+ * openDate 기준으로 1년 간의 날짜와 closeDate 중 가까운 날짜를 반환.
+ * 1년간의 날짜란 openDate가 20230303이면 20230303 ~ 20240302까지를 의미.
+ */
+export const getMaximumEndDate = (params: {
+  openDate: number
+  closeDate: number
+}) => {
+  const { openDate, closeDate } = params
+  const strDate = String(openDate)
   const yyyyMMdd = `${strDate.slice(0, 4)}-${strDate.slice(4, 6)}-${strDate.slice(6, 8)}`
+
   const date = new Date(`${yyyyMMdd}T00:00:00.000Z`)
+  const t1 = date.getTime()
   date.setUTCFullYear(date.getUTCFullYear() + 1)
+  const t2 = date.getTime()
 
-  const maximumEndDate = new Date(date.getTime() - ms('1d'))
+  const after1Year = dateSum(openDate, (t2 - t1) / ms('1d'))
 
-  // let result = Number(maximumEndDate.toISOString().split('T')[0].replace(/-/g, ''))
-  let result = Number(dayjs(maximumEndDate).format('YYYYMMDD'))
+  // local 시간대가 서버 시간대가 다를 수 있으므로 여유이게 1일을 더해줌.
+  const today = Number(dateSum(dayjs().format('YYYYMMDD'), 1))
 
-  if (result > account.close_date) {
-    result = account.close_date
-  }
-
-  const today = Number(dayjs().format('YYYYMMDD'))
-  if (result > today) {
-    result = today
-  }
-
-  return result
+  return (
+    after1Year > closeDate ? closeDate
+      : after1Year > today ? today
+        : after1Year
+  )
 }
 
 export const formatCurrency = (value: number) => {
@@ -68,7 +73,8 @@ export const today = () => {
 }
 
 // 20240303 같은 base 날짜에 days를 더한 날짜를 반환
-// 예를들어 20240303에 3을 더하면 20240306을 반환
+// 예를들어 20240303에 3을 더하면 20240306을 반환.
+// number 타입은 Timestamp가 아닌 20240303 같은 10진수.
 export const dateSum = <T extends string | number | Date>(base: T, days: number): T => {
   const isIncludeHyphen = typeof base === 'string' && base.split('-').length === 3
   const baseStr = base instanceof Date
@@ -77,6 +83,7 @@ export const dateSum = <T extends string | number | Date>(base: T, days: number)
       ? String(base.split('-').join(''))
       : String(base)
 
+  // 날짜만 다룰 것 이므로 시간을 0으로 설정
   const date = new Date(`${baseStr.slice(0, 4)}-${baseStr.slice(4, 6)}-${baseStr.slice(6, 8)}`)
   date.setHours(0, 0, 0, 0)
 

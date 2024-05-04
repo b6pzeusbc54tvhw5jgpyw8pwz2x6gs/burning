@@ -89,7 +89,6 @@ export const useInvestableItems = (
 
       const groupedByDate = group(entries, e => e.entry_date.split('.')[0])
       const dates = Object.keys(groupedByDate)
-      console.log("🚀 ~ constinvestableItems:InvestableItem[]=useMemo ~ dates:", dates)
 
       // 각 종목 별 거래 정보(tradingInfos)를 일자별로 가공.
       const tradingInfos = dates.reduce<DateTradingInfo[]>((acc, date) => {

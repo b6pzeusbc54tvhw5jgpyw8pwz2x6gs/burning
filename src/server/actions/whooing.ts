@@ -90,15 +90,24 @@ export const getEntries = async (params: {
   return zEntry.array().parse(res.data.results.rows)
 }
 
-export async function getAllEntries(account: Account, initialDate?: number) {
-  let startDate = initialDate || Number(account.open_date)
-  let endDate = getMaximumEndDate(account)
+// export async function getAllEntries(account: Account, initialDate?: number) {
+export async function getAllEntries(params: {
+  sectionId: string
+  accountId: string
+  accountOpenDate: number
+  accountCloseDate: number
+  initialDate?: number
+}) {
+  const { sectionId, accountId, accountOpenDate, accountCloseDate, initialDate } = params
+
+  const endDate = getMaximumEndDate({ openDate: accountOpenDate, closeDate: accountCloseDate })
+  let startDate = initialDate || Number(accountOpenDate)
   let result: Entry[] = []
 
   while (startDate <= endDate) {
     const data = await getEntries({
-      sectionId: account.sectionId,
-      accountId: account.account_id,
+      sectionId: sectionId,
+      accountId: accountId,
       startDate,
       endDate,
     })
@@ -106,7 +115,7 @@ export async function getAllEntries(account: Account, initialDate?: number) {
     result = [...result, ...data.reverse()!]
 
     startDate = endDate + 1
-    endDate = getMaximumEndDate(account)
+    // endDate = getMaximumEndDate({ openDate: accountOpenDate, closeDate: accountCloseDate})
   }
 
   return result

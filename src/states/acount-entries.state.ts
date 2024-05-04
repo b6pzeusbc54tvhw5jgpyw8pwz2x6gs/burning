@@ -1,10 +1,11 @@
 import { atomWithStorage } from 'jotai/utils'
 import { atom } from 'jotai'
-import { last } from 'radash'
+import { last, shake } from 'radash'
 import { Entry } from '../types/entry.type'
 import { getAllEntries } from '../server/actions/whooing'
 import { Account } from '../types/account.type'
 import { dateSum } from '@/utils/date.util'
+import axios from 'axios'
 
 // entry_id 가 유니크.
 const mergeEntries = (oldItems: Entry[], newItems: Entry[], updatedFirstEntryDate?: string) => {
@@ -38,7 +39,17 @@ export const fetchEntriesByAccountAtom = atom(null, async (get, set, account: Ac
   const day2WeeksAgo = exitingItem
     ? dateSum(last(exitingItem)?.entry_date.split('.')[0]!, -14)
     : undefined
-  const data = await getAllEntries(account, Number(day2WeeksAgo) || undefined)
+
+  // const data = await getAllEntries(account, Number(day2WeeksAgo) || undefined)
+  const query = new URLSearchParams(shake({
+    sectionId: account.sectionId,
+    accountId: account.account_id,
+    accountOpenDate: String(account.open_date),
+    accountCloseDate: String(account.close_date),
+    initialDate: day2WeeksAgo || undefined,
+  })).toString()
+
+  const { data } = await axios.get<Entry[]>(`/api/entries?${query}`)
 
   const updatedEntries = mergeEntries(exitingItem || [], data, day2WeeksAgo)
   set(entriesByAccountAtom, p => ({ ...p, [key]: updatedEntries }))
