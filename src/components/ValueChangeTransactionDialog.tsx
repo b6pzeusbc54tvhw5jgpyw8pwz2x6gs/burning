@@ -15,6 +15,8 @@ import { Loader2 } from "lucide-react"
 import { lastSelectedIncomeAtom } from "@/states/last-selected-income.state"
 import { nonTickerEvaluatedPricesAtom } from "@/states/non-ticker-evaluated-price.state"
 import { useItemDetail } from "@/hooks/use-item-price"
+import { currentDateAtom } from "@/states/date.state"
+import dayjs from "dayjs"
 
 export function ValueChangeTransactionDialog(props: {
   opened: boolean
@@ -32,8 +34,13 @@ export function ValueChangeTransactionDialog(props: {
     }))
   }, [accounts])
 
+  const [date] = useAtom(currentDateAtom)
   const { isPending, mutateAsync: postEntry, error } = usePostEntry()
-  const [entryDate, setEntryDate] = useState(() => today())
+  // 팝업열 때 +1 일 날짜가 들어있는게 문제
+  // 팝업열 때 +1 일 날짜가 들어있는게 문제
+  // 팝업열 때 +1 일 날짜가 들어있는게 문제
+  // 팝업열 때 +1 일 날짜가 들어있는게 문제
+  const [entryDate, setEntryDate] = useState(() => Number(dayjs(date).format('YYYYMMDD')))
 
   const getAccountName = (accountId: string | null, type: 'assets' | 'income') => {
     return accounts?.[type]?.find(a => a.account_id === accountId)?.title || '-'
@@ -45,7 +52,7 @@ export function ValueChangeTransactionDialog(props: {
 
   const [openedIncomeSelect, setOpenedIncomeSelect] = useState(false)
   const [incomeAccountId, setIncomeAccountId] = useAtom(lastSelectedIncomeAtom)
-  const itemDetail = useItemDetail(item)
+  const itemDetail = useItemDetail(item, date)
 
   const handlePost = async () => {
     const account = accounts?.assets?.find(a => a.account_id === accountId)

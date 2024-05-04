@@ -3,14 +3,16 @@ import { TableCell } from "./ui/table"
 import { useItemDetail } from "@/hooks/use-item-price"
 import { useAtom } from "jotai"
 import { itemHistoricalsByTickerLoadingAtom } from "@/states/ticker-historical.state"
+import { currentDateAtom } from "@/states/date.state"
 
 export const ItemsTableCellEvaluatedProfit = (props: {
   item: TableRowItem
 }) => {
   const { item } = props
   const { ticker } = item
+  const [date] = useAtom(currentDateAtom)
   const [itemHistoricalsByTickerLoading] = useAtom(itemHistoricalsByTickerLoadingAtom)
-  const { evaluatedProfit } = useItemDetail(item)
+  const { evaluatedProfit } = useItemDetail(item, date)
 
   if (ticker && itemHistoricalsByTickerLoading[ticker]) {
     return (

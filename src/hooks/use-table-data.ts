@@ -7,7 +7,7 @@ import dayjs from "dayjs"
 import { useAtom } from "jotai"
 import { sum, unique } from "radash"
 
-export const useTableData = (items: InvestableItem[]): TableRowItem[] => {
+export const useTableRowItems = (items: InvestableItem[]): TableRowItem[] => {
   const [startDate] = useAtom(startDateAtom)
   const [endDate] = useAtom(endDateAtom)
   const [currentDate] = useAtom(currentDateAtom)

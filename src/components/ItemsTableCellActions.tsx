@@ -72,11 +72,13 @@ export const ItemsTableCellActions = (props: {
         >
           📝
         </Button>
-        <ValueChangeTransactionDialog
-          item={item}
-          opened={openedVCTDialog}
-          setOpened={setOpenedVCTDialog}
-        />
+        {openedVCTDialog && (
+          <ValueChangeTransactionDialog
+            item={item}
+            opened={openedVCTDialog}
+            setOpened={setOpenedVCTDialog}
+          />
+        )}
         <Button
           variant="outline"
           size="sm"

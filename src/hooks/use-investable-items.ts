@@ -87,16 +87,16 @@ export const useInvestableItems = (
       // || getTicketByMemos(entries.map(e => e.memo))
       // || getUndefinedTicker(sectionId, accountId, itemName)
 
-      const groupedByDate = group(entries, e => e.entry_date)
+      const groupedByDate = group(entries, e => e.entry_date.split('.')[0])
       const dates = Object.keys(groupedByDate)
+      console.log("🚀 ~ constinvestableItems:InvestableItem[]=useMemo ~ dates:", dates)
 
-      // tradingInfos를 구하자.
+      // 각 종목 별 거래 정보(tradingInfos)를 일자별로 가공.
       const tradingInfos = dates.reduce<DateTradingInfo[]>((acc, date) => {
         const prev = last(acc) || undefined
         const openQty = prev
           ? prev.openQty + sum(prev.buy.map(b => b.qty)) + sum(prev.sell.map(s => s.qty))
           : 0
-
 
         // last written price. 가계부에 기록된 마지막 가격.
         const prevLastWrittenPrice = prev ? prev.lastWrittenPrice : 0

@@ -90,6 +90,7 @@ export const ItemsTableLastRow = (props: {
         <b>{Math.floor(currentEvaluatedTotalPrice).toLocaleString()}</b>원
       </TableCell>
 
+      {/* 현재 평가 손익 */}
       <TableCell className="text-right">
         <span className={`${profit >= 0 ? 'text-green-600' : 'text-red-400'}`}>
           {profit >= 0 ? '+' : '-'} {Math.abs(Math.floor(profit)).toLocaleString()}원

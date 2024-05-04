@@ -23,7 +23,7 @@ export const getMaximumEndDate = (account: Account) => {
     result = account.close_date
   }
 
-  const today = Number(dayjs().format().slice(0, 10).replace(/-/g, ''))
+  const today = Number(dayjs().format('YYYYMMDD'))
   if (result > today) {
     result = today
   }
@@ -87,4 +87,12 @@ export const dateSum = <T extends string | number | Date>(base: T, days: number)
     : typeof base === 'number'
       ? (Number(dayjs(result).format('YYYYMMDD')) as T)
       : (result as T)
+}
+
+/**
+ * 20240303 같은 날짜를 받아서 2024-03-03 형태로 반환
+ */
+export const includeDash = (value: string | number) => {
+  let result = typeof value === 'number' ? String(value) : value
+  return `${result.slice(0, 4)}-${result.slice(4, 6)}-${result.slice(6, 8)}`
 }

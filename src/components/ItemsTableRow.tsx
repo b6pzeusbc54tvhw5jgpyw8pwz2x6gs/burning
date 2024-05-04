@@ -5,7 +5,7 @@ import { useAtom } from 'jotai'
 import { ExternalLink } from 'lucide-react'
 import { stockAssetsAtom } from '@/states/stock-assets.state'
 import { Account } from '@/types/account.type'
-import { formatCurrency, relativeDate } from '@/utils/date.util'
+import { formatCurrency, includeDash, relativeDate } from '@/utils/date.util'
 import { TableRowItem } from '@/types/item.type'
 import { TableCell, TableRow } from './ui/table'
 import { ItemsTableCellTickerPrice } from './ItemsTableCellTickerPrice'
@@ -105,8 +105,8 @@ export const ItemsTableRow = (props: {
         <div>
           <b>{Math.floor(totalPrice).toLocaleString()}</b>원
         </div>
-        <div className='text-gray-400'>
-          {relativeDate(item.lastItemDate, currentDateStr)}
+        <div className='text-gray-400 text-xs'>
+          {includeDash(item.lastItemDate)}
         </div>
       </TableCell>
 

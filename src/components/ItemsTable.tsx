@@ -9,7 +9,7 @@ import { Table, TableBody, TableHead, TableHeader, TableRow } from './ui/table'
 import { ItemsTableRow } from './ItemsTableRow'
 import { ItemsTableLastRow } from './ItemsTableLastRow'
 import { nonTickerEvaluatedPricesAtom } from '@/states/non-ticker-evaluated-price.state'
-import { useTableData } from '@/hooks/use-table-data'
+import { useTableRowItems } from '@/hooks/use-table-data'
 import { useInvestableItems } from '@/hooks/use-investable-items'
 import { useInvestableEntries } from '@/hooks/use-investable-entries'
 
@@ -23,7 +23,7 @@ export const ItemsTable = (props: {
 
   const investableEntries = useInvestableEntries(allAccounts)
   const investableItems = useInvestableItems(investableEntries)
-  const tableData = useTableData(investableItems)
+  const tableData = useTableRowItems(investableItems)
 
   useEffect(() => {
     setGlobalTotalPrice(sum(tableData.map(item => item.totalPrice)))
