@@ -8,7 +8,6 @@ import { globalTotalPriceAtom } from '../states/global-total-price.state'
 import { Table, TableBody, TableHead, TableHeader, TableRow } from './ui/table'
 import { ItemsTableRow } from './ItemsTableRow'
 import { ItemsTableLastRow } from './ItemsTableLastRow'
-import { nonTickerEvaluatedPricesAtom } from '@/states/non-ticker-evaluated-price.state'
 import { useTableRowItems } from '@/hooks/use-table-data'
 import { useInvestableItems } from '@/hooks/use-investable-items'
 import { useInvestableEntries } from '@/hooks/use-investable-entries'
@@ -19,7 +18,6 @@ export const ItemsTable = (props: {
   const { allAccounts } = props
 
   const [, setGlobalTotalPrice] = useAtom(globalTotalPriceAtom)
-  const [nonTickerEvaluatedPrices] = useAtom(nonTickerEvaluatedPricesAtom)
 
   const investableEntries = useInvestableEntries(allAccounts)
   const investableItems = useInvestableItems(investableEntries)

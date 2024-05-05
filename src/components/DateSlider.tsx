@@ -16,10 +16,11 @@ export function DateSlider({ className, ...props }: SliderProps) {
 
   // 0일 때 from. 하루에 1씩 to 까지 증가
   const max = Math.floor((to.getTime() - from.getTime()) / 86_400_000) // 86,400,000은 1d
+  const value = Math.floor((currentDate - from.getTime()) / 86_400_000)
 
   const handleChange = (v: number[]) => {
     const updated = dateSum(from, v[0])
-    setCurrentDate(updated)
+    setCurrentDate(updated.getTime())
   }
 
   return (
@@ -27,6 +28,7 @@ export function DateSlider({ className, ...props }: SliderProps) {
       <div>{dayjs(currentDate).format('YYYY-MM-DD')}</div>
       <Slider
         defaultValue={[max]}
+        value={[value]}
         max={max}
         step={1}
         className={cn("w-[60%]", className)}

@@ -6,10 +6,10 @@ import { TableRowItem } from '@/types/item.type'
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from './ui/table'
 import { Button } from './ui/button'
 import { ChevronRight, RefreshCw } from 'lucide-react'
-import { nonTickerEvaluatedPricesAtom, putNonTickerEvaluatedPricesAtom } from '@/states/non-ticker-evaluated-price.state'
-import { itemHistoricalsByTickerAtom } from '@/states/ticker-historical.state'
+import { itemHistoricalsByTickerAtom, manualTickerItemHistoricalsByTickerAtom, nonTickerItemHistoricalsByTickerAtom } from '@/states/ticker-historical.state'
 import { getTickerPrice } from '@/utils/ticker-price.util'
 import { currentDateAtom } from '@/states/date.state'
+import { isAutoTicker, isManualTicker } from '@/utils/ticker-name.util'
 
 const colors = [
   "md:bg-red-500/30",
@@ -36,9 +36,11 @@ export const ItemsTableLastRow = (props: {
 }) => {
   const { items } = props
   const [date] = useAtom(currentDateAtom)
-  const [nonTickerPrices] = useAtom(nonTickerEvaluatedPricesAtom)
-  nonTickerPrices.find(v => v.evaluatedPrice)
+  // const [nonTickerPrices] = useAtom(nonTickerEvaluatedPricesAtom)
+  // nonTickerPrices.find(v => v.evaluatedPrice)
 
+  const [nonTickerItemHistoricalsByTicker] = useAtom(nonTickerItemHistoricalsByTickerAtom)
+  const [manualTickerItemHistoricalsByTicker] = useAtom(manualTickerItemHistoricalsByTickerAtom)
   const [itemHistoricalsByTicker] = useAtom(itemHistoricalsByTickerAtom)
 
   // Date 기준 가장 최신 가계부에 기록된 평가액.
@@ -48,28 +50,32 @@ export const ItemsTableLastRow = (props: {
 
   const currentEvaluatedTotalPrice = useMemo(() => {
     return items.reduce((acc, item) => {
-      const nonTickerPrice = nonTickerPrices.find(v => (
-        v.sectionId === item.sectionId
-        && v.accountId === item.accountId
-        && v.itemName === item.name
-      ))
-      if (nonTickerPrice) {
-        const evaluatedPrice = nonTickerPrice.evaluatedPrice || item.totalPrice
-        return acc + evaluatedPrice
+      const { ticker } = item
+      if (acc === null || !ticker) {
+        return null
       }
 
-      const tickerPrice = getTickerPrice(date, itemHistoricalsByTicker[item.ticker || ''])
-      if (tickerPrice === undefined) {
-        // tickerPrice가 없으면, 가계부 가격을 그대로 사용.
-        return acc + item.totalPrice
+      const isTickerType = isAutoTicker(ticker) || isManualTicker(ticker)
+      if (isTickerType) {
+        const tickerPrice = isAutoTicker(ticker)
+          ? getTickerPrice(date, itemHistoricalsByTicker[ticker])
+          : getTickerPrice(date, manualTickerItemHistoricalsByTicker[ticker])
+
+        return tickerPrice !== null
+          ? acc + tickerPrice * item.totalQty
+          : null
       }
 
-      const price = item.totalQty * tickerPrice
-      return acc + price
-    }, 0)
-  }, [items, itemHistoricalsByTicker, nonTickerPrices, date])
+      const evaluatedPrice = getTickerPrice(date, nonTickerItemHistoricalsByTicker[ticker])
+      return evaluatedPrice !== null
+        ? acc + evaluatedPrice
+        : null
+    }, 0 as number | null)
+  }, [items, date, itemHistoricalsByTicker, manualTickerItemHistoricalsByTicker, nonTickerItemHistoricalsByTicker])
 
-  const profit = currentEvaluatedTotalPrice - lastWrittenTotalPrice
+  const profit = currentEvaluatedTotalPrice !== null
+    ? currentEvaluatedTotalPrice - lastWrittenTotalPrice
+    : null
 
   return (
     <TableRow className={`py-0`}>
@@ -85,16 +91,26 @@ export const ItemsTableLastRow = (props: {
 
       <TableCell className="text-right"></TableCell>
 
-      {/* 현재 평가액	*/}
+      {/* 현재 평가액 */}
       <TableCell className="text-right">
-        <b>{Math.floor(currentEvaluatedTotalPrice).toLocaleString()}</b>원
+        {currentEvaluatedTotalPrice === null ? (
+          '평가액을 모르는 항목이 있어요'
+        ) : (
+          <>
+            <b>{Math.floor(currentEvaluatedTotalPrice).toLocaleString()}</b>원
+          </>
+        )}
       </TableCell>
 
       {/* 현재 평가 손익 */}
       <TableCell className="text-right">
-        <span className={`${profit >= 0 ? 'text-green-600' : 'text-red-400'}`}>
-          {profit >= 0 ? '+' : '-'} {Math.abs(Math.floor(profit)).toLocaleString()}원
-        </span>
+        {profit !== null ? (
+          <span className={`${profit >= 0 ? 'text-green-600' : 'text-red-400'}`}>
+            {profit >= 0 ? '+' : '-'} {Math.abs(Math.floor(profit)).toLocaleString()}원
+          </span>
+        ) : (
+          <span>-</span>
+        )}
       </TableCell>
 
       <TableCell className="text-right flex gap-1 justify-end">

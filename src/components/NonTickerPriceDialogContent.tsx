@@ -5,12 +5,12 @@ import { TableRowItem } from "@/types/item.type"
 import { useAtom, useSetAtom } from "jotai"
 import { useState } from "react"
 import { currentDateAtom } from "@/states/date.state"
-import { manualTickerItemHistoricalsByTickerAtom, putManualTickerItemHistoricalAtom } from "@/states/ticker-historical.state"
+import { manualTickerItemHistoricalsByTickerAtom, nonTickerItemHistoricalsByTickerAtom, putManualTickerItemHistoricalAtom, putNonTickerItemHistoricalAtom } from "@/states/ticker-historical.state"
 import dayjs from "dayjs"
 import { getTickerPrice } from "@/utils/ticker-price.util"
 
 
-export function ManualTickerPriceDialogContent(props: {
+export function NonTickerPriceDialogContent(props: {
   item: TableRowItem
 }) {
   const { item } = props
@@ -18,9 +18,9 @@ export function ManualTickerPriceDialogContent(props: {
   const [currentDate] = useAtom(currentDateAtom)
   const dateStr = dayjs(currentDate).format('YYYY-MM-DD')
 
-  const [manualTickerItemHistoricalsByTicker] = useAtom(manualTickerItemHistoricalsByTickerAtom)
-  const putManualTickerItemHistorical = useSetAtom(putManualTickerItemHistoricalAtom)
-  const historicals = manualTickerItemHistoricalsByTicker[ticker || '']
+  const [nonTickerItemHistoricalsByTicker] = useAtom(nonTickerItemHistoricalsByTickerAtom)
+  const putNonTickerItemHistorical = useSetAtom(putNonTickerItemHistoricalAtom)
+  const historicals = nonTickerItemHistoricalsByTicker[ticker || '']
 
   const tickerPrice = getTickerPrice(currentDate, historicals)
 
@@ -32,7 +32,7 @@ export function ManualTickerPriceDialogContent(props: {
     const price = Number(manualTickerPrice.replace(/,/g, ''))
     if (isNaN(price)) return
 
-    putManualTickerItemHistorical(ticker, currentDate, price)
+    putNonTickerItemHistorical(ticker, currentDate, price)
   }
 
   return (

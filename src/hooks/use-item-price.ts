@@ -4,7 +4,9 @@ import { itemHistoricalsByTickerAtom, manualTickerItemHistoricalsByTickerAtom, n
 import { getTickerPrice } from "@/utils/ticker-price.util"
 import { isManualTicker, isNonTickerTypeTicker, isUndefinedTicker } from "@/utils/ticker-name.util"
 
-export const useItemDetail = (item: TableRowItem, date: Date) => {
+// TODO: 이거 없애고, useTableRowItems 이런 곳에 녹여야한다.
+export const useItemDetail = (item: TableRowItem, dateOrTimestamp: number | Date) => {
+  const date = typeof dateOrTimestamp === 'number' ? new Date(dateOrTimestamp) : dateOrTimestamp
   const { ticker, totalQty, totalPrice } = item
   const [itemHistoricalsByTicker] = useAtom(itemHistoricalsByTickerAtom)
   const [manualTickerItemHistoricalsByTicker] = useAtom(manualTickerItemHistoricalsByTickerAtom)

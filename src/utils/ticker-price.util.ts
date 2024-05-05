@@ -30,18 +30,21 @@ export const getLastItemDate = (base: string, itemHistoricals?: ItemHistoricalBy
  * 유틸로 보내자
  */
 export const getTickerPrice = (
-  date: Date | string,
+  dateOrTimestamp: Date | number,
   itemHistoricals?: ItemHistoricalByDate
 ) => {
-  const dateStr = typeof date === 'string' ? date : dayjs(date).format('YYYYMMDD')
+  const date = typeof dateOrTimestamp === 'number' ? new Date(dateOrTimestamp) : dateOrTimestamp
+  // const dateStr = typeof date === 'string' ? date : dayjs(date).format('YYYYMMDD')
+  // console.log("🚀 ~ dateStr:", dateStr)
 
   if (!itemHistoricals) {
-    return 0
+    return null
   }
 
+  const dateStr = dayjs(date).format('YYYYMMDD')
   const selectedDate = getLastItemDate(dateStr, itemHistoricals)
   if (!selectedDate) {
-    return 0
+    return null
   }
 
   return itemHistoricals[selectedDate][3]  // Close 가격

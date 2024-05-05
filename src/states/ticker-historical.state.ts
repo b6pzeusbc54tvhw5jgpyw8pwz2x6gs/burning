@@ -2,7 +2,6 @@ import axios from "axios"
 import dayjs from "dayjs"
 import { atom } from "jotai"
 import { atomWithStorage } from "jotai/utils"
-import { getTickerPrice } from "@/utils/ticker-price.util"
 
 type Open = number
 type High = number
@@ -47,18 +46,30 @@ export const manualTickerItemHistoricalsByTickerAtom = atomWithStorage<
   Record<string, Record<string, ItemHistorical>>
 >('manual-ticker-item-historicals-by-ticker', {})
 
-export const putManualTickerItemHistoricalAtom = atom(null, async (get, set, ticker: string, date: Date, price: number) => {
-  const dateStr = dayjs(date).format('YYYYMMDD')
+export const putManualTickerItemHistoricalAtom = atom(null, async (get, set, ticker: string, dateOrTimestamp: Date | number, price: number) => {
+  const dateStr = dayjs(dateOrTimestamp).format('YYYYMMDD')
 
   set(manualTickerItemHistoricalsByTickerAtom, prev => {
-    const open = getTickerPrice(date, prev[ticker])
 
     return {
       ...prev,
       [ticker]: {
         ...prev[ticker],
-        [dateStr]: [open, price, price, price, price, 0],
+        [dateStr]: [price, price, price, price, price, 0],
       },
+    }
+  })
+})
+
+export const deleteManualTickerItemHistoricalAtom = atom(null, async (get, set, ticker: string, dateOrTimestamp: Date | number) => {
+  const dateStr = dayjs(dateOrTimestamp).format('YYYYMMDD')
+
+  set(manualTickerItemHistoricalsByTickerAtom, prev => {
+    const newHistoricals = { ...prev[ticker] }
+    delete newHistoricals[dateStr]
+    return {
+      ...prev,
+      [ticker]: newHistoricals,
     }
   })
 })
@@ -71,18 +82,30 @@ export const nonTickerItemHistoricalsByTickerAtom = atomWithStorage<
   Record<string, Record<string, ItemHistorical>>
 >('non-ticker-item-historicals-by-ticker', {})
 
-export const putFundTypeItemHistoricalAtom = atom(null, async (get, set, ticker: string, date: Date, price: number) => {
-  const dateStr = dayjs(date).format('YYYYMMDD')
+export const putNonTickerItemHistoricalAtom = atom(null, async (get, set, ticker: string, dateOrTimestamp: Date | number, price: number) => {
+  const dateStr = dayjs(dateOrTimestamp).format('YYYYMMDD')
 
-  set(manualTickerItemHistoricalsByTickerAtom, prev => {
-    const open = getTickerPrice(date, prev[ticker])
-
+  set(nonTickerItemHistoricalsByTickerAtom, prev => {
     return {
       ...prev,
       [ticker]: {
         ...prev[ticker],
-        [dateStr]: [open, price, price, price, price, 0],
+        // ticker price와 같은 타입을 쓸 이유가 없음. number[]가 아닌 number 타입이면 족함.
+        [dateStr]: [price, price, price, price, price, 0],
       },
+    }
+  })
+})
+
+export const deleteNonTickerItemHistoricalAtom = atom(null, async (get, set, ticker: string, dateOrTimestamp: Date | number) => {
+  const dateStr = dayjs(dateOrTimestamp).format('YYYYMMDD')
+
+  set(nonTickerItemHistoricalsByTickerAtom, prev => {
+    const newHistoricals = { ...prev[ticker] }
+    delete newHistoricals[dateStr]
+    return {
+      ...prev,
+      [ticker]: newHistoricals,
     }
   })
 })

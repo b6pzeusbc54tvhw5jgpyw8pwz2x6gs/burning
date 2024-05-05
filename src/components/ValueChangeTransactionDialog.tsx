@@ -1,22 +1,20 @@
-import { useAccounts, usePostEntry } from "@/data/hooks"
+import { useMemo, useState } from "react"
+import { useAtom, useSetAtom } from "jotai"
+import dayjs from "dayjs"
+import { Loader2 } from "lucide-react"
 import { toast } from "react-toastify"
+import { useAccounts, usePostEntry } from "@/data/hooks"
 import { Button } from "./ui/button"
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
 import { Input } from "./ui/input"
 import { Textarea } from "./ui/textarea"
 import { TableRowItem } from "@/types/item.type"
-import { today } from "@/utils/date.util"
-import { useAtom, useSetAtom } from "jotai"
 import { CommandForSelect } from "./CommandForSelect"
-import { useMemo, useState } from "react"
 import { useErrorToast } from "@/hooks/use-error-toast"
 import { fetchEntriesByAccountAtom, removeAccountEntriesAtom } from "@/states/acount-entries.state"
-import { Loader2 } from "lucide-react"
 import { lastSelectedIncomeAtom } from "@/states/last-selected-income.state"
-import { nonTickerEvaluatedPricesAtom } from "@/states/non-ticker-evaluated-price.state"
 import { useItemDetail } from "@/hooks/use-item-price"
 import { currentDateAtom } from "@/states/date.state"
-import dayjs from "dayjs"
 
 export function ValueChangeTransactionDialog(props: {
   opened: boolean
@@ -36,10 +34,6 @@ export function ValueChangeTransactionDialog(props: {
 
   const [date] = useAtom(currentDateAtom)
   const { isPending, mutateAsync: postEntry, error } = usePostEntry()
-  // 팝업열 때 +1 일 날짜가 들어있는게 문제
-  // 팝업열 때 +1 일 날짜가 들어있는게 문제
-  // 팝업열 때 +1 일 날짜가 들어있는게 문제
-  // 팝업열 때 +1 일 날짜가 들어있는게 문제
   const [entryDate, setEntryDate] = useState(() => Number(dayjs(date).format('YYYYMMDD')))
 
   const getAccountName = (accountId: string | null, type: 'assets' | 'income') => {

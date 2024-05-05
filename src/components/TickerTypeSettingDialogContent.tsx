@@ -7,7 +7,6 @@ import { removeTickerPriceAtom } from "@/states/ticker-price.state"
 import { useState } from "react"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { putNonTickerEvaluatedPricesAtom } from "@/states/non-ticker-evaluated-price.state"
 import { toast } from "react-toastify"
 import { currentDateAtom } from "@/states/date.state"
 import { putManualTickerItemHistoricalAtom } from "@/states/ticker-historical.state"
@@ -30,7 +29,7 @@ export function TickerTypeSettingDialogContent(props: {
   const [manualTickerPrice, setManualTickerPrice] = useState(() => Math.floor(totalPrice / totalQty))
   // const putTickerPrice = useSetAtom(putTickerPriceAtom)
   const removeTickerPrice = useSetAtom(removeTickerPriceAtom)
-  const putNonTickerEvaluatedPrice = useSetAtom(putNonTickerEvaluatedPricesAtom)
+  // const putNonTickerEvaluatedPrice = useSetAtom(putNonTickerEvaluatedPricesAtom)
   const putManualTickerItemHistorical = useSetAtom(putManualTickerItemHistoricalAtom)
   const [currentDate] = useAtom(currentDateAtom)
 

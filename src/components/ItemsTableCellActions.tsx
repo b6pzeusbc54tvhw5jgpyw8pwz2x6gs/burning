@@ -6,7 +6,6 @@ import { TableCell } from "./ui/table"
 import { Button } from "./ui/button"
 import { Eraser, RefreshCw } from "lucide-react"
 import { ValueChangeTransactionDialog } from "./ValueChangeTransactionDialog"
-import { removeNonTickerEvaluatedPriceAtom } from "@/states/non-ticker-evaluated-price.state"
 import { useItemDetail } from "@/hooks/use-item-price"
 import { toast } from "react-toastify"
 import { currentDateAtom } from "@/states/date.state"
@@ -20,7 +19,6 @@ export const ItemsTableCellActions = (props: {
   const [openedVCTDialog, setOpenedVCTDialog] = useState(false)
 
   const removeTickerPrice = useSetAtom(removeTickerPriceAtom)
-  const removeNonTickerEvaluatedPrice = useSetAtom(removeNonTickerEvaluatedPriceAtom)
 
   const removeTickerName = useSetAtom(removeTickerNameAtom)
 

@@ -52,8 +52,11 @@ export const ItemsTableRow = (props: {
   const idx = stockAssets.findIndex(sa => sa.account.account_id === accountId)
   // const { nonTickerType } = useItemDetail(item)
 
-  const [currentDate] = useAtom(currentDateAtom)
-  const currentDateStr = dayjs(currentDate).format('YYYY-MM-DD')
+  const [date] = useAtom(currentDateAtom)
+  const { evaluatedPrice } = useItemDetail(item, date)
+  if (evaluatedPrice === 0 && item.totalPrice === 0) {
+    return null
+  }
 
   return (
     <TableRow className={`${colors[idx]} py-0`}>
@@ -115,7 +118,7 @@ export const ItemsTableRow = (props: {
         item={item}
       />
 
-      {/* 현재 평가 액 */}
+      {/* 현재 평가액 */}
       <ItemsTableCellEvaluatedTotalPrice
         item={item}
       />

@@ -1,5 +1,6 @@
 import { atom } from 'jotai'
 import { dateSum } from '@/utils/date.util'
+import { atomWithStorage } from 'jotai/utils'
 
 const initial = new Date()
 
@@ -14,7 +15,7 @@ initial.setHours(0, 0, 0, 0)
 // console.log("🚀 ~ from:", from)
 // 🚀 ~ from: Wed May 01 2024 00:00:00 GMT+0900 (Korean Standard Time)
 
-export const startDateAtom = atom<Date>(dateSum(initial, -60))
+export const startDateAtom = atom<Date>(dateSum(initial, -180))
 export const endDateAtom = atom<Date>(initial)
 
-export const currentDateAtom = atom<Date>(initial)
+export const currentDateAtom = atomWithStorage<number>('current-date', initial.getTime())

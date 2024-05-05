@@ -1,11 +1,7 @@
-import { currentDateAtom, endDateAtom, startDateAtom } from "@/states/date.state"
-import { ItemHistoricalByDate, itemHistoricalsByTickerAtom } from "@/states/ticker-historical.state"
-import { DateTradingInfo, InvestableItem, TableRowItem } from "@/types/item.type"
-import { dateSum } from "@/utils/date.util"
-import { getLastItemDate, getTickerPrice } from "@/utils/ticker-price.util"
 import dayjs from "dayjs"
 import { useAtom } from "jotai"
-import { sum, unique } from "radash"
+import { currentDateAtom, endDateAtom, startDateAtom } from "@/states/date.state"
+import { InvestableItem, TableRowItem } from "@/types/item.type"
 
 export const useTableRowItems = (items: InvestableItem[]): TableRowItem[] => {
   const [startDate] = useAtom(startDateAtom)
@@ -15,8 +11,6 @@ export const useTableRowItems = (items: InvestableItem[]): TableRowItem[] => {
   const from = dayjs(startDate).format('YYYYMMDD')
   const to = dayjs(endDate).format('YYYYMMDD')
   const date = dayjs(currentDate).format('YYYYMMDD')
-
-  const [itemHistoricalsByTicker] = useAtom(itemHistoricalsByTickerAtom)
 
   // 가장 가까운 날짜의 거래 정보를 가져옴.
   const tableRows: TableRowItem[] = items
@@ -37,13 +31,6 @@ export const useTableRowItems = (items: InvestableItem[]): TableRowItem[] => {
       const totalQty = tradingInfo.openQty
         + tradingInfo.buy.reduce((acc, cur) => acc + cur.qty, 0)
         + tradingInfo.sell.reduce((acc, cur) => acc + cur.qty, 0)
-
-      const perAccount = tradingInfo.openQtyPerAccount
-
-      const itemHistoricals = itemHistoricalsByTicker[item.ticker || '']
-      const tickerPrice = getTickerPrice(date, itemHistoricals)
-
-      const lastItemDate = getLastItemDate(date, itemHistoricals)
 
       return {
         sectionId: item.sectionId,
