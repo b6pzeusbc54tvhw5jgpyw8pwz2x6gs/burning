@@ -43,7 +43,8 @@ export const useInvestableEntries = (
       }
 
       // 투자 자산 목록은 지금은 모두 "거래처(client)" 타입.
-      if (allAccounts.assets?.find(a => a.account_id === accountId)?.category !== 'client') {
+      const category = allAccounts.assets?.find(a => a.account_id === accountId)?.category
+      if (category !== 'client' && category !== 'normal') {
         return acc
       }
 

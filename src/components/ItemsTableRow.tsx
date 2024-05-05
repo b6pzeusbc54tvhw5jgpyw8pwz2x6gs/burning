@@ -55,11 +55,9 @@ export const ItemsTableRow = (props: {
 
   const [date] = useAtom(currentDateAtom)
   const { evaluatedPrice } = useItemDetail(item, date)
-
   const [externalWalletItems] = useAtom(externalWalletItemsAtom)
 
-
-  if (evaluatedPrice === 0 && item.totalPrice === 0) {
+  if (ticker && evaluatedPrice === 0 && item.totalPrice === 0) {
     return null
   }
 
