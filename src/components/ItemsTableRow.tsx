@@ -16,6 +16,7 @@ import { useItemDetail } from '@/hooks/use-item-price'
 import { currentDateAtom } from '@/states/date.state'
 import dayjs from 'dayjs'
 import { isAutoTicker, isManualTicker } from '@/utils/ticker-name.util'
+import { externalWalletItemsAtom } from '@/states/ticker-name.state'
 
 const colors = [
   "bg-amber-500/30",
@@ -54,6 +55,10 @@ export const ItemsTableRow = (props: {
 
   const [date] = useAtom(currentDateAtom)
   const { evaluatedPrice } = useItemDetail(item, date)
+
+  const [externalWalletItems] = useAtom(externalWalletItemsAtom)
+
+
   if (evaluatedPrice === 0 && item.totalPrice === 0) {
     return null
   }
@@ -79,7 +84,7 @@ export const ItemsTableRow = (props: {
 
       {/* 계좌 별 수량 */}
       <TableCell className='text-right'>
-        {(isAutoTicker(ticker) || isManualTicker(ticker)) ? (
+        {(!externalWalletItems.includes(ticker || '') && (isAutoTicker(ticker) || isManualTicker(ticker))) ? (
           <>
             {Object.keys(perAccount).map(from => (
               <div key={from}>

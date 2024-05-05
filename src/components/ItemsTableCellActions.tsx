@@ -8,7 +8,8 @@ import { ValueChangeTransactionDialog } from "./ValueChangeTransactionDialog"
 import { useItemDetail } from "@/hooks/use-item-price"
 import { toast } from "react-toastify"
 import { currentDateAtom } from "@/states/date.state"
-import { removeTickerNameAtom } from "@/states/ticker-name.state"
+import { removeTickerNameAtom, toggleExternalWalletItemAtom } from "@/states/ticker-name.state"
+import { EmojiButton } from "./EmojiButton"
 
 export const ItemsTableCellActions = (props: {
   item: TableRowItem
@@ -26,6 +27,7 @@ export const ItemsTableCellActions = (props: {
 
   const [date] = useAtom(currentDateAtom)
   const { evaluatedProfit } = useItemDetail(item, date)
+  const toggleExternalWalletItem = useSetAtom(toggleExternalWalletItemAtom)
 
   const handleOpenVCTDialog = () => {
     if (evaluatedProfit !== null && evaluatedProfit < 1 && evaluatedProfit > -1) {
@@ -73,6 +75,10 @@ export const ItemsTableCellActions = (props: {
             onClick={() => handleReset()}
           />
         </Button>
+        <EmojiButton
+          onClick={() => item.ticker ? toggleExternalWalletItem(item.ticker) : undefined}
+          emoji="🧾"
+        />
       </div>
     </TableCell>
   )
