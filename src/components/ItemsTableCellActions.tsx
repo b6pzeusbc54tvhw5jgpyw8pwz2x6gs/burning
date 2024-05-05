@@ -1,6 +1,5 @@
 import { useAtom, useSetAtom } from "jotai"
 import { useState } from 'react'
-import { removeTickerPriceAtom, } from "../states/ticker-price.state"
 import { TableRowItem } from "../types/item.type"
 import { TableCell } from "./ui/table"
 import { Button } from "./ui/button"
@@ -18,36 +17,24 @@ export const ItemsTableCellActions = (props: {
   const { ticker } = item
   const [openedVCTDialog, setOpenedVCTDialog] = useState(false)
 
-  const removeTickerPrice = useSetAtom(removeTickerPriceAtom)
-
   const removeTickerName = useSetAtom(removeTickerNameAtom)
 
   const handleReset = () => {
-    // if (ticker) {
-    //   removeTickerPrice(ticker)
-    // }
-    // removeNonTickerEvaluatedPrice(item)
-
     const itemKey = `${item.sectionId}-${item.accountId}-${item.name}`
     removeTickerName(itemKey)
   }
 
   const [date] = useAtom(currentDateAtom)
   const { evaluatedProfit } = useItemDetail(item, date)
+
   const handleOpenVCTDialog = () => {
-    if (evaluatedProfit < 1 && evaluatedProfit > -1) {
+    if (evaluatedProfit !== null && evaluatedProfit < 1 && evaluatedProfit > -1) {
       toast.warn('손익이 1원 미만입니다')
       return
     }
 
     setOpenedVCTDialog(true)
   }
-
-  // useEffect(() => {
-  //   if (!ticker || !data) return
-
-  //   putTickerPrice(ticker, data, 'yahoo')
-  // }, [putTickerPrice, ticker, data])
 
   return (
     <TableCell className="text-right">

@@ -2,7 +2,7 @@ import { useAtom } from "jotai"
 import { TableRowItem } from "@/types/item.type"
 import { itemHistoricalsByTickerAtom, manualTickerItemHistoricalsByTickerAtom, nonTickerItemHistoricalsByTickerAtom } from "@/states/ticker-historical.state"
 import { getTickerPrice } from "@/utils/ticker-price.util"
-import { isManualTicker, isNonTickerTypeTicker, isUndefinedTicker } from "@/utils/ticker-name.util"
+import { isAutoTicker, isManualTicker, isNonTickerTypeTicker, isUndefinedTicker } from "@/utils/ticker-name.util"
 
 // TODO: 이거 없애고, useTableRowItems 이런 곳에 녹여야한다.
 export const useItemDetail = (item: TableRowItem, dateOrTimestamp: number | Date) => {
@@ -26,8 +26,22 @@ export const useItemDetail = (item: TableRowItem, dateOrTimestamp: number | Date
         : itemHistoricalsByTicker[ticker]
 
   const tickerPrice = getTickerPrice(date, itemHistoricals)
-  const evaluatedPrice = tickerPrice ? tickerPrice * totalQty : totalPrice
+  if (tickerPrice === null) {
+    return {
+      tickerPrice: null,
+      evaluatedPrice: null,
+      evaluatedProfit: null,
+    }
+  }
+
+  const isTickerType = isAutoTicker(ticker) || isManualTicker(ticker)
+
+  const evaluatedPrice = isTickerType
+    ? tickerPrice * totalQty
+    : tickerPrice
+
   const evaluatedProfit = evaluatedPrice - totalPrice
+
   return {
     tickerPrice,
     evaluatedPrice,

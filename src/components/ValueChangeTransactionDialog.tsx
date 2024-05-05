@@ -61,6 +61,10 @@ export function ValueChangeTransactionDialog(props: {
       return
     }
 
+    if (itemDetail.evaluatedProfit === null) {
+      toast.error('가격 정보를 찾을 수 없습니다')
+      return
+    }
 
     await postEntry({
       item: name,
@@ -136,7 +140,7 @@ export function ValueChangeTransactionDialog(props: {
           <Input
             className="basis-2/12 px-1 h-8 mt-1 text-right"
             disabled
-            value={itemDetail.evaluatedProfit.toLocaleString()}
+            value={itemDetail.evaluatedProfit ? itemDetail.evaluatedProfit.toLocaleString() : '가격 정보를 찾을 수 없습니다'}
           />
 
           {/* 왼쪽 */}

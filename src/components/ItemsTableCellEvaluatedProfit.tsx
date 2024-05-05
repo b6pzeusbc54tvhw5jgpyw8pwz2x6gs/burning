@@ -20,6 +20,14 @@ export const ItemsTableCellEvaluatedProfit = (props: {
     )
   }
 
+  if (evaluatedProfit === null) {
+    return (
+      <TableCell className="text-right">
+        가격 정보가 없습니다
+      </TableCell>
+    )
+  }
+
   return (
     <TableCell className="text-right">
       <span className={`${evaluatedProfit >= 0 ? 'text-green-600' : 'text-red-400'}`}>

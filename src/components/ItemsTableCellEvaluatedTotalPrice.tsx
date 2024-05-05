@@ -54,11 +54,11 @@ export const ItemsTableCellEvaluatedTotalPrice = (props: {
       : isNonTickerTypeTicker(ticker) ? nonTickerItemHistoricalsByTicker[ticker]
         : null
 
-  if (!itemHistoricals) {
-    return (
-      <TableCell className="text-right animate-pulse">가격 정보 필요</TableCell>
-    )
-  }
+  // if (!itemHistoricals) {
+  //   return (
+  //     <TableCell className="text-right animate-pulse">가격 정보 필요</TableCell>
+  //   )
+  // }
 
   if (!isTickerType) {
     return (
@@ -79,11 +79,11 @@ export const ItemsTableCellEvaluatedTotalPrice = (props: {
               <span>원</span>
             </>
           ) : (
-            <span>가격 입력 필요x</span>
+            <span>가격 입력 필요</span>
           )}
         </div>
 
-        {isManualTicker(ticker) && (
+        {isNonTickerTypeTicker(ticker) && (
           <div className="flex justify-end gap-1 mt-1">
             <Dialog>
               <DialogTrigger asChild>
