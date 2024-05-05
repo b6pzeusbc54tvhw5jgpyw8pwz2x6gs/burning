@@ -8,7 +8,7 @@ import { globalTotalPriceAtom } from '../states/global-total-price.state'
 import { Table, TableBody, TableHead, TableHeader, TableRow } from './ui/table'
 import { ItemsTableRow } from './ItemsTableRow'
 import { ItemsTableLastRow } from './ItemsTableLastRow'
-import { useTableRowItems } from '@/hooks/use-table-data'
+import { useTableRowItems } from '@/hooks/use-table-row-items'
 import { useInvestableItems } from '@/hooks/use-investable-items'
 import { useInvestableEntries } from '@/hooks/use-investable-entries'
 
@@ -21,11 +21,11 @@ export const ItemsTable = (props: {
 
   const investableEntries = useInvestableEntries(allAccounts)
   const investableItems = useInvestableItems(investableEntries)
-  const tableData = useTableRowItems(investableItems)
+  const tableRowItems = useTableRowItems(investableItems)
 
   useEffect(() => {
-    setGlobalTotalPrice(sum(tableData.map(item => item.totalPrice)))
-  }, [tableData, setGlobalTotalPrice])
+    setGlobalTotalPrice(sum(tableRowItems.map(item => item.totalPrice)))
+  }, [tableRowItems, setGlobalTotalPrice])
 
   // const getRowSpan = (idx: number) => {
   //   // 다음 항목들이 몇개나 동일한 accountId를 사용하는지 반환.
@@ -55,7 +55,7 @@ export const ItemsTable = (props: {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {tableData.map(item => (
+        {tableRowItems.map(item => (
           <ItemsTableRow
             accounts={allAccounts}
             key={item.sectionId + '-' + item.accountId + '-' + item.name}
@@ -63,7 +63,7 @@ export const ItemsTable = (props: {
           />
         ))}
 
-        <ItemsTableLastRow items={tableData} />
+        <ItemsTableLastRow items={tableRowItems} />
       </TableBody>
     </Table>
 
