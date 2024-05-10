@@ -107,7 +107,7 @@ export const ItemsTableCellEvaluatedTotalPrice = (props: {
   return (
     <TableCell className="text-right">
       {tickerPrice !== null ? (
-        <><b>{(Math.floor(evaluatedPrice)).toLocaleString()}</b>원</>
+        <><b>{evaluatedPrice ? (Math.floor(evaluatedPrice)).toLocaleString() : '-'}</b>원</>
       ) : (
         <div>
           {isManualTicker(ticker) ? '1주 당 가격 입력 필요' : 'Ticker 정보 로드 실패'}
