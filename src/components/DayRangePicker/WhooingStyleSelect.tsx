@@ -33,8 +33,8 @@ export const WhooingStyleSelect = (props: {
       onMouseLeave={() => setOpen(false)}
     >
       <div
-        className={cn("w-[92px] relative text-xs py-3 text-center bg-[#28282A]",
-          value && "bg-black"
+        className={cn("w-[92px] relative text-xs py-3 text-center bg-card",
+          value && "bg-background"
         )}
       >
         {value ? value : title}
@@ -42,12 +42,15 @@ export const WhooingStyleSelect = (props: {
       {open && (
         <div
           className="absolute w-[92px] z-10 max-h-48 overflow-y-scroll mt-[1px]"
-          style={{ display: open ? "block" : "none" }}
+          style={{
+            display: open ? "block" : "none",
+            boxShadow: '0 1px 6px 1px rgba(0,0,0,.78)',
+          }}
         >
           {options.map(option => (
             <div
               className={cn(
-                "w-full border-b-2 border-[#4A4A4A] bg-[#28282A] text-center py-2 text-xs cursor-pointer",
+                "w-full border-b-2 border-border bg-card text-center py-2 text-xs cursor-pointer",
                 option === value && "border-l-2 border-l-orange-500",
                 option === now && "text-red-500",
               )}

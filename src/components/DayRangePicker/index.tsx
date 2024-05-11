@@ -5,7 +5,7 @@ import dayjs from "dayjs"
 import { useAtom } from "jotai"
 import { endDateAtom, startDateAtom } from "@/states/date.state"
 import { DayPicker } from "./DayPicker"
-import { WhooingStyleSelect } from "./ShortcutSelects"
+import { WhooingStyleSelect } from "./WhooingStyleSelect"
 import { useState } from "react"
 
 const nowYear = dayjs().format('YYYY')

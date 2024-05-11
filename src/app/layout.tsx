@@ -2,11 +2,11 @@ import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import Providers from "@/lib/query-provider"
 import { GlobalNav } from "@/components/GlobalNav"
-import { Theme } from '@radix-ui/themes'
 import "./globals.css"
 import { ThemeProvider } from "../lib/theme-provider"
 import { ToastContainer } from 'react-toastify'
 import "react-toastify/dist/ReactToastify.css"
+import { cn } from "@/lib/utils"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -22,7 +22,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
+      <body className={cn(inter.className, "")} >
         <Providers>
           <ThemeProvider
             attribute="class"
@@ -30,15 +30,15 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <Theme appearance="light">
-              <div className="flex min-h-screen w-full flex-col">
-                <GlobalNav />
-                <div className="flex p-2 lg:py-6 lg:px-12 min-h-64">
-                  {children}
-                </div>
-                <ToastContainer />
+            {/* <Theme appearance="light"> */}
+            <div className="flex min-h-screen w-full flex-col">
+              <GlobalNav />
+              <div className="flex p-2 lg:py-6 lg:px-12 min-h-64">
+                {children}
               </div>
-            </Theme>
+              <ToastContainer />
+            </div>
+            {/* </Theme> */}
           </ThemeProvider>
         </Providers>
       </body>
