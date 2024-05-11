@@ -51,7 +51,7 @@ export const WhooingStyleSelect = (props: {
             <div
               className={cn(
                 "w-full border-b-2 border-border bg-card text-center py-2 text-xs cursor-pointer",
-                option === value && "border-l-2 border-l-orange-500",
+                option === value && "border-l-2 border-l-accent-foreground",
                 option === now && "text-red-500",
               )}
               ref={isCenter(option) ? selectedRef : null}
