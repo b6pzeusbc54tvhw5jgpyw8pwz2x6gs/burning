@@ -1,10 +1,11 @@
+import { useAtom } from 'jotai'
 import { getAllAccounts } from '@/server/actions/whooing'
 import { StockAssets } from '@/components/StockAssets'
 import { ItemsTable } from '@/components/ItemsTable'
 import { GlobalTotalPrice } from '@/components/GlobalTotalPrice'
 import { SubTitleAndDescription } from '@/components/SubTitleAndDescription'
-import { DateRangePicker } from '@/components/DateRangePicker'
 import { DateSlider } from '@/components/DateSlider'
+import { DayRangePicker } from '@/components/DayRangePicker'
 
 export default async function Home({ params }: {
   params: {
@@ -23,7 +24,7 @@ export default async function Home({ params }: {
 
       <StockAssets sectionId={sectionId} />
 
-      <DateRangePicker />
+      <DayRangePicker />
       <DateSlider />
 
       <div className="mt-12 mb-2 text-xl font-semibold">
