@@ -17,8 +17,10 @@ export default async function Home({ params }: {
   const accounts = await getAllAccounts(sectionId)
 
   return (
-    <div className='flex flex-col gap-6'>
-      <GridCard>
+    <div className='flex flex-col gap-6 w-full'>
+      <GridCard
+        className='flex-col'
+      >
         <SubTitleAndDescription
           title={`투자 자산 목록`}
           description={`주식, ETF, 예금, 적금, RP, 개별 채권 등 투자 자산이 담긴 자산을 선택하세요.`}
@@ -26,7 +28,9 @@ export default async function Home({ params }: {
         <StockAssets sectionId={sectionId} />
       </GridCard>
 
-      <GridCard>
+      <GridCard
+        className='flex-col'
+      >
         <DayRangePicker />
         <DateSlider />
       </GridCard>
