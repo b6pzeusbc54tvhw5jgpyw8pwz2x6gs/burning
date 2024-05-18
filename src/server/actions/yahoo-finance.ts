@@ -70,7 +70,7 @@ type ItemHistoricalByDate = Record<string, [number, number, number, number, numb
  * @param to ex: 2022-01-31
  * @returns
  */
-export const listTickerPricesByRange = async (ticker: string, from: string, to: string) => {
+export const listTickerPricesByRange = async (ticker: string, from: string, to: string, convertTo?: 'KRW') => {
   const result = await yahooFinance.historical(ticker, {
     period1: from,
     period2: dateSum(to, 1),
@@ -79,9 +79,9 @@ export const listTickerPricesByRange = async (ticker: string, from: string, to: 
 
   const summary = await yahooFinance.quoteSummary(ticker, { modules: ['price'] })
   // 환율
-  const rate = summary.price!.currency === 'KRW'
-    ? 1
-    : await getRateToKRW(summary.price!.currency!)
+  const rate = convertTo && summary.price!.currency !== convertTo
+    ? await getRateToKRW(summary.price!.currency!)
+    : 1
 
   const itemHistoricalByDate = result.reduce<ItemHistoricalByDate>((acc, cur) => {
     const date = cur.date.toISOString().split('T')[0].replace(/-/g, '')
