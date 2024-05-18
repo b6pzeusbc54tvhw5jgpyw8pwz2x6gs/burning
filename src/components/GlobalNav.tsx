@@ -23,7 +23,7 @@ export function GlobalNav() {
             onMouseLeave={() => setMouseOn(false)}
           >
             {mouseOn ? '🏠 버닝' : '🔥 버닝'}
-          </Link> - 후잉 연동 자산 관리 시스템
+          </Link> - 후잉 연동 투자 자산 관리 시스템
         </div>
 
         <div className="flex justify-end gap-x-2">

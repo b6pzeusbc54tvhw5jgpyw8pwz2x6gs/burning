@@ -11,8 +11,8 @@ import { cn } from "@/lib/utils"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "버닝 - 후잉 연동 자산 관리 시스템",
-  description: "후잉 가계부 데이터를 활용한 자산 관리 시스템",
+  title: "버닝 - 후잉 연동 투자 자산 관리 시스템",
+  description: "후잉 가계부 데이터를 활용하여 투자 자산을 더 잘 관리하게 도와주는 시스템입니다.",
 }
 
 export default function RootLayout({

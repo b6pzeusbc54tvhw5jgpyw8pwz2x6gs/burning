@@ -1,5 +1,6 @@
-# Whooing stock manager
-Whooing 가계부 연동 투자 자산 관리 서비스
+# Burning
+버닝은 후잉 연동 투자 자산 관리 시스템입니다.
+후잉 가계부 데이터를 활용하여 투자 자산을 더 잘 관리하게 도와주는 웹 서비스입니다.
 
 ## Getting Started
 
