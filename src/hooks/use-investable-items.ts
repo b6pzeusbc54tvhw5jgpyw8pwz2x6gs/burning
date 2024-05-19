@@ -65,11 +65,16 @@ export const useInvestableItems = (
   const entriesByItemName: Record<string, Entry[]> = useMemo(() => {
     return keys.reduce((acc, key) => {
       const entries = investableEntries[key]
-      const [, assetCategory] = key.split('-')
+      const [assetType, assetCategory] = key.split('-')
       if (assetCategory === 'normal' || assetCategory === 'floating') {
         // client 카테고리가 아니면 아이템별 나눌 필요가 없음.
         // itemName을 key로 포함하지 않고, accountId 까지만 key로 사용.
-        return { ...acc, [key]: entries }
+
+        return assetType === 'money'
+          // 자산군 컬럼에 '현금성 자산'이, 투자 자산 컬럼에 '{accountName}' 이 들어감.
+          ? { ...acc, [key]: entries }
+          // 자산군 컬럼에 {accountName}이, 투자 자산 컬럼에 '.' 이 들어감.
+          : { ...acc, [`${key}-.`]: entries }
       }
 
       return {
@@ -155,7 +160,7 @@ export const useInvestableItems = (
       return {
         sectionId,
         accountId,
-        assetType,  // 미국주식, 한국주식, 현금성 자산 등
+        assetType: assetType as 'money' | 'stock',
         assetCategory,  // normal, client
         ticker,
         itemName,

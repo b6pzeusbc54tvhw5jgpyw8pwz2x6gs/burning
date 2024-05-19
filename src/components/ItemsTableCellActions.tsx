@@ -15,12 +15,14 @@ export const ItemsTableCellActions = (props: {
 }) => {
   const { item } = props
   const { ticker, evaluatedProfit } = item
+  const { assetType, assetCategory, sectionId, accountId, name } = item
   const [openedVCTDialog, setOpenedVCTDialog] = useState(false)
 
   const removeTickerName = useSetAtom(removeTickerNameAtom)
 
+  const itemKey = `${assetType}-${assetCategory}-${sectionId}-${accountId}-${name}`
+
   const handleReset = () => {
-    const itemKey = `${item.sectionId}-${item.accountId}-${item.name}`
     removeTickerName(itemKey)
   }
 
