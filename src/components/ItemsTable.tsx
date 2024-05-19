@@ -15,9 +15,10 @@ import { PieChart } from '@/components/PieChart'
 import { GridCard } from '@/layouts/GridCard'
 
 export const ItemsTable = (props: {
+  sectionId: string
   allAccounts: AllAccounts
 }) => {
-  const { allAccounts } = props
+  const { allAccounts, sectionId } = props
 
   const [, setGlobalTotalPrice] = useAtom(globalTotalPriceAtom)
 
@@ -48,6 +49,7 @@ export const ItemsTable = (props: {
         className='flex-col'
       >
         <PieChart
+          sectionId={sectionId}
           tableRowItems={tableRowItems}
         />
       </GridCard>

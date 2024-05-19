@@ -1,20 +1,52 @@
+import { useAccounts } from '@/data/hooks'
 import { TableRowItem } from '@/types/item.type'
 import * as d3 from 'd3'
 import { useEffect, useMemo, useRef } from 'react'
 
 export const PieChart = (props: {
+  sectionId: string
   tableRowItems: TableRowItem[]
 }) => {
-  const { tableRowItems } = props
+  const { tableRowItems, sectionId } = props
   const ref = useRef<SVGSVGElement>(null)
 
+  const { data: accounts } = useAccounts(sectionId)
+
   const data = useMemo(() => {
+    if (tableRowItems.some(item => item.evaluatedPrice === null)) {
+      return null
+    }
+
     const totalPrice = tableRowItems.reduce((acc, item) => acc + item.totalPrice, 0)
-    return tableRowItems.map(item => ({
-      value: ((item.totalPrice / totalPrice)*100).toFixed(2),
-      label: item.name,
+    const totalPricePerAccount = tableRowItems.reduce<{ value: number, label: string }[]>((acc, item) => {
+      const account = accounts?.assets?.find(a => a.account_id === item.accountId)
+      if (!account) return acc
+
+      const idx = acc.findIndex(a => a.label === account.title)
+      if (idx === -1) {
+        return [
+          ...acc,
+          { value: item.totalPrice, label: account.title }
+        ]
+      }
+
+      const found = acc[idx]
+      if (!found?.value) {
+        console.log(found)
+      }
+      return [
+        ...acc.slice(0, idx),
+        { ...found, value: found.value + item.totalPrice },
+        ...acc.slice(idx + 1),
+      ]
+    }, [] as { value: number, label: string }[])
+
+    return totalPricePerAccount.map(item => ({
+      ...item,
+      value: (item.value / totalPrice * 100).toFixed(2),
     }))
-  }, [tableRowItems])
+
+  }, [tableRowItems, accounts])
 
   useEffect(() => {
     if (!ref.current) return
@@ -112,6 +144,10 @@ export const PieChart = (props: {
       svg.remove()
     }
   }, [data])
+
+  if (!data) {
+    return null
+  }
 
   return (
     <div className='flex justify-center w-full'>

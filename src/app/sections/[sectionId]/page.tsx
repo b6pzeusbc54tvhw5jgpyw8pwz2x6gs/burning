@@ -40,7 +40,10 @@ export default async function Home({ params }: {
         <GlobalTotalPrice />
         {`원)`}
       </div>
-      <ItemsTable allAccounts={accounts} />
+      <ItemsTable
+        sectionId={sectionId}
+        allAccounts={accounts}
+      />
     </div>
   )
 }
