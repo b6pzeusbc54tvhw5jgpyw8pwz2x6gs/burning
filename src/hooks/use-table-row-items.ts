@@ -2,15 +2,22 @@ import dayjs from "dayjs"
 import { useAtom } from "jotai"
 import { currentDateAtom, endDateAtom, startDateAtom } from "@/states/date.state"
 import { InvestableItem, TableRowItem } from "@/types/item.type"
+import { isAutoTicker, isManualTicker, isNonTickerTypeTicker, isUndefinedTicker } from "@/utils/ticker-name.util"
+import { autoTickerItemHistoricalsByTickerAtom, manualTickerItemHistoricalsByTickerAtom, nonTickerItemHistoricalsByTickerAtom } from "@/states/ticker-historical.state"
+import { getTickerPriceInHistoricals } from "@/utils/ticker-price.util"
 
 export const useTableRowItems = (items: InvestableItem[]): TableRowItem[] => {
   const [startDate] = useAtom(startDateAtom)
   const [endDate] = useAtom(endDateAtom)
-  const [currentDate] = useAtom(currentDateAtom)
+  const [date] = useAtom(currentDateAtom)
+
+  const [itemHistoricalsByTicker] = useAtom(autoTickerItemHistoricalsByTickerAtom)
+  const [manualTickerItemHistoricalsByTicker] = useAtom(manualTickerItemHistoricalsByTickerAtom)
+  const [nonTickerItemHistoricalsByTicker] = useAtom(nonTickerItemHistoricalsByTickerAtom)
 
   const from = dayjs(startDate).format('YYYYMMDD')
   const to = dayjs(endDate).format('YYYYMMDD')
-  const date = dayjs(currentDate).format('YYYYMMDD')
+  const dateStr = dayjs(date).format('YYYYMMDD')
 
   // 가장 가까운 날짜의 거래 정보를 가져옴.
   const tableRows: TableRowItem[] = items
@@ -18,12 +25,12 @@ export const useTableRowItems = (items: InvestableItem[]): TableRowItem[] => {
     .filter(item=> item.tradingInfos.some(t => t.date >= from))
     .filter(item=> item.tradingInfos.some(t => t.date <= to))
     .filter(item=> {
-      const idx = item.tradingInfos.findIndex(t => t.date > date)
+      const idx = item.tradingInfos.findIndex(t => t.date > dateStr)
       const latestIdx = idx === -1 ? item.tradingInfos.length - 1 : idx - 1
       return latestIdx >= 0
     })
     .map(item => {
-      const idx = item.tradingInfos.findIndex(t => t.date > date)
+      const idx = item.tradingInfos.findIndex(t => t.date > dateStr)
       const latestIdx = idx === -1 ? item.tradingInfos.length - 1 : idx - 1
       const tradingInfo = item.tradingInfos[latestIdx]
 
@@ -31,6 +38,28 @@ export const useTableRowItems = (items: InvestableItem[]): TableRowItem[] => {
       const totalQty = tradingInfo.openQty
         + tradingInfo.buy.reduce((acc, cur) => acc + cur.qty, 0)
         + tradingInfo.sell.reduce((acc, cur) => acc + cur.qty, 0)
+
+      const ticker = item.ticker
+      const itemHistoricals =
+        isManualTicker(ticker) ? manualTickerItemHistoricalsByTicker[ticker]
+          : isNonTickerTypeTicker(ticker) ? nonTickerItemHistoricalsByTicker[ticker]
+            : isAutoTicker(ticker) ? itemHistoricalsByTicker[ticker]
+              : null
+
+      const tickerPrice = itemHistoricals
+        ? getTickerPriceInHistoricals(date, itemHistoricals)
+        : null
+
+      const isTickerType = isAutoTicker(ticker) || isManualTicker(ticker)
+      const evaluatedPrice = tickerPrice !== null
+        ? isTickerType
+          ? tickerPrice * totalQty
+          : tickerPrice
+        : null
+
+      const evaluatedProfit = evaluatedPrice !== null
+        ? evaluatedPrice - tradingInfo.lastWrittenPrice
+        : null
 
       return {
         sectionId: item.sectionId,
@@ -42,6 +71,9 @@ export const useTableRowItems = (items: InvestableItem[]): TableRowItem[] => {
         ticker: item.ticker,
         tickerFromMemos: item.tickerFromMemos,
 
+        tickerPrice,
+        evaluatedPrice,
+        evaluatedProfit,
         // ticker는 언제 날짜 가격인지 추가 필요.
         // tickerPriceDate:
 

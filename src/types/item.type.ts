@@ -11,6 +11,10 @@ export interface TableRowItem {
 
   ticker?: string
   tickerFromMemos?: string
+
+  tickerPrice: number | null
+  evaluatedPrice: number | null
+  evaluatedProfit: number | null
 }
 
 /*

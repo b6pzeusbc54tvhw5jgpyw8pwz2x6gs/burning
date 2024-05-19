@@ -6,8 +6,8 @@ import { TableRowItem } from '@/types/item.type'
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from './ui/table'
 import { Button } from './ui/button'
 import { ChevronRight, RefreshCw } from 'lucide-react'
-import { itemHistoricalsByTickerAtom, manualTickerItemHistoricalsByTickerAtom, nonTickerItemHistoricalsByTickerAtom } from '@/states/ticker-historical.state'
-import { getTickerPrice } from '@/utils/ticker-price.util'
+import { autoTickerItemHistoricalsByTickerAtom, manualTickerItemHistoricalsByTickerAtom, nonTickerItemHistoricalsByTickerAtom } from '@/states/ticker-historical.state'
+import { getTickerPriceInHistoricals } from '@/utils/ticker-price.util'
 import { currentDateAtom } from '@/states/date.state'
 import { isAutoTicker, isManualTicker } from '@/utils/ticker-name.util'
 
@@ -41,7 +41,7 @@ export const ItemsTableLastRow = (props: {
 
   const [nonTickerItemHistoricalsByTicker] = useAtom(nonTickerItemHistoricalsByTickerAtom)
   const [manualTickerItemHistoricalsByTicker] = useAtom(manualTickerItemHistoricalsByTickerAtom)
-  const [itemHistoricalsByTicker] = useAtom(itemHistoricalsByTickerAtom)
+  const [itemHistoricalsByTicker] = useAtom(autoTickerItemHistoricalsByTickerAtom)
 
   // Date 기준 가장 최신 가계부에 기록된 평가액.
   const lastWrittenTotalPrice = useMemo(() => {
@@ -58,15 +58,15 @@ export const ItemsTableLastRow = (props: {
       const isTickerType = isAutoTicker(ticker) || isManualTicker(ticker)
       if (isTickerType) {
         const tickerPrice = isAutoTicker(ticker)
-          ? getTickerPrice(date, itemHistoricalsByTicker[ticker])
-          : getTickerPrice(date, manualTickerItemHistoricalsByTicker[ticker])
+          ? getTickerPriceInHistoricals(date, itemHistoricalsByTicker[ticker])
+          : getTickerPriceInHistoricals(date, manualTickerItemHistoricalsByTicker[ticker])
 
         return tickerPrice !== null
           ? acc + tickerPrice * item.totalQty
           : null
       }
 
-      const evaluatedPrice = getTickerPrice(date, nonTickerItemHistoricalsByTicker[ticker])
+      const evaluatedPrice = getTickerPriceInHistoricals(date, nonTickerItemHistoricalsByTicker[ticker])
       return evaluatedPrice !== null
         ? acc + evaluatedPrice
         : null

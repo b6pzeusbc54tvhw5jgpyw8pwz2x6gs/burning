@@ -5,7 +5,6 @@ import { TableCell } from "./ui/table"
 import { Button } from "./ui/button"
 import { Eraser, RefreshCw } from "lucide-react"
 import { ValueChangeTransactionDialog } from "./ValueChangeTransactionDialog"
-import { useItemDetail } from "@/hooks/use-item-price"
 import { toast } from "react-toastify"
 import { currentDateAtom } from "@/states/date.state"
 import { removeTickerNameAtom, toggleExternalWalletItemAtom } from "@/states/ticker-name.state"
@@ -15,7 +14,7 @@ export const ItemsTableCellActions = (props: {
   item: TableRowItem
 }) => {
   const { item } = props
-  const { ticker } = item
+  const { ticker, evaluatedProfit } = item
   const [openedVCTDialog, setOpenedVCTDialog] = useState(false)
 
   const removeTickerName = useSetAtom(removeTickerNameAtom)
@@ -26,7 +25,6 @@ export const ItemsTableCellActions = (props: {
   }
 
   const [date] = useAtom(currentDateAtom)
-  const { evaluatedProfit } = useItemDetail(item, date)
   const toggleExternalWalletItem = useSetAtom(toggleExternalWalletItemAtom)
 
   const handleOpenVCTDialog = () => {

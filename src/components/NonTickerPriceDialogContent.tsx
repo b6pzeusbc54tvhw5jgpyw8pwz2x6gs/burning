@@ -7,7 +7,7 @@ import { useState } from "react"
 import { currentDateAtom } from "@/states/date.state"
 import { manualTickerItemHistoricalsByTickerAtom, nonTickerItemHistoricalsByTickerAtom, putManualTickerItemHistoricalAtom, putNonTickerItemHistoricalAtom } from "@/states/ticker-historical.state"
 import dayjs from "dayjs"
-import { getTickerPrice } from "@/utils/ticker-price.util"
+import { getTickerPriceInHistoricals } from "@/utils/ticker-price.util"
 
 
 export function NonTickerPriceDialogContent(props: {
@@ -22,7 +22,7 @@ export function NonTickerPriceDialogContent(props: {
   const putNonTickerItemHistorical = useSetAtom(putNonTickerItemHistoricalAtom)
   const historicals = nonTickerItemHistoricalsByTicker[ticker || '']
 
-  const tickerPrice = getTickerPrice(currentDate, historicals)
+  const tickerPrice = getTickerPriceInHistoricals(currentDate, historicals)
 
   const [manualTickerPrice, setManualTickerPrice] = useState(() => tickerPrice !== null ? tickerPrice.toLocaleString() : '')
 

@@ -12,9 +12,6 @@ import { ItemsTableCellTickerPrice } from './ItemsTableCellTickerPrice'
 import { ItemsTableCellActions } from './ItemsTableCellActions'
 import { ItemsTableCellEvaluatedTotalPrice } from './ItemsTableCellEvaluatedTotalPrice'
 import { ItemsTableCellEvaluatedProfit } from './ItemsTableCellEvaluatedProfit'
-import { useItemDetail } from '@/hooks/use-item-price'
-import { currentDateAtom } from '@/states/date.state'
-import dayjs from 'dayjs'
 import { isAutoTicker, isManualTicker } from '@/utils/ticker-name.util'
 import { externalWalletItemsAtom } from '@/states/ticker-name.state'
 
@@ -43,7 +40,7 @@ export const ItemsTableRow = (props: {
   accounts: Record<string, Account[]>
 }) => {
   const { item, accounts } = props
-  const { accountId, perAccount, name, ticker, totalQty, totalPrice } = item
+  const { accountId, perAccount, name, ticker, totalQty, totalPrice, evaluatedPrice } = item
   const assets = accounts.assets
   const [stockAssets, setStockAssets] = useAtom(stockAssetsAtom)
   const getAssetName = (accountId: string) => {
@@ -51,10 +48,7 @@ export const ItemsTableRow = (props: {
     return found ? found.title : 'Unknown'
   }
   const idx = stockAssets.findIndex(sa => sa.account.account_id === accountId)
-  // const { nonTickerType } = useItemDetail(item)
 
-  const [date] = useAtom(currentDateAtom)
-  const { evaluatedPrice } = useItemDetail(item, date)
   const [externalWalletItems] = useAtom(externalWalletItemsAtom)
 
   if (ticker && evaluatedPrice === 0 && item.totalPrice === 0) {

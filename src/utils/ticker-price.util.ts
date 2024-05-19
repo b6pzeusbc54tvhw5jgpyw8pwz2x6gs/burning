@@ -29,7 +29,7 @@ export const getLastItemDate = (base: string, itemHistoricals?: ItemHistoricalBy
  * @param date: Date | string (ex: '20220301')
  * 유틸로 보내자
  */
-export const getTickerPrice = (
+export const getTickerPriceInHistoricals = (
   dateOrTimestamp: Date | number,
   itemHistoricals?: ItemHistoricalByDate
 ) => {

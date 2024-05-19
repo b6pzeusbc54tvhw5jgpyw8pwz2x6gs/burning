@@ -11,9 +11,8 @@ import { Textarea } from "./ui/textarea"
 import { TableRowItem } from "@/types/item.type"
 import { CommandForSelect } from "./CommandForSelect"
 import { useErrorToast } from "@/hooks/use-error-toast"
-import { fetchEntriesByAccountAtom, removeAccountEntriesAtom } from "@/states/acount-entries.state"
+import { fetchEntriesByAccountAtom } from "@/states/acount-entries.state"
 import { lastSelectedIncomeAtom } from "@/states/last-selected-income.state"
-import { useItemDetail } from "@/hooks/use-item-price"
 import { currentDateAtom } from "@/states/date.state"
 
 export function ValueChangeTransactionDialog(props: {
@@ -22,7 +21,7 @@ export function ValueChangeTransactionDialog(props: {
   item: TableRowItem
 }) {
   const { item, opened, setOpened } = props
-  const { sectionId, accountId, name, totalQty, totalPrice, ticker } = item
+  const { sectionId, accountId, name, evaluatedProfit } = item
 
   const { data: accounts } = useAccounts(item.sectionId)
   const incomeSelectItems = useMemo(() => {
@@ -46,7 +45,6 @@ export function ValueChangeTransactionDialog(props: {
 
   const [openedIncomeSelect, setOpenedIncomeSelect] = useState(false)
   const [incomeAccountId, setIncomeAccountId] = useAtom(lastSelectedIncomeAtom)
-  const itemDetail = useItemDetail(item, date)
 
   const handlePost = async () => {
     const account = accounts?.assets?.find(a => a.account_id === accountId)
@@ -61,14 +59,14 @@ export function ValueChangeTransactionDialog(props: {
       return
     }
 
-    if (itemDetail.evaluatedProfit === null) {
+    if (evaluatedProfit === null) {
       toast.error('가격 정보를 찾을 수 없습니다')
       return
     }
 
     await postEntry({
       item: name,
-      money: itemDetail.evaluatedProfit,
+      money: evaluatedProfit,
       lAccount: 'assets',
       lAccountId: accountId,
       rAccount: 'income',
@@ -140,7 +138,7 @@ export function ValueChangeTransactionDialog(props: {
           <Input
             className="basis-2/12 px-1 h-8 mt-1 text-right"
             disabled
-            value={itemDetail.evaluatedProfit ? itemDetail.evaluatedProfit.toLocaleString() : '가격 정보를 찾을 수 없습니다'}
+            value={evaluatedProfit ? evaluatedProfit.toLocaleString() : '가격 정보를 찾을 수 없습니다'}
           />
 
           {/* 왼쪽 */}

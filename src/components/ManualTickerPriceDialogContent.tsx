@@ -5,12 +5,17 @@ import { TableRowItem } from "@/types/item.type"
 import { useAtom, useSetAtom } from "jotai"
 import { useState } from "react"
 import { currentDateAtom } from "@/states/date.state"
-import { manualTickerItemHistoricalsByTickerAtom, putManualTickerItemHistoricalAtom } from "@/states/ticker-historical.state"
+import { autoTickerItemHistoricalsByTickerAtom, manualTickerItemHistoricalsByTickerAtom, putAutoTickerItemHistoricalAtom, putManualTickerItemHistoricalAtom } from "@/states/ticker-historical.state"
 import dayjs from "dayjs"
-import { getTickerPrice } from "@/utils/ticker-price.util"
+import { getTickerPriceInHistoricals } from "@/utils/ticker-price.util"
+import { isAutoTicker } from "@/utils/ticker-name.util"
 
 
-export function ManualTickerPriceDialogContent(props: {
+/**
+ * manual ticker 또는 auto ticker 중에서도 API 문제로 가격을 못 받아 오는 경우,
+ * 수동으로 가격을 입력할 수 있는 다이얼로그.
+ */
+export function AddTickerPriceDialogContent(props: {
   item: TableRowItem
 }) {
   const { item } = props
@@ -19,20 +24,30 @@ export function ManualTickerPriceDialogContent(props: {
   const dateStr = dayjs(currentDate).format('YYYY-MM-DD')
 
   const [manualTickerItemHistoricalsByTicker] = useAtom(manualTickerItemHistoricalsByTickerAtom)
+  const [autoTickerItemHistoricalsByTicker] = useAtom(autoTickerItemHistoricalsByTickerAtom)
+
   const putManualTickerItemHistorical = useSetAtom(putManualTickerItemHistoricalAtom)
-  const historicals = manualTickerItemHistoricalsByTicker[ticker || '']
+  const putAutoTickerItemHistorical = useSetAtom(putAutoTickerItemHistoricalAtom)
 
-  const tickerPrice = getTickerPrice(currentDate, historicals)
+  const [tickerPrice, setTickerPrice] = useState(() => {
+    if (ticker === undefined) return ''
 
-  const [manualTickerPrice, setManualTickerPrice] = useState(() => tickerPrice !== null ? tickerPrice.toLocaleString() : '')
+    const historicals = isAutoTicker(ticker)
+      ? autoTickerItemHistoricalsByTicker[ticker]
+      : manualTickerItemHistoricalsByTicker[ticker]
+    const initialValue = getTickerPriceInHistoricals(currentDate, historicals)
+    return initialValue !== null ? initialValue.toLocaleString() : ''
+  })
 
   const handleSubmit = async () => {
     if (!ticker) return
 
-    const price = Number(manualTickerPrice.replace(/,/g, ''))
+    const price = Number(tickerPrice.replace(/,/g, ''))
     if (isNaN(price)) return
 
-    putManualTickerItemHistorical(ticker, currentDate, price)
+    isAutoTicker(ticker)
+      ? putAutoTickerItemHistorical(ticker, currentDate, price)
+      : putManualTickerItemHistorical(ticker, currentDate, price)
   }
 
   return (
@@ -49,10 +64,10 @@ export function ManualTickerPriceDialogContent(props: {
       <div>
         <Input
           placeholder="가격을 입력해주세요."
-          value={manualTickerPrice ? manualTickerPrice.toLocaleString() : ''}
+          value={tickerPrice ? tickerPrice.toLocaleString() : ''}
           onChange={e => {
             const price = Number(e.target.value.replace(/,/g, ''))
-            setManualTickerPrice(price.toLocaleString())
+            setTickerPrice(price.toLocaleString())
           }}
         />
       </div>
@@ -66,7 +81,7 @@ export function ManualTickerPriceDialogContent(props: {
         <Button
           type="submit"
           onClick={handleSubmit}
-          disabled={!manualTickerPrice}
+          disabled={!tickerPrice}
         >
           {'📝 '}
           저장

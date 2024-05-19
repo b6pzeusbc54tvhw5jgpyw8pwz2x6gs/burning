@@ -16,17 +16,17 @@ export type ItemHistoricalByDate = Record<string, ItemHistorical> // key는 date
 
 // TODO: Ticker가 많아지면 매번 fetch하는 것은 부담이되므로,
 // 브라우저에 캐싱을 해두는 것이 좋을 것 같음.
-export const itemHistoricalsByTickerLoadingAtom = atom<Record<string, boolean>>({}) // key는 ticker
-export const itemHistoricalsByTickerAtom = atom<Record<string, ItemHistoricalByDate>>({}) // key는 ticker
+export const autoTickerItemHistoricalsByTickerLoadingAtom = atom<Record<string, boolean>>({}) // key는 ticker
+export const autoTickerItemHistoricalsByTickerAtom = atom<Record<string, ItemHistoricalByDate>>({}) // key는 ticker
 
-export const putAndFetchItemHistoricalsAtom = atom(null, async (get, set, ticker: string) => {
-  if (get(itemHistoricalsByTickerLoadingAtom)[ticker]) return
+export const fetchAndPutAutoTickerItemHistoricalsAtom = atom(null, async (get, set, ticker: string) => {
+  if (get(autoTickerItemHistoricalsByTickerLoadingAtom)[ticker]) return
 
   // 이미 있으면 fetch하지 않음. 지금은 정적으로 2년 이상 데이터만 가져오도록 되어 있음.
   // 동적 데이터를 지원하면 이 부분도 날짜를 비교해서 fetch하도록 수정해야 함.
-  if (get(itemHistoricalsByTickerAtom)[ticker]) return
+  if (get(autoTickerItemHistoricalsByTickerAtom)[ticker]) return
 
-  set(itemHistoricalsByTickerLoadingAtom, prev => ({ ...prev, [ticker]: true }))
+  set(autoTickerItemHistoricalsByTickerLoadingAtom, prev => ({ ...prev, [ticker]: true }))
 
   // TODO: 지금은 거의 정적으로 현재로부터 2년 이상 데이터만 가져오도록 되어 있음.
   const from = '2022-01-01'
@@ -34,9 +34,25 @@ export const putAndFetchItemHistoricalsAtom = atom(null, async (get, set, ticker
   const url = `/api/item-historicals/${ticker}?from=${from}&to=${to}`
   const { data } = await axios.get<ItemHistoricalByDate>(url)
 
-  set(itemHistoricalsByTickerAtom, prev => ({ ...prev, [ticker]: data }))
-  set(itemHistoricalsByTickerLoadingAtom, prev => ({ ...prev, [ticker]: false }))
+  set(autoTickerItemHistoricalsByTickerAtom, prev => ({ ...prev, [ticker]: data }))
+  set(autoTickerItemHistoricalsByTickerLoadingAtom, prev => ({ ...prev, [ticker]: false }))
 })
+
+export const putAutoTickerItemHistoricalAtom = atom(null, async (get, set, ticker: string, dateOrTimestamp: Date | number, price: number) => {
+  const dateStr = dayjs(dateOrTimestamp).format('YYYYMMDD')
+
+  set(autoTickerItemHistoricalsByTickerAtom, prev => {
+
+    return {
+      ...prev,
+      [ticker]: {
+        ...prev[ticker],
+        [dateStr]: [price, price, price, price, price, 0],
+      },
+    }
+  })
+})
+
 
 /**
  * 비상장 주식이나 비트 모빅 같이 Yahoo API로 1주당 가격을 불러올 수 없는 자산의

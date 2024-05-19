@@ -1,16 +1,12 @@
 import { useAtom, useSetAtom } from "jotai"
-import { useEffect, useState } from 'react'
 import { TableRowItem } from "../types/item.type"
 import { TableCell } from "./ui/table"
 import { Input } from "./ui/input"
-import { useItemDetail } from "@/hooks/use-item-price"
 import { Dialog, DialogTrigger } from "./ui/dialog"
-import { Button } from "./ui/button"
-import { TickerTypeSettingDialogContent } from "./TickerTypeSettingDialogContent"
-import { deleteNonTickerItemHistoricalAtom, itemHistoricalsByTickerAtom, itemHistoricalsByTickerLoadingAtom, manualTickerItemHistoricalsByTickerAtom, nonTickerItemHistoricalsByTickerAtom, putNonTickerItemHistoricalAtom } from "@/states/ticker-historical.state"
+import { deleteNonTickerItemHistoricalAtom, autoTickerItemHistoricalsByTickerAtom, autoTickerItemHistoricalsByTickerLoadingAtom, manualTickerItemHistoricalsByTickerAtom, nonTickerItemHistoricalsByTickerAtom, putNonTickerItemHistoricalAtom } from "@/states/ticker-historical.state"
 import { currentDateAtom } from "@/states/date.state"
 import dayjs from "dayjs"
-import { getTickerPrice } from "@/utils/ticker-price.util"
+import { getTickerPriceInHistoricals } from "@/utils/ticker-price.util"
 import { isAutoTicker, isManualTicker, isNonTickerTypeTicker } from "@/utils/ticker-name.util"
 import { NonTickerPriceDialogContent } from "./NonTickerPriceDialogContent"
 import { EmojiButton } from "./EmojiButton"
@@ -19,17 +15,15 @@ export const ItemsTableCellEvaluatedTotalPrice = (props: {
   item: TableRowItem
 }) => {
   const { item } = props
-  const { name, sectionId, accountId, ticker, totalQty } = item
+  const { ticker, evaluatedPrice } = item
 
   const [currentDate] = useAtom(currentDateAtom)
 
-  const { evaluatedPrice } = useItemDetail(item, currentDate)
-
-  const [itemHistoricalsByTicker] = useAtom(itemHistoricalsByTickerAtom)
+  const [itemHistoricalsByTicker] = useAtom(autoTickerItemHistoricalsByTickerAtom)
   const [manualTickerItemHistoricalsByTicker] = useAtom(manualTickerItemHistoricalsByTickerAtom)
   const [nonTickerItemHistoricalsByTicker] = useAtom(nonTickerItemHistoricalsByTickerAtom)
 
-  const [itemHistoricalsByTickerLoading] = useAtom(itemHistoricalsByTickerLoadingAtom)
+  const [itemHistoricalsByTickerLoading] = useAtom(autoTickerItemHistoricalsByTickerLoadingAtom)
   const deleteNonTickerItemHistorical = useSetAtom(deleteNonTickerItemHistoricalAtom)
   const putNonTickerItemHistorical = useSetAtom(putNonTickerItemHistoricalAtom)
 
@@ -47,7 +41,7 @@ export const ItemsTableCellEvaluatedTotalPrice = (props: {
     : isManualTicker(ticker) ? !!manualTickerItemHistoricalsByTicker[ticker]?.[dateInYYYYMMDD]
       : !!nonTickerItemHistoricalsByTicker[ticker]?.[dateInYYYYMMDD]
 
-  const tickerPrice = getTickerPrice(currentDate, historicalsByTicker)
+  const tickerPrice = getTickerPriceInHistoricals(currentDate, historicalsByTicker)
 
   const itemHistoricals = isAutoTicker(ticker) ? itemHistoricalsByTicker[ticker]
     : isManualTicker(ticker) ? manualTickerItemHistoricalsByTicker[ticker]

@@ -6,23 +6,20 @@ import { Input } from "./ui/input"
 import { Dialog, DialogTrigger } from "./ui/dialog"
 import { Button } from "./ui/button"
 import { TickerTypeSettingDialogContent } from "./TickerTypeSettingDialogContent"
-import { useItemDetail } from "@/hooks/use-item-price"
-import { deleteManualTickerItemHistoricalAtom, itemHistoricalsByTickerAtom, itemHistoricalsByTickerLoadingAtom, manualTickerItemHistoricalsByTickerAtom } from "@/states/ticker-historical.state"
+import { deleteManualTickerItemHistoricalAtom, autoTickerItemHistoricalsByTickerAtom, autoTickerItemHistoricalsByTickerLoadingAtom, manualTickerItemHistoricalsByTickerAtom } from "@/states/ticker-historical.state"
 import { isManualTicker, isNonTickerTypeTicker, isUndefinedTicker } from "@/utils/ticker-name.util"
 import { currentDateAtom } from "@/states/date.state"
-import { ManualTickerPriceDialogContent } from "./ManualTickerPriceDialogContent"
+import { AddTickerPriceDialogContent } from "./ManualTickerPriceDialogContent"
 import { EmojiButton } from "./EmojiButton"
 
 export const ItemsTableCellTickerPrice = (props: {
   item: TableRowItem
 }) => {
   const { item } = props
-  const { ticker } = item
-  const [itemHistoricalsByTicker] = useAtom(itemHistoricalsByTickerAtom)
-  const [itemHistoricalsByTickerLoading] = useAtom(itemHistoricalsByTickerLoadingAtom)
+  const { ticker, tickerPrice } = item
+  const [itemHistoricalsByTicker] = useAtom(autoTickerItemHistoricalsByTickerAtom)
+  const [itemHistoricalsByTickerLoading] = useAtom(autoTickerItemHistoricalsByTickerLoadingAtom)
   const [currentDate] = useAtom(currentDateAtom)
-
-  const { tickerPrice } = useItemDetail(item, currentDate)
 
   const [manualTickerItemHistoricalsByTicker]= useAtom(manualTickerItemHistoricalsByTickerAtom)
   const deleteManualTickerItemHistorical = useSetAtom(deleteManualTickerItemHistoricalAtom)
@@ -72,7 +69,14 @@ export const ItemsTableCellTickerPrice = (props: {
             <span>원</span>
           </>
         ) : (
-          <span>가격 입력 필요s</span>
+          <div className="flex justify-end gap-1 mt-1">
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button>가격 입력 필요</Button>
+              </DialogTrigger>
+              <AddTickerPriceDialogContent item={item} />
+            </Dialog>
+          </div>
         )}
       </div>
 
@@ -82,7 +86,7 @@ export const ItemsTableCellTickerPrice = (props: {
             <DialogTrigger asChild>
               <div className="cursor-pointer">📝</div>
             </DialogTrigger>
-            <ManualTickerPriceDialogContent item={item} />
+            <AddTickerPriceDialogContent item={item} />
           </Dialog>
 
           <EmojiButton

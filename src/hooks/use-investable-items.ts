@@ -4,7 +4,7 @@ import { Entry } from "@/types/entry.type"
 import { DateTradingInfo, InvestableItem } from "@/types/item.type"
 import { getTickerByMemos, isAutoTicker } from "@/utils/ticker-name.util"
 import { useAtom, useSetAtom } from "jotai"
-import { putAndFetchItemHistoricalsAtom } from "@/states/ticker-historical.state"
+import { fetchAndPutAutoTickerItemHistoricalsAtom } from "@/states/ticker-historical.state"
 import { tickerNameByItemKeyAtom } from "@/states/ticker-name.state"
 
 const getOpenQtyPerAccount = (prev?: DateTradingInfo) => {
@@ -56,7 +56,7 @@ const getCloseQtyPerAccount = (
 export const useInvestableItems = (
   investableEntries: Record<string, Entry[]>
 ): InvestableItem[] => {
-  const putAndFetchItemHistoricals = useSetAtom(putAndFetchItemHistoricalsAtom)
+  const putAndFetchItemHistoricals = useSetAtom(fetchAndPutAutoTickerItemHistoricalsAtom)
   const [tickerNameByItemKey] = useAtom(tickerNameByItemKeyAtom)
 
   const keys = useMemo(() => Object.keys(investableEntries), [investableEntries])
