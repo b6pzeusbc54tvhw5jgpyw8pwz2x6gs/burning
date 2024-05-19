@@ -1,16 +1,14 @@
 import { useAccounts } from '@/data/hooks'
 import { TableRowItem } from '@/types/item.type'
 import * as d3 from 'd3'
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 export const PieChart = (props: {
-  sectionId: string
   tableRowItems: TableRowItem[]
 }) => {
-  const { tableRowItems, sectionId } = props
+  const { tableRowItems } = props
   const ref = useRef<SVGSVGElement>(null)
-
-  const { data: accounts } = useAccounts(sectionId)
+  const [showPrice, setShowPrice] = useState(false)
 
   const data = useMemo(() => {
     if (tableRowItems.some(item => item.evaluatedPrice === null)) {
@@ -18,22 +16,19 @@ export const PieChart = (props: {
     }
 
     const totalPrice = tableRowItems.reduce((acc, item) => acc + item.totalPrice, 0)
-    const totalPricePerAccount = tableRowItems.reduce<{ value: number, label: string }[]>((acc, item) => {
-      const account = accounts?.assets?.find(a => a.account_id === item.accountId)
-      if (!account) return acc
 
-      const idx = acc.findIndex(a => a.label === account.title)
+    const totalPricePerAssetGroup = tableRowItems.reduce<{ value: number, label: string }[]>((acc, item) => {
+      const { assetGroup } = item
+
+      const idx = acc.findIndex(a => a.label === assetGroup)
       if (idx === -1) {
         return [
           ...acc,
-          { value: item.totalPrice, label: account.title }
+          { value: item.totalPrice, label: assetGroup }
         ]
       }
 
       const found = acc[idx]
-      if (!found?.value) {
-        console.log(found)
-      }
       return [
         ...acc.slice(0, idx),
         { ...found, value: found.value + item.totalPrice },
@@ -41,12 +36,15 @@ export const PieChart = (props: {
       ]
     }, [] as { value: number, label: string }[])
 
-    return totalPricePerAccount.map(item => ({
+    return totalPricePerAssetGroup.map(item => ({
       ...item,
+      label: showPrice
+        ? `${item.label} ${item.value.toLocaleString()}원`  // `${item.label} (${item.value.toLocaleString()}원)`, // `${item.label} (${(item.value / totalPrice * 100).toFixed(2)}%)`,
+        : item.label,
       value: (item.value / totalPrice * 100).toFixed(2),
     }))
 
-  }, [tableRowItems, accounts])
+  }, [tableRowItems, showPrice])
 
   useEffect(() => {
     if (!ref.current) return

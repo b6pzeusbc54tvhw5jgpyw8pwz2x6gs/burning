@@ -5,8 +5,13 @@ import { InvestableItem, TableRowItem } from "@/types/item.type"
 import { isAutoTicker, isManualTicker, isNonTickerTypeTicker, isUndefinedTicker } from "@/utils/ticker-name.util"
 import { autoTickerItemHistoricalsByTickerAtom, manualTickerItemHistoricalsByTickerAtom, nonTickerItemHistoricalsByTickerAtom } from "@/states/ticker-historical.state"
 import { getTickerPriceInHistoricals } from "@/utils/ticker-price.util"
+import { Account } from "@/types/account.type"
+import { useMemo } from "react"
 
-export const useTableRowItems = (items: InvestableItem[]): TableRowItem[] => {
+export const useTableRowItems = (
+  items: InvestableItem[],
+  accounts: Record<string, Account[]>
+): TableRowItem[] => {
   const [startDate] = useAtom(startDateAtom)
   const [endDate] = useAtom(endDateAtom)
   const [date] = useAtom(currentDateAtom)
@@ -20,68 +25,80 @@ export const useTableRowItems = (items: InvestableItem[]): TableRowItem[] => {
   const dateStr = dayjs(date).format('YYYYMMDD')
 
   // 가장 가까운 날짜의 거래 정보를 가져옴.
-  const tableRows: TableRowItem[] = items
-    // from ~ to 사이 데이터 있는 것만 필터.
-    .filter(item=> item.tradingInfos.some(t => t.date >= from))
-    .filter(item=> item.tradingInfos.some(t => t.date <= to))
-    .filter(item=> {
-      const idx = item.tradingInfos.findIndex(t => t.date > dateStr)
-      const latestIdx = idx === -1 ? item.tradingInfos.length - 1 : idx - 1
-      return latestIdx >= 0
-    })
-    .map(item => {
-      const idx = item.tradingInfos.findIndex(t => t.date > dateStr)
-      const latestIdx = idx === -1 ? item.tradingInfos.length - 1 : idx - 1
-      const tradingInfo = item.tradingInfos[latestIdx]
+  const tableRows: TableRowItem[] = useMemo(() => {
+    return items
+      // from ~ to 사이 데이터 있는 것만 필터.
+      .filter(item=> item.tradingInfos.some(t => t.date >= from))
+      .filter(item=> item.tradingInfos.some(t => t.date <= to))
+      .filter(item=> {
+        const idx = item.tradingInfos.findIndex(t => t.date > dateStr)
+        const latestIdx = idx === -1 ? item.tradingInfos.length - 1 : idx - 1
+        return latestIdx >= 0
+      })
+      .map(item => {
+        const { ticker, tradingInfos, sectionId, accountId, itemName } = item
+        const { tickerFromMemos, assetType, assetCategory } = item
+        const idx = tradingInfos.findIndex(t => t.date > dateStr)
+        const latestIdx = idx === -1 ? tradingInfos.length - 1 : idx - 1
+        const tradingInfo = tradingInfos[latestIdx]
 
-      // console.log(date, tradingInfo.openQty, tradingInfo.buy.reduce((acc, cur) => acc + cur.qty, 0), tradingInfo.sell.reduce((acc, cur) => acc + cur.qty, 0))
-      const totalQty = tradingInfo.openQty
-        + tradingInfo.buy.reduce((acc, cur) => acc + cur.qty, 0)
-        + tradingInfo.sell.reduce((acc, cur) => acc + cur.qty, 0)
+        const totalQty = tradingInfo.openQty
+          + tradingInfo.buy.reduce((acc, cur) => acc + cur.qty, 0)
+          + tradingInfo.sell.reduce((acc, cur) => acc + cur.qty, 0)
 
-      const ticker = item.ticker
-      const itemHistoricals =
-        isManualTicker(ticker) ? manualTickerItemHistoricalsByTicker[ticker]
-          : isNonTickerTypeTicker(ticker) ? nonTickerItemHistoricalsByTicker[ticker]
-            : isAutoTicker(ticker) ? itemHistoricalsByTicker[ticker]
-              : null
+        const itemHistoricals =
+          isManualTicker(ticker) ? manualTickerItemHistoricalsByTicker[ticker]
+            : isNonTickerTypeTicker(ticker) ? nonTickerItemHistoricalsByTicker[ticker]
+              : isAutoTicker(ticker) ? itemHistoricalsByTicker[ticker]
+                : null
 
-      const tickerPrice = itemHistoricals
-        ? getTickerPriceInHistoricals(date, itemHistoricals)
-        : null
+        const tickerPrice = itemHistoricals
+          ? getTickerPriceInHistoricals(date, itemHistoricals)
+          : null
 
-      const isTickerType = isAutoTicker(ticker) || isManualTicker(ticker)
-      const evaluatedPrice = tickerPrice !== null
-        ? isTickerType
-          ? tickerPrice * totalQty
-          : tickerPrice
-        : null
+        const isTickerType = isAutoTicker(ticker) || isManualTicker(ticker)
+        const evaluatedPrice = tickerPrice !== null
+          ? isTickerType
+            ? tickerPrice * totalQty
+            : tickerPrice
+          : null
 
-      const evaluatedProfit = evaluatedPrice !== null
-        ? evaluatedPrice - tradingInfo.lastWrittenPrice
-        : null
+        const evaluatedProfit = evaluatedPrice !== null
+          ? evaluatedPrice - tradingInfo.lastWrittenPrice
+          : null
 
-      return {
-        sectionId: item.sectionId,
-        accountId: item.accountId,
-        name: item.itemName,
-        perAccount: tradingInfo.closeQtyPerAccount,
-        totalQty,
-        totalPrice: tradingInfo.lastWrittenPrice,
-        ticker: item.ticker,
-        tickerFromMemos: item.tickerFromMemos,
+        const getAssetName = (accountId: string) => {
+          const found = accounts.assets.find(a => a.account_id === accountId)
+          return found ? found.title : 'Unknown'
+        }
 
-        tickerPrice,
-        evaluatedPrice,
-        evaluatedProfit,
-        // ticker는 언제 날짜 가격인지 추가 필요.
-        // tickerPriceDate:
+        return {
+          assetType: assetType,
+          assetCategory: assetCategory,
+          sectionId: sectionId,
+          accountId: accountId,
 
-        // 마지막 가계부 업데이트 날짜여예함.
-        // lastItemDate: lastItemDate || '20230101',
-        lastItemDate: tradingInfo.date,
-      }
-    })
+          assetGroup: assetType === 'money' ? '현금성 자산' : getAssetName(accountId),
+          name: assetType === 'money' ? getAssetName(accountId) : itemName,
+
+          perAccount: tradingInfo.closeQtyPerAccount,
+          totalQty,
+          totalPrice: tradingInfo.lastWrittenPrice,
+          ticker: ticker,
+          tickerFromMemos: tickerFromMemos,
+
+          tickerPrice,
+          evaluatedPrice,
+          evaluatedProfit,
+          // ticker는 언제 날짜 가격인지 추가 필요.
+          // tickerPriceDate:
+
+          // 마지막 가계부 업데이트 날짜여예함.
+          // lastItemDate: lastItemDate || '20230101',
+          lastItemDate: tradingInfo.date,
+        }
+      })
+  }, [items, accounts, date, from, to, dateStr, itemHistoricalsByTicker, manualTickerItemHistoricalsByTicker, nonTickerItemHistoricalsByTicker])
 
   return tableRows
 }

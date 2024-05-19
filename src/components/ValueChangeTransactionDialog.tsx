@@ -28,6 +28,7 @@ export function ValueChangeTransactionDialog(props: {
     return (accounts?.income || []).map(a => ({
       value: a.account_id,
       label: a.title,
+      type: a.type,
     }))
   }, [accounts])
 

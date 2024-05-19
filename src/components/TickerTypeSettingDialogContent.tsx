@@ -19,6 +19,7 @@ export function TickerTypeSettingDialogContent(props: {
 }) {
   const { item } = props
   const { tickerFromMemos, sectionId, accountId, name, totalQty, totalPrice } = item
+  const { assetType, assetCategory } = item
 
   const addTickerName = useSetAtom(addTickerNameAtom)
   const [tickerNameByItemKey] = useAtom(tickerNameByItemKeyAtom)
@@ -32,19 +33,18 @@ export function TickerTypeSettingDialogContent(props: {
   const putManualTickerItemHistorical = useSetAtom(putManualTickerItemHistoricalAtom)
   const [currentDate] = useAtom(currentDateAtom)
 
+  const itemKey = `${assetType}-${assetCategory}-${sectionId}-${accountId}-${name}`
+
   const handleAutoTicker = async () => {
-    const itemKey = `${sectionId}-${accountId}-${name}`
     addTickerName(itemKey, autoTicker)
   }
 
   const handleManualTickerPrice = async () => {
-    const itemKey = `${sectionId}-${accountId}-${name}`
     const ticketName = getManualTicker(itemKey)
     addTickerName(itemKey, ticketName)
   }
 
   const handleNonTickerEvaluatedPrice = async () => {
-    const itemKey = `${sectionId}-${accountId}-${name}`
     const ticketName = getNonTickerTypeTicker(itemKey)
     addTickerName(itemKey, ticketName)
     // putNonTickerEvaluatedPrice({

@@ -1,31 +1,30 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useMemo, useState } from "react"
 import { CommandForSelect } from "./CommandForSelect"
-import { Button } from "./ui/button"
 import { Input } from "./ui/input"
 import { useAccounts } from "@/data/hooks"
-import { useAtom, useSetAtom } from "jotai"
-import { stockAssetsAtom, toggleStockAssetAtom } from "@/states/stock-assets.state"
+import { Account } from "@/types/account.type"
 
 export const AccountSelect = (props: {
   sectionId: string
+  selectedAccounts: Account[]
+  toggle: (account: Account) => void
 }) => {
-  const { sectionId } = props
+  const { sectionId, toggle, selectedAccounts } = props
   const [openedAccountSelect, setOpenedAccountSelect] = useState(false)
 
   const { data: accounts} = useAccounts(sectionId)
-  const [seletedAssets, setSelectedAssets] = useAtom(stockAssetsAtom)
-  const toggleStockAsset = useSetAtom(toggleStockAssetAtom)
 
   const selectedItems = useMemo(() => {
-    return seletedAssets.map(a => a.account.account_id)
-  }, [seletedAssets])
+    return selectedAccounts.map(a => a.account_id)
+  }, [selectedAccounts])
 
   const items = useMemo(() => {
     return (accounts?.assets || []).map(a => ({
       value: a.account_id,
       label: a.title,
+      type: a.type,
     }))
   }, [accounts?.assets])
 
@@ -33,7 +32,7 @@ export const AccountSelect = (props: {
     const account = accounts?.assets?.find(a => a.account_id === accountId)
     if (!account) return
 
-    toggleStockAsset({ sectionId, account })
+    toggle(account)
   }
 
   return (

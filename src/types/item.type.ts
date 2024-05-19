@@ -1,6 +1,11 @@
 export interface TableRowItem {
+  assetType: 'money' | 'stock'
+  assetCategory: string // normal, client, floating 등
+
   sectionId: string
   accountId: string
+
+  assetGroup: string  // 투자 자산으로 선택한 자산은 자산의 이름이고, 현금성 자산으로 선택하면 "현금성 자산"으로 표시.
   name: string
   perAccount: {  // 계좌별 수량
     [from: string]: number
@@ -59,6 +64,8 @@ export interface InvestableItem {
   sectionId: string    // 후잉 section id
   accountId: string    // item이 들어있는 account id
   itemName: string     // TIGER 나스닥100
+  assetType: 'money' | 'stock'
+  assetCategory: string // normal, client, floating 등
   tradingInfos: DateTradingInfo[]
   ticker?: string       // 156156.KS
   tickerFromMemos?: string // 메모에서 추출한 ticker. Ticker 입력 받을 때 자동 완성 시켜주는 용도.

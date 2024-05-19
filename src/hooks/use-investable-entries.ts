@@ -1,7 +1,7 @@
 import { useMemo } from "react"
 import { useAtom } from "jotai"
 import { entriesByAccountAtom } from "@/states/acount-entries.state"
-import { stockAssetsAtom } from "@/states/stock-assets.state"
+import { moneyAssetsAtom, stockAssetsAtom } from "@/states/selected-assets.state"
 import { AllAccounts } from "@/types/account.type"
 import { Entry } from "@/types/entry.type"
 
@@ -30,25 +30,32 @@ export const useInvestableEntries = (
   // Local에 불러온 모든 Account별 Entry.
   const [entriesByAccount] = useAtom(entriesByAccountAtom)
 
-  // 투자 자산 목록으로 선택된 Asset들.
+  // 선택된 투자 자산들
   const [stockAssets] = useAtom(stockAssetsAtom)
+
+  // 선택된 현금성 자산들
+  const [moneyAssets] = useAtom(moneyAssetsAtom)
 
   return useMemo(() => {
     const keys = Object.keys(entriesByAccount)
     return keys.reduce((acc, key) => {
-      const [, accountId] = key.split('-')
-      const selected = stockAssets.some(sa => sa.account.account_id === accountId)
+      const [sectionId, accountId] = key.split('-')
+      const selectedStock = stockAssets.some(sa => sa.sectionId === sectionId && sa.account_id === accountId)
+      const selectedMoney = moneyAssets.some(sa => sa.sectionId === sectionId && sa.account_id === accountId)
+      const selected = selectedStock || selectedMoney
       if (!selected) {
         return acc
       }
 
+      const assetType = selectedStock ? 'stock' : 'money'
+
       // 투자 자산 목록은 지금은 모두 "거래처(client)" 타입.
-      const category = allAccounts.assets?.find(a => a.account_id === accountId)?.category
-      if (category !== 'client' && category !== 'normal') {
+      const assetCategory = allAccounts.assets?.find(a => a.sectionId === sectionId && a.account_id === accountId)?.category
+      if (!assetCategory || !['client', 'normal', 'floating'].includes(assetCategory)) {
         return acc
       }
 
-      return { ...acc, [key]: entriesByAccount[key] }
+      return { ...acc, [`${assetType}-${assetCategory}-${key}`]: entriesByAccount[key] }
     }, {} satisfies Record<string, Entry[]>)
-  }, [entriesByAccount, stockAssets, allAccounts])
+  }, [entriesByAccount, stockAssets, moneyAssets, allAccounts])
 }

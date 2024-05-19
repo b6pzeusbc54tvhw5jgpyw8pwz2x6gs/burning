@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useAtom } from 'jotai'
 import { ExternalLink } from 'lucide-react'
-import { stockAssetsAtom } from '@/states/stock-assets.state'
+import { stockAssetsAtom } from '@/states/selected-assets.state'
 import { Account } from '@/types/account.type'
 import { formatCurrency, includeDash, relativeDate } from '@/utils/date.util'
 import { TableRowItem } from '@/types/item.type'
@@ -41,13 +41,15 @@ export const ItemsTableRow = (props: {
 }) => {
   const { item, accounts } = props
   const { accountId, perAccount, name, ticker, totalQty, totalPrice, evaluatedPrice } = item
-  const assets = accounts.assets
+  const { assetGroup: assetTypeName } = item
   const [stockAssets, setStockAssets] = useAtom(stockAssetsAtom)
+  const assets = accounts.assets
   const getAssetName = (accountId: string) => {
     const found = assets.find(a => a.account_id === accountId)
     return found ? found.title : 'Unknown'
   }
-  const idx = stockAssets.findIndex(sa => sa.account.account_id === accountId)
+
+  const idx = stockAssets.findIndex(sa => sa.account_id === accountId)
 
   const [externalWalletItems] = useAtom(externalWalletItemsAtom)
 
@@ -57,7 +59,7 @@ export const ItemsTableRow = (props: {
 
   return (
     <TableRow className={`${colors[idx]} py-0`}>
-      <TableCell className="font-medium py-0">{getAssetName(accountId)}</TableCell>
+      <TableCell className="font-medium py-0">{assetTypeName}</TableCell>
       <TableCell className=''>
         <div className='flex'>
           <span>

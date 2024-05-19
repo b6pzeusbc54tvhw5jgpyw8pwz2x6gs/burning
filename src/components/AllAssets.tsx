@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react'
 import { useAtom, useSetAtom } from 'jotai'
-import { stockAssetsAtom } from '@/states/stock-assets.state'
+import { stockAssetsAtom } from '@/states/selected-assets.state'
 import { Account } from '@/types/account.type'
 import { removeAccountEntriesAtom } from '../states/acount-entries.state'
 import { useAccounts } from '@/data/hooks'

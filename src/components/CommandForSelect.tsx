@@ -17,6 +17,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 interface Item {
   value: string
   label: string
+  type: string
 }
 
 export function CommandForSelect(props: {
@@ -58,6 +59,9 @@ export function CommandForSelect(props: {
     }
   }, [handleClose])
 
+  // TODO: 일단 그룹을 제거하자. 나중에는 CommandGroup을 활용하여 표현하자.
+  const filteredGroups = items.filter(i => i.type !== 'group')
+
   return (
     <div className="w-full absolute z-50">
       <Command ref={listRef}>
@@ -68,8 +72,9 @@ export function CommandForSelect(props: {
         />
         <CommandList ref={listRef}>
           <CommandEmpty>No results found.</CommandEmpty>
-          <CommandGroup heading="수익">
-            {items.map(account => (
+
+          <CommandGroup heading="선택하세요">
+            {filteredGroups.map(account => (
               <CommandItem
                 key={account.value}
                 onSelect={() => localHandleSelect(account.value)}
@@ -79,6 +84,7 @@ export function CommandForSelect(props: {
               </CommandItem>
             ))}
           </CommandGroup>
+
         </CommandList>
       </Command>
     </div>

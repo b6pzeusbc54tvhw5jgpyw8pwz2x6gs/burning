@@ -59,11 +59,19 @@ export const useInvestableItems = (
   const putAndFetchItemHistoricals = useSetAtom(fetchAndPutAutoTickerItemHistoricalsAtom)
   const [tickerNameByItemKey] = useAtom(tickerNameByItemKeyAtom)
 
+  // `${assetType}-${assetCategory}-${sectionId}-${accountId}` 형태
   const keys = useMemo(() => Object.keys(investableEntries), [investableEntries])
 
   const entriesByItemName: Record<string, Entry[]> = useMemo(() => {
     return keys.reduce((acc, key) => {
       const entries = investableEntries[key]
+      const [, assetCategory] = key.split('-')
+      if (assetCategory === 'normal' || assetCategory === 'floating') {
+        // client 카테고리가 아니면 아이템별 나눌 필요가 없음.
+        // itemName을 key로 포함하지 않고, accountId 까지만 key로 사용.
+        return { ...acc, [key]: entries }
+      }
+
       return {
         ...acc,
         ...entries.reduce((acc, entry) => {
@@ -76,13 +84,17 @@ export const useInvestableItems = (
 
   const investableItems: InvestableItem[] = useMemo(() => {
 
+    // normal인 경우 `${assetType}-${assetCategory}-${sectionId}-${accountId}` 형태
+    // client인 경우 `${assetType}-${assetCategory}-${sectionId}-${accountId}-${itemName}` 형태
     const itemKeys = Object.keys(entriesByItemName)
 
     return itemKeys.map(key => {
-      const [sectionId, accountId, ...rest] = key.split('-')
+      const [assetType, assetCategory, sectionId, accountId, ...rest] = key.split('-')
       const itemName = rest.join('-')
       const entries = entriesByItemName[key]
-      const ticker = tickerNameByItemKey[key]
+      const ticker = assetType === 'money'
+        ? `non-ticker-${sectionId}-${accountId}`
+        : tickerNameByItemKey[key]
       const tickerFromMemos = ticker ? undefined : getTickerByMemos(entries.map(e => e.memo))
       // || getTicketByMemos(entries.map(e => e.memo))
       // || getUndefinedTicker(sectionId, accountId, itemName)
@@ -143,6 +155,8 @@ export const useInvestableItems = (
       return {
         sectionId,
         accountId,
+        assetType,  // 미국주식, 한국주식, 현금성 자산 등
+        assetCategory,  // normal, client
         ticker,
         itemName,
         tradingInfos,

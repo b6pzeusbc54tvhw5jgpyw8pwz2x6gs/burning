@@ -24,7 +24,7 @@ export const ItemsTable = (props: {
 
   const investableEntries = useInvestableEntries(allAccounts)
   const investableItems = useInvestableItems(investableEntries)
-  const tableRowItems = useTableRowItems(investableItems)
+  const tableRowItems = useTableRowItems(investableItems, allAccounts)
 
   useEffect(() => {
     setGlobalTotalPrice(sum(tableRowItems.map(item => item.totalPrice)))
@@ -48,10 +48,7 @@ export const ItemsTable = (props: {
         title='자산군별 비중'
         className='flex-col'
       >
-        <PieChart
-          sectionId={sectionId}
-          tableRowItems={tableRowItems}
-        />
+        <PieChart tableRowItems={tableRowItems} />
       </GridCard>
 
       <GridCard
@@ -74,9 +71,9 @@ export const ItemsTable = (props: {
           <TableBody>
             {tableRowItems.map(item => (
               <ItemsTableRow
-                accounts={allAccounts}
                 key={item.sectionId + '-' + item.accountId + '-' + item.name}
                 item={item}
+                accounts={allAccounts}
               />
             ))}
 

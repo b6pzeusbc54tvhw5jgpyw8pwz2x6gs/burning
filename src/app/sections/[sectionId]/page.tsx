@@ -7,6 +7,7 @@ import { SubTitleAndDescription } from '@/components/SubTitleAndDescription'
 import { DateSlider } from '@/components/DateSlider'
 import { DayRangePicker } from '@/components/DayRangePicker'
 import { GridCard } from '@/layouts/GridCard'
+import { MoneyAssets } from '@/components/MoneyAssets'
 
 export default async function Home({ params }: {
   params: {
@@ -26,6 +27,16 @@ export default async function Home({ params }: {
           description={`주식, ETF, 예금, 적금, RP, 개별 채권 등 투자 자산이 담긴 자산을 선택하세요.`}
         />
         <StockAssets sectionId={sectionId} />
+      </GridCard>
+
+      <GridCard
+        className='flex-col'
+      >
+        <SubTitleAndDescription
+          title={`현금성 자산`}
+          description={`은행 계좌, 예금, 적금, 증권사 계좌에서 매수한 CMA, RP, MMF 또는 개별 채권 등 현금성 자산을 선택하세요.`}
+        />
+        <MoneyAssets sectionId={sectionId} />
       </GridCard>
 
       <GridCard
