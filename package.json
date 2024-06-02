@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@mathieuc/tradingview": "^3.4.2",
     "@radix-ui/react-avatar": "^1.0.4",
     "@radix-ui/react-checkbox": "^1.0.4",
     "@radix-ui/react-dialog": "^1.0.5",
@@ -47,7 +48,7 @@
     "react-toastify": "^10.0.4",
     "tailwind-merge": "^2.2.1",
     "tailwindcss-animate": "^1.0.7",
-    "yahoo-finance2": "^2.11.2",
+    "yahoo-finance2": "^2.11.3",
     "zod": "^3.22.4"
   },
   "devDependencies": {

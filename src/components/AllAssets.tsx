@@ -16,22 +16,22 @@ export const AllAssets = (props: {
   const removeAccountEntries = useSetAtom(removeAccountEntriesAtom)
   const { data: accounts, isFetching } = useAccounts(sectionId)
 
-  const handleAdd = (a: Account) => {
-    const found = stockAssets.find(p => p.account.account_id === a.account_id)
+  const handleAdd = (account: Account) => {
+    const found = stockAssets.find(p => p.account_id === account.account_id)
     if (!found) {
-      setStockAssets(prev => [...prev, { account: a, sectionId }])
+      setStockAssets(prev => [...prev, account])
       return
     }
 
-    setStockAssets(prev => prev.filter(p => p.account.account_id !== a.account_id))
-    removeAccountEntries(a)
+    setStockAssets(prev => prev.filter(p => p.account_id !== account.account_id))
+    removeAccountEntries(account)
   }
 
   const stockAssetsWithSelected = useMemo(() => {
     return assets
       .filter(as => as.type !== 'group')
       .map(asset => {
-        const found = stockAssets.find(sa => sa.account.account_id === asset.account_id)
+        const found = stockAssets.find(sa => sa.account_id === asset.account_id)
         return {
           ...asset,
           selected: !!found,
