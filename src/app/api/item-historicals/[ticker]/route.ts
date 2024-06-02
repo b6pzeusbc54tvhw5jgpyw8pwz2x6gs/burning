@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.error()
   }
 
-  const rrr = await listTickerPricesByRange(ticker, from, to)
+  const rrr = await listTickerPricesByRange(ticker, from, to, 'KRW')
 
   return NextResponse.json(rrr)
 }

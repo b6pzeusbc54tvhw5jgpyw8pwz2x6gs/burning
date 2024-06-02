@@ -25,7 +25,6 @@ export const getRealtimeTickerPrice = async (ticker: string) => {
   const res = await yahooFinance.quoteSummary(ticker, {
     modules: ['price'],
   })
-  // console.log("🚀 ~ getTickerPrice ~ price:", ticker, res.price)
 
   if (!res.price?.regularMarketPrice) {
     throw new Error('no price')
@@ -78,6 +77,7 @@ export const listTickerPricesByRange = async (ticker: string, from: string, to: 
   })
 
   const summary = await yahooFinance.quoteSummary(ticker, { modules: ['price'] })
+
   // 환율
   const rate = convertTo && summary.price!.currency !== convertTo
     ? await getRateToKRW(summary.price!.currency!)
