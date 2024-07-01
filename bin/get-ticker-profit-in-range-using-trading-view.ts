@@ -8,10 +8,11 @@ npx ts-node -r tsconfig-paths/register -P bin/tsconfig.json bin/get-ticker-profi
 npx ts-node -r tsconfig-paths/register -P bin/tsconfig.json bin/get-ticker-profit-in-range-using-trading-view.ts "TVC:US30Y" 2024-05-01 2024-05-31 "미국 30년물 국채 금리"
  */
 
-import { listTickerPricesByRange } from "@/server/actions/trading-view"
+import { listTickerPricesByLongRange } from "@/server/actions/trading-view"
 
 const run = async (ticker: string, from: string, to: string, fixed = 2) => {
-  const r = await listTickerPricesByRange(ticker, from, to)
+  const r = await listTickerPricesByLongRange(ticker, from, to)
+  // console.log(JSON.stringify(r, null, 2))
 
   const keys = Object.keys(r).sort()
   const first = r[keys[0]]

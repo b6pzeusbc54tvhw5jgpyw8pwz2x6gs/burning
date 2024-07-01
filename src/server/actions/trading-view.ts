@@ -71,7 +71,8 @@ const getPeriods = (ticker: string, from: string, to: string) => new Promise((re
   }).catch(() => console.log('getIndicator catch'))
 })
 
-export const listTickerPricesByRange = async (ticker: string, from: string, to: string, convertTo?: 'KRW') => {
+const listTickerPricesByRange = async (ticker: string, from: string, to: string, convertTo?: 'KRW') => {
+  // console.log('ticker:', ticker, 'from:', from, 'to:', to, 'convertTo:', convertTo)
   const client = new TradingView.Client()
   const chart = new client.Session.Chart()
 
@@ -79,7 +80,7 @@ export const listTickerPricesByRange = async (ticker: string, from: string, to: 
     timeframe: '1D',
     // range: 20, // Can be positive to get before or negative to get after
     from: new Date(from).getTime() / 1000,
-    to: new Date(to + ms('1d')).getTime() / 1000 ,
+    to: new Date(to).getTime() + ms('1d') / 1000,
 
     // timeframe: '240',
     // range: 2, // Can be positive to get before or negative to get after
@@ -96,7 +97,9 @@ export const listTickerPricesByRange = async (ticker: string, from: string, to: 
   })
 
   const prefixesNeedPlus1D = [
-    'TVC:US02Y', 'TVC:US10Y', 'TVC:US30Y', 'FX_IDC:USDKRW', 'FX_IDC:JPYKRW', 'TVC:DXY',
+    'TVC:US02Y', 'TVC:US10Y', 'TVC:US30Y',
+    'FX_IDC:USDKRW', 'FX_IDC:USDJPY', 'FX_IDC:JPYKRW',
+    'TVC:DXY', 'FXOPEN:J225',
   ]
 
   const ItemHistoricalByDate: ItemHistoricalByDate = periods.reduce((acc, cur) => {
@@ -124,4 +127,29 @@ export const listTickerPricesByRange = async (ticker: string, from: string, to: 
 
   // console.log("🚀 ~ listTikkerPricesByRange ~ ItemHistoricalByDate:", ItemHistoricalByDate)
   return ItemHistoricalByDate
+}
+
+export const listTickerPricesByLongRange = async (ticker: string, from: string, to: string, convertTo?: 'KRW') => {
+  const fromDate = new Date(from).getTime()
+  const toDate = new Date(to).getTime()
+
+  // 100일 제한이 있는 것 같다. 90일씩 잘라서 listTickerPricesByRange를 호출한 뒤 합쳐서 리턴하자.
+  const ranges = []
+  let current = fromDate
+  while (current < toDate) {
+    ranges.push({ from: current, to: current + ms('90d') })
+    current += ms('91d')
+  }
+
+  ranges[ranges.length - 1].to = toDate
+
+  const promises = ranges.map(range => {
+    return listTickerPricesByRange(ticker, dayjs(range.from).format('YYYY-MM-DD'), dayjs(range.to).format('YYYY-MM-DD'))
+  })
+  const results = await Promise.all(promises)
+
+  // 반환 타입은 ItemHistoricalByDate와 동일하게 하자.
+  return results.reduce((acc, cur) => {
+    return { ...acc, ...cur }
+  }, {} as ItemHistoricalByDate)
 }
