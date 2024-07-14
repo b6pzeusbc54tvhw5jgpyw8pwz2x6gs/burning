@@ -80,7 +80,7 @@ const listTickerPricesByRange = async (ticker: string, from: string, to: string,
     timeframe: '1D',
     // range: 20, // Can be positive to get before or negative to get after
     from: new Date(from).getTime() / 1000,
-    to: new Date(to).getTime() + ms('1d') / 1000,
+    to: (new Date(to).getTime() + ms('1d')) / 1000,
 
     // timeframe: '240',
     // range: 2, // Can be positive to get before or negative to get after
@@ -137,15 +137,16 @@ export const listTickerPricesByLongRange = async (ticker: string, from: string, 
   const ranges = []
   let current = fromDate
   while (current < toDate) {
-    ranges.push({ from: current, to: current + ms('90d') })
+    ranges.push({
+      from: dayjs(current).format('YYYY-MM-DD'),
+      to: dayjs(current + ms('90d')).format('YYYY-MM-DD'),
+    })
     current += ms('91d')
   }
 
-  ranges[ranges.length - 1].to = toDate
+  ranges[ranges.length - 1].to = dayjs(toDate).format('YYYY-MM-DD')
 
-  const promises = ranges.map(range => {
-    return listTickerPricesByRange(ticker, dayjs(range.from).format('YYYY-MM-DD'), dayjs(range.to).format('YYYY-MM-DD'))
-  })
+  const promises = ranges.map(r => listTickerPricesByRange(ticker, r.from, r.to))
   const results = await Promise.all(promises)
 
   // 반환 타입은 ItemHistoricalByDate와 동일하게 하자.
